@@ -7,62 +7,47 @@ import LoginForm from "@/components/loginForm";
 
 export default function WelcomeScreen() {
     const [showLogin, setShowLogin] = useState(false);
-    const translateY = useRef(new Animated.Value(500)).current; // Start below the screen
-    const pan = useRef(new Animated.ValueXY()).current;
-
-    // Create PanResponder to track the swipe gesture
-    // const panResponder = PanResponder.create({
-    //     onStartShouldSetPanResponder: () => true,
-    //     onPanResponderMove: (e, gestureState) => {
-    //         // Only move if the user is swiping down (vertical movement)
-    //         if (gestureState.dy > 0) {
-    //             pan.setValue({ x: 0, y: gestureState.dy });
-    //         }
-    //     },
-    //     onPanResponderRelease: (e, gestureState) => {
-    //         // If the user swipes more than 150 units down, close the form
-    //         if (gestureState.dy > 150) {
-    //             closeForm();
-    //         } else {
-    //             // Otherwise, reset the form to its initial position
-    //             Animated.spring(pan, {
-    //                 toValue: { x: 0, y: 0 },
-    //                 useNativeDriver: true,
-    //             }).start();
-    //         }
-    //     },
-    // });
+    const translateY = useRef(new Animated.Value(800)).current; // Start below the screen
+    //Chat GPT code used for animation
+    const panResponder = useRef(
+        PanResponder.create({
+            onStartShouldSetPanResponder: () => true,
+            onPanResponderMove: Animated.event(
+                [null, { dy: translateY }],
+                { useNativeDriver: false }  // Keep it false for JS control
+            ),
+            onPanResponderRelease: (e, gestureState) => {
+                if (gestureState.dy > 100) {
+                    // Swipe down enough to close
+                    Animated.timing(translateY, {
+                        toValue: 800, // Move it back down
+                        duration: 500,
+                        useNativeDriver: false, // Ensure useNativeDriver is false here as well
+                    }).start(() => {
+                        setShowLogin(false); // Close after the animation finishes
+                    });
+                } else {
+                    // If not swiped enough, return to original position
+                    Animated.timing(translateY, {
+                        toValue: 0, // Move up to show the form
+                        duration: 500,
+                        useNativeDriver: false, // Keep it false to handle animation with JS
+                    }).start();
+                }
+            },
+        })
+    ).current;
+    //End of Chat GPT code
 
     useEffect(() => {
         if (showLogin) {
             Animated.timing(translateY, {
                 toValue: 0, // Move up to show the form
                 duration: 500,
-                useNativeDriver: true,
+                useNativeDriver: false, // Keep this consistent with JS-based animation
             }).start();
-            // } else {
-            //     Animated.timing(translateY, {
-            //         toValue: 500, // Slide down to hide the form
-            //         duration: 500,
-            //         useNativeDriver: true,
-            //     }).start();
         }
     }, [showLogin]);
-
-    // const closeForm = () => {
-    //     setShowLogin(false);
-    //     Animated.timing(translateY, {
-    //         toValue: 500, // Slide down to hide the form
-    //         duration: 500,
-    //         useNativeDriver: true,
-    //     }).start();
-
-    //     // Reset pan position as well when closing
-    //     Animated.spring(pan, {
-    //         toValue: { x: 0, y: 0 },
-    //         useNativeDriver: true,
-    //     }).start();
-    // };
 
     return (
         <ImageBackground
@@ -74,16 +59,15 @@ export default function WelcomeScreen() {
             </View>
             <View style={styles.buttonContainer}>
                 <StartButton title="Sign in" onPress={() => setShowLogin(true)} />
-                <StartButton title="Sign up" onPress={() => router.push("/(tabs)/home")} />
+                <StartButton title="Sign up" onPress={() => setShowLogin(true)} />
             </View>
 
             {showLogin && (
                 <Animated.View
-                    // {...panResponder.panHandlers}
+                    {...panResponder.panHandlers} // Attach pan responder
                     style={[styles.loginFormContainer, {
                         transform: [
                             { translateY }, // Slide the form up or down based on `translateY`
-                            ...pan.getTranslateTransform(), // Apply pan gesture movement
                         ],
                     }]}
                 >

@@ -91,8 +91,7 @@ const styles = StyleSheet.create({
         fontWeight: "700",
         color: "#363636",
         fontSize: 25,
-        margin: 20,
-        marginBottom: 40,
+        margin: 60,
     },
     inputContainer: {
         flexDirection: "row",
@@ -116,6 +115,8 @@ const styles = StyleSheet.create({
     signUpText: {
         marginTop: 20,
         fontSize: 14,
+        position: "absolute",
+        bottom: 40,
     },
     signUpLink: {
         color: "#2F80ED",
