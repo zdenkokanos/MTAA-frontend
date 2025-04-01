@@ -1,38 +1,25 @@
-import { Text, View, StyleSheet } from "react-native";
-import { Link } from "expo-router";
+import { Text, StyleSheet, ImageBackground, View, Image } from "react-native";
+import { router } from "expo-router";
+import StartButton from "@/components/startButton";
+import WelcomeHeader from "@/components/welcome-header";
 
-export default function Index() {
+export default function WelcomeScreen() {
     return (
-        <View style={styles.container}>
-            <Text style={styles.text}>Welcome back!</Text>
-            <Link href="/login" style={styles.button}>
-                Sign In
-            </Link>
-            <Link href="/register" style={styles.button}>
-                Sign Up
-            </Link>
-        </View>
+        <ImageBackground
+            source={require("../images/baseball-md.jpg")}
+            style={styles.container}
+        >
+            <WelcomeHeader />
+            <StartButton title="Sign in" onPress={() => router.push("/login")} />
+            <StartButton title="Sign up" onPress={() => router.push("/(tabs)/home")} />
+        </ImageBackground>
     );
 }
-
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#4FC1FF",
         alignItems: "center",
         justifyContent: "center",
-    },
-    text: {
-        color: "#fff",
-        fontSize: 50,
-    },
-    button: {
-        color: "#000",
-        fontSize: 20,
-        backgroundColor: "#fff",
-        padding: 10,
-        borderRadius: 5,
-        marginTop: 20,
     },
 });
