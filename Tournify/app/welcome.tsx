@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { Text, StyleSheet, ImageBackground, View, Animated, PanResponder, KeyboardAvoidingView, Platform } from "react-native";
 import { router } from "expo-router";
@@ -57,7 +58,6 @@ export default function WelcomeScreen() {
             }).start();
         }
     }, [showLogin, showSignUp]);
-
     return (
         <ImageBackground
             source={require("../images/baseball-md.jpg")}
