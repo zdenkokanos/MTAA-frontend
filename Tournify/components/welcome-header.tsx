@@ -13,15 +13,12 @@ const WelcomeHeader = () => {
 
 const styles = StyleSheet.create({
     textContainer: {
-        position: "absolute", // Ensures it stays in place
-        top: 50,
-        left: 20,
         alignItems: "flex-start",
         flexDirection: "column",
     },
     text: {
         fontFamily: "Arial",
-        fontWeight: "600",
+        fontWeight: "bold",
         color: "#363636",
         fontSize: 20,
         marginTop: -40,

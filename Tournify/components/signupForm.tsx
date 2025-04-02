@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import {
     View, Text, TextInput, StyleSheet, TouchableOpacity,
-    KeyboardAvoidingView, ScrollView, TouchableWithoutFeedback, Keyboard,
-    Platform
+    KeyboardAvoidingView, ScrollView, Platform
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -10,18 +9,27 @@ import { useRouter } from "expo-router";
 import StartButton from "@/components/startButton";
 import API_BASE_URL from "../config/config"; // Adjust path as needed
 
-const LoginForm = () => {
+const SignUpForm = () => {
     const router = useRouter();
+    const [first_name, setFirstName] = useState("");
+    const [last_name, setLastName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
     const [passwordVisible, setPasswordVisible] = useState(false);
+    const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
 
-    const handleSignIn = async () => {
+    const handleSignUp = async () => {
+        if (password !== confirmPassword) {
+            alert("Passwords do not match");
+            return;
+        }
+
         try {
-            const response = await fetch(`${API_BASE_URL}/users/login`, {
+            const response = await fetch(`${API_BASE_URL}/users`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password }),
+                body: JSON.stringify({ first_name, last_name, email, password }),
             });
 
             const data = await response.json();
@@ -30,7 +38,7 @@ const LoginForm = () => {
                 await AsyncStorage.setItem("userId", JSON.stringify(data.id));
                 router.push("/(tabs)/home");
             } else {
-                alert(data.message || "Login failed");
+                alert(data.message || "Sign up failed");
             }
         } catch (error) {
             console.error(error);
@@ -48,7 +56,32 @@ const LoginForm = () => {
                 keyboardShouldPersistTaps="handled"
             >
                 <View style={styles.container}>
-                    <Text style={styles.text}>Welcome back!</Text>
+                    <Text style={styles.text}>New Account</Text>
+                    <View>
+                        <View style={styles.inputContainer}>
+                            <Ionicons name="person-outline" size={20} color="gray" style={styles.inputIcon} />
+                            <TextInput
+                                style={styles.input}
+                                placeholder="First Name"
+                                placeholderTextColor="#888"
+                                value={first_name}
+                                onChangeText={setFirstName}
+                                autoCapitalize="words"
+                            />
+                        </View>
+                        <View style={styles.inputContainer}>
+                            <Ionicons name="person-outline" size={20} color="gray" style={styles.inputIcon} />
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Last Name"
+                                placeholderTextColor="#888"
+                                value={last_name}
+                                onChangeText={setLastName}
+                                autoCapitalize="words"
+                            />
+                        </View>
+                    </View>
+
                     <View style={styles.inputContainer}>
                         <Ionicons name="mail-outline" size={20} color="gray" style={styles.inputIcon} />
                         <TextInput
@@ -61,6 +94,7 @@ const LoginForm = () => {
                             keyboardType="email-address"
                         />
                     </View>
+
                     <View style={styles.inputContainer}>
                         <Ionicons name="key-outline" size={20} color="gray" style={styles.inputIcon} />
                         <TextInput
@@ -75,12 +109,26 @@ const LoginForm = () => {
                             <Ionicons name={passwordVisible ? "eye-off-outline" : "eye-outline"} size={20} color="gray" />
                         </TouchableOpacity>
                     </View>
-                    <TouchableOpacity onPress={() => alert("Forgot Password?")}>
-                        <Text style={styles.forgotPassword}>Forgot Password?</Text>
-                    </TouchableOpacity>
-                    <StartButton title="Sign in" onPress={handleSignIn} />
+
+                    <View style={styles.inputContainer}>
+                        <Ionicons name="key-outline" size={20} color="gray" style={styles.inputIcon} />
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Confirm Password"
+                            placeholderTextColor="#888"
+                            value={confirmPassword}
+                            onChangeText={setConfirmPassword}
+                            secureTextEntry={!confirmPasswordVisible}
+                        />
+                        <TouchableOpacity onPress={() => setConfirmPasswordVisible(!confirmPasswordVisible)}>
+                            <Ionicons name={confirmPasswordVisible ? "eye-off-outline" : "eye-outline"} size={20} color="gray" />
+                        </TouchableOpacity>
+                    </View>
+
+                    <StartButton title="Sign up" onPress={handleSignUp} />
+
                     <Text style={styles.signUpText}>
-                        Don't have an account? <Text style={styles.signUpLink} onPress={() => alert("Sign up!")}>Sign up.</Text>
+                        I have an account, <Text style={styles.signUpLink} onPress={() => alert("/signin")}>sign in.</Text>
                     </Text>
                 </View>
             </ScrollView>
@@ -88,7 +136,7 @@ const LoginForm = () => {
     );
 };
 
-export default LoginForm;
+export default SignUpForm;
 
 const styles = StyleSheet.create({
     scrollContainer: {
@@ -100,7 +148,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "flex-start",
         backgroundColor: "#fff",
-        height: 550,
+        height: 630,
         padding: 20,
         borderTopLeftRadius: 40,
         borderTopRightRadius: 40,
@@ -110,7 +158,7 @@ const styles = StyleSheet.create({
         fontWeight: "700",
         color: "#363636",
         fontSize: 25,
-        margin: 60,
+        margin: 50,
     },
     inputContainer: {
         flexDirection: "row",
@@ -140,10 +188,5 @@ const styles = StyleSheet.create({
     signUpLink: {
         color: "#2F80ED",
         textDecorationLine: "underline",
-    },
-    forgotPassword: {
-        color: "#2F80ED",
-        textDecorationLine: "underline",
-        marginBottom: 20,
     },
 });
