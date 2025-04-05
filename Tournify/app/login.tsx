@@ -1,50 +1,15 @@
-import { Text, View, StyleSheet, TextInput, ImageBackground, Button, TouchableOpacity, TouchableWithoutFeedback, KeyboardAvoidingView, Platform, Keyboard } from "react-native";
+import { Text, View, StyleSheet, TextInput, ImageBackground, Button, TouchableOpacity, TouchableWithoutFeedback, KeyboardAvoidingView, Platform, Keyboard, ScrollView } from "react-native";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import WelcomeHeader from "@/components/welcome-header";
 import StartButton from "@/components/startButton";
 import { Ionicons } from '@expo/vector-icons';
-import API_BASE_URL from "../config/config"; // If placed in "config/"
 
 export default function LoginScreen() {
-    const router = useRouter(); // Get the router instance
+    const router = useRouter();
 
-    const [email, setEmail] = useState(""); // Store email input
-    const [password, setPassword] = useState(""); // Store password input
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
     const [passwordVisible, setPasswordVisible] = useState(false);
-
-    const handleSignIn = async () => {
-        // Backend URL
-        const backendUrl = `${API_BASE_URL}/users/login`;
-
-        try {
-            const response = await fetch(backendUrl, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    email: email,
-                    password: password,
-                }),
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                // Handle successful login, navigate to the home page
-                await AsyncStorage.setItem('userId', JSON.stringify(data.id));
-                router.push("/(tabs)/home");
-            } else {
-                // Handle errors, e.g., invalid credentials
-                alert(data.message || "Login failed");
-            }
-        } catch (error) {
-            console.error(error);
-            alert("An error occurred, please try again.");
-        }
-    };
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -52,12 +17,8 @@ export default function LoginScreen() {
                 behavior={Platform.OS === "ios" ? "padding" : "height"}
                 style={{ flex: 1 }}
             >
-                <ImageBackground
-                    source={require('../images/baseball-md.jpg')}
-                    style={styles.container}
-                >
-                    <WelcomeHeader />
-                    <View style={styles.loginContainer}>
+                <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+                    <View style={styles.container}>
                         <Text style={styles.text}>Welcome back!</Text>
                         <View style={styles.inputContainer}>
                             <Ionicons name="mail-outline" size={20} color="gray" style={styles.inputIcon} />
@@ -87,12 +48,12 @@ export default function LoginScreen() {
                         <TouchableOpacity onPress={() => alert("Forgot Password?")}>
                             <Text style={styles.forgotPassword}>Forgot Password?</Text>
                         </TouchableOpacity>
-                        <StartButton title="Sign in" onPress={handleSignIn} />
+                        <StartButton title="Sign in" onPress={() => router.push("/(tabs)/home")} />
                         <Text style={styles.signUpText}>
-                            Don't have an account? <Text style={styles.signUpLink} onPress={() => alert("Sign up!")}>Sign up.</Text>
+                            Don't have an account? <Text style={styles.signUpLink} onPress={() => router.push("/register")}>Sign up.</Text>
                         </Text>
                     </View>
-                </ImageBackground>
+                </ScrollView>
             </KeyboardAvoidingView>
         </TouchableWithoutFeedback>
     );
@@ -101,34 +62,22 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
     text: {
         fontFamily: "Inter",
-        fontWeight: "700",
-        color: "#363636",
+        fontWeight: "bold",
         fontSize: 25,
-        // alignSelf: "flex-start",
         margin: 20,
         marginTop: 50,
         marginBottom: 40,
     },
     container: {
         alignItems: "center",
-        justifyContent: "flex-end",
+        justifyContent: "center",
         flex: 1,
+        backgroundColor: "#fff",
     },
     input: {
         flex: 1,
         height: 40,
         paddingHorizontal: 10,
-    },
-    loginContainer: {
-        width: '100%',
-        height: '70%',  // This ensures the container takes up 75% of the screen height
-        alignItems: "center",  // Center content horizontally
-        justifyContent: "flex-start",  // Center content vertically within the container
-        backgroundColor: "#fff",
-        padding: 20,
-        borderTopLeftRadius: 40,  // Rounded top-left corner
-        borderTopRightRadius: 40,  // Rounded top-right corner
-        marginBottom: 0,  // Remove marginTop and use height to control position
     },
     inputContainer: {
         flexDirection: "row",
