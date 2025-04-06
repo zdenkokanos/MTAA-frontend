@@ -3,7 +3,9 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import StartButton from "@/components/startButton";
+import API_BASE_URL from "../config/config";
 import * as ImagePicker from "expo-image-picker";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function SignUpScreen() {
     const router = useRouter();
@@ -16,6 +18,10 @@ export default function SignUpScreen() {
     const [passwordVisible, setPasswordVisible] = useState(false);
     const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
     const [profileImage, setProfileImage] = useState<string | null>(null);
+    const preferredLocation = "summertime";
+    const preferredLongitude = -122.4194;
+    const preferredLatitude = 37.7749;
+    const selectedPreferences = [1, 2, 3];
 
     // Funkcia pre výber profilového obrázka
     const pickImage = async () => {
@@ -32,10 +38,54 @@ export default function SignUpScreen() {
             quality: 0.5,
         });
 
-        if (!result.canceled) {  // sets preview of profile image in circle
+        if (!result.canceled) {  // sets preview of profile image
             setProfileImage(result.assets[0].uri);
         }
     };
+
+    const handleSignUp = async () => {
+        if (password !== confirmPassword) {
+            alert("Passwords do not match");
+            return;
+        }
+
+        try {
+            // Create a JSON object with the data
+            const userData = {
+                first_name,
+                last_name,
+                email,
+                password,
+                preferred_location: preferredLocation,
+                preferred_longitude: preferredLongitude,
+                preferred_latitude: preferredLatitude,
+                preferences: selectedPreferences,
+            };
+
+            // Send the request
+            const response = await fetch(`${API_BASE_URL}/auth/register`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(userData),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                await AsyncStorage.setItem("userId", JSON.stringify(data.user.id));
+                await AsyncStorage.setItem("token", data.token);
+                router.push("/(tabs)/home");
+            } else {
+                alert(data.message || "Sign up failed");
+            }
+        } catch (error) {
+            console.error(error);
+            alert("An error occurred. Please try again.");
+        }
+    };
+
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -124,7 +174,7 @@ export default function SignUpScreen() {
                             </TouchableOpacity>
                         </View>
 
-                        <StartButton title="Sign up" onPress={() => router.push("/sport_preferences")} />
+                        <StartButton title="Sign up" onPress={handleSignUp} />
 
                         <Text style={styles.signUpText}>
                             I have an account, <Text style={styles.signUpLink} onPress={() => router.push("/login")}>sign in.</Text>
