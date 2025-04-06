@@ -1,8 +1,9 @@
-import { Text, View, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, TouchableWithoutFeedback, Platform, ScrollView, Keyboard } from "react-native";
-import { Link, useRouter } from "expo-router";
+import { Text, View, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, TouchableWithoutFeedback, Platform, ScrollView, Keyboard, Image } from "react-native";
+import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import StartButton from "@/components/startButton";
+import * as ImagePicker from "expo-image-picker";
 
 export default function SignUpScreen() {
     const router = useRouter();
@@ -14,6 +15,27 @@ export default function SignUpScreen() {
     const [confirmPassword, setConfirmPassword] = useState("");
     const [passwordVisible, setPasswordVisible] = useState(false);
     const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
+    const [profileImage, setProfileImage] = useState<string | null>(null);
+
+    // Funkcia pre výber profilového obrázka
+    const pickImage = async () => {
+        const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (!permissionResult.granted) {
+            alert("Permission to access media library is required!");
+            return;
+        }
+
+        const result = await ImagePicker.launchImageLibraryAsync({
+            mediaTypes: ['images'],
+            allowsEditing: true,
+            aspect: [1, 1],
+            quality: 0.5,
+        });
+
+        if (!result.canceled) {  // sets preview of profile image in circle
+            setProfileImage(result.assets[0].uri);
+        }
+    };
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -23,6 +45,16 @@ export default function SignUpScreen() {
             >
                 <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
                     <View style={styles.container}>
+                        <TouchableOpacity onPress={pickImage} style={styles.profileImageContainer}>
+                            {profileImage ? (
+                                <Image source={{ uri: profileImage }} style={styles.profileImage} />
+                            ) : (
+                                <View style={styles.profilePlaceholder}>
+                                    <Ionicons name="camera-outline" size={30} color="#888" />
+                                </View>
+                            )}
+                        </TouchableOpacity>
+
                         <Text style={styles.text}>Create New Account</Text>
                         <View>
                             <View style={styles.inputContainer}>
@@ -104,7 +136,6 @@ export default function SignUpScreen() {
     );
 }
 
-
 const styles = StyleSheet.create({
     text: {
         fontFamily: "Inter",
@@ -148,9 +179,28 @@ const styles = StyleSheet.create({
         textDecorationLine: "underline",
         paddingBottom: 20,
     },
-    forgotPassword: {
-        color: "#2F80ED",
-        textDecorationLine: "underline",
+    profileImageContainer: {
+        width: 100,
+        height: 100,
+        borderRadius: 50,
+        borderWidth: 2,
+        borderColor: "#ccc",
+        justifyContent: "center",
+        alignItems: "center",
+        marginTop: 30,
         marginBottom: 20,
+        overflow: "hidden",
+    },
+    profilePlaceholder: {
+        width: "100%",
+        height: "100%",
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "#f0f0f0",
+    },
+    profileImage: {
+        width: "100%",
+        height: "100%",
+        resizeMode: "cover",
     },
 });
