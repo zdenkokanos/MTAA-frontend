@@ -50,6 +50,8 @@ export default function SignUpScreen() {
         }
 
         try {
+            const formData = new FormData();
+
             // Create a JSON object with the data
             const userData = {
                 first_name,
@@ -62,13 +64,23 @@ export default function SignUpScreen() {
                 preferences: selectedPreferences,
             };
 
+            // Append the user data as a JSON string
+            formData.append("user_data", JSON.stringify(userData));
+
+            // Add the profile image if it exists
+            if (profileImage) {
+                console.log("Image URI:", profileImage);
+                const response = await fetch(profileImage);
+                const fileName = profileImage.split('/').pop();  // Get the file name from the URI
+                const blob = await response.blob();
+                console.log("Blob size:", blob.size);
+                formData.append("image", blob, fileName); // You can adjust the file name and type here
+            }
+
             // Send the request
             const response = await fetch(`${API_BASE_URL}/auth/register`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(userData),
+                body: formData,
             });
 
             const data = await response.json();
