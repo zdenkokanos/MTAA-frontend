@@ -4,7 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 interface HistoryCardProps {
     title: string;
     date: string;
-    position: string;
+    position: any;
     imageUrl: any;
     onInfoPress: () => void;
 }
@@ -16,9 +16,11 @@ const HistoryCard = ({ title, date, position, imageUrl, onInfoPress }: HistoryCa
             <View style={styles.content}>
                 <Text style={styles.title}>{title}</Text>
                 <Text style={styles.date}>{date}</Text>
-                <View style={styles.badge}>
-                    <Text style={styles.badgeText}>{position}</Text>
-                </View>
+                {position && (
+                    <View style={styles.badge}>
+                        <Text style={styles.badgeText}>{position}</Text>
+                    </View>
+                )}
             </View>
             <TouchableOpacity style={styles.infoButton} onPress={onInfoPress}>
                 <Ionicons name="information-circle-outline" size={30} color="#000" />

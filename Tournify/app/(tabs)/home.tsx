@@ -27,8 +27,15 @@ export default function HomeScreen() {
         category_image: string;
         id: string;
     }
+    interface HistoryItem {
+        id: string;
+        tournament_name: string;
+        date: string;
+        position: number;
+        category_image: string;
+    }
 
-
+    const [history, setHistory] = useState<HistoryItem[]>([]);
     const [topPicks, setTopPicks] = useState<TopPick[]>([]);
     const [token, setToken] = useState<string | null>(null);
     const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
@@ -86,6 +93,20 @@ export default function HomeScreen() {
                     console.error("Tickets error:", ticketsData.message);
                 }
 
+                // Fetch History
+                const historyResponse = await fetch(`${API_BASE_URL}/users/${storedUserId}/tournaments/history`, {
+                    headers: {
+                        Authorization: `Bearer ${storedToken}`,
+                        "Content-Type": "application/json",
+                    },
+                });
+                const historyData = await historyResponse.json();
+                if (historyResponse.ok) {
+                    setHistory(historyData);
+                } else {
+                    console.error("History error:", historyData.message);
+                }
+
             } catch (err) {
                 console.error("Failed to load home screen data:", err);
             }
@@ -131,70 +152,77 @@ export default function HomeScreen() {
                 </View>
 
                 <Text style={styles.sectionTitle}>Top Picks</Text>
-                <ScrollView
-                    contentContainerStyle={styles.scrollContainer}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                >
-                    {topPicks.map((item, index) => (
-                        <TournamentCard
-                            key={index}
+                {topPicks.length > 0 ? (
+                    <ScrollView
+                        contentContainerStyle={styles.scrollContainer}
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                    >
+                        {topPicks.map((item, index) => (
+                            <TournamentCard
+                                key={index}
+                                title={item.tournament_name}
+                                dateText={formatDateRelative(item.date)}
+                                distanceText={`${item.distance} km from you`}
+                                imageUrl={{
+                                    uri: `${API_BASE_URL}/uploads/${item.category_image}`,
+                                    headers: {
+                                        Authorization: `Bearer ${token}`,
+                                    },
+                                }}
+                                onInfoPress={() => console.log("Show info for", item.id)}
+                            />
+                        ))}
+                    </ScrollView>
+                ) : (
+                    <Text style={styles.emptyText}>No top picks found.</Text>
+                )}
+                {/* Tickets */}
+                <Text style={styles.sectionTitle}>Tickets</Text>
+                {tickets.length > 0 ? (
+                    <ScrollView
+                        contentContainerStyle={styles.horizontalList}
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                    >
+                        {tickets.map((ticket) => (
+                            <TicketCard
+                                key={ticket.id}
+                                dateText={formatDateRelative(ticket.date)}
+                                imageUrl={{
+                                    uri: `${API_BASE_URL}/uploads/${ticket.category_image}`,
+                                    headers: {
+                                        Authorization: `Bearer ${token}`,
+                                    },
+                                }}
+                            />
+                        ))}
+                    </ScrollView>
+                ) : (
+                    <Text style={styles.emptyText}>You have no tickets yet.</Text>
+                )}
+                {/* History */}
+                <Text style={styles.sectionTitle}>History</Text>
+                {history.length > 0 ? (
+                    history.map((item) => (
+                        <HistoryCard
+                            key={item.id}
                             title={item.tournament_name}
-                            dateText={formatDateRelative(item.date)}
-                            distanceText={`${item.distance} km from you`}
+                            date={formatDate(item.date)}
+                            position={item.position ? formatPosition(item.position) : null}
                             imageUrl={{
                                 uri: `${API_BASE_URL}/uploads/${item.category_image}`,
                                 headers: {
                                     Authorization: `Bearer ${token}`,
                                 },
                             }}
-                            onInfoPress={() => console.log("Show info for", item.id)}
+                            onInfoPress={() => console.log("Details for", item.id)}
                         />
-                    ))}
-                </ScrollView>
-                {/* Tickets */}
-                <Text style={styles.sectionTitle}>Tickets</Text>
-                <ScrollView
-                    contentContainerStyle={styles.horizontalList}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                >
-                    {tickets.map((ticket) => (
-                        <TicketCard
-                            key={ticket.id}
-                            dateText={formatDateRelative(ticket.date)}
-                            imageUrl={{
-                                uri: `${API_BASE_URL}/uploads/${ticket.category_image}`,
-                                headers: {
-                                    Authorization: `Bearer ${token}`,
-                                },
-                            }}
-                        />
-                    ))}
-                    <TicketCard
-                        dateText="in 15 days"
-                        imageUrl={require("@/images/tennis.jpg")}
-                    />
-                    <TicketCard
-                        dateText="in 6 days"
-                        imageUrl={require("@/images/badminton.jpg")}
-                    />
-                </ScrollView>
-                <Text style={styles.sectionTitle}>History</Text>
-                <HistoryCard
-                    title="Tennis tournament"
-                    date="14th April 2024"
-                    position="1st place"
-                    imageUrl={require("@/images/tennis.jpg")}
-                    onInfoPress={() => console.log("Details")}
-                />
-                <HistoryCard
-                    title="Badminton tournament"
-                    date="20th March 2024"
-                    position="2nd place"
-                    imageUrl={require("@/images/badminton.jpg")}
-                    onInfoPress={() => console.log("Details")}
-                />
+                    ))
+                ) : (
+                    <Text style={styles.emptyText}>No tournament history yet!</Text>
+                )}
+
             </ScrollView>
         </SafeAreaView>
     );
@@ -208,9 +236,37 @@ function formatDateRelative(dateString: string): string {
     return diff <= 0 ? "Today" : `in ${diff} days`;
 }
 
+function formatDate(dateString: string): string {
+    const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+}
+
+function formatPosition(position: number | null): string | null {
+    if (position === null || position === undefined) return null;
+
+    const lastDigit = position % 10;
+    const lastTwoDigits = position % 100;
+
+    if (lastTwoDigits >= 11 && lastTwoDigits <= 13) {
+        return `${position}th place`;
+    }
+
+    switch (lastDigit) {
+        case 1:
+            return `${position}st place`;
+        case 2:
+            return `${position}nd place`;
+        case 3:
+            return `${position}rd place`;
+        default:
+            return `${position}th place`;
+    }
+}
+
 const styles = StyleSheet.create({
     safeArea: {
         backgroundColor: "#fff",
+        minHeight: '100%'
     },
     header: {
         marginTop: 20,
@@ -256,4 +312,16 @@ const styles = StyleSheet.create({
         paddingLeft: 16,
         gap: 16,
     },
+    emptyText: {
+        padding: 20,
+        fontSize: 14,
+        color: "#999",
+        fontStyle: "italic",
+        marginRight: 20,
+        marginBottom: 10,
+        marginLeft: 20,
+        backgroundColor: "#eee",
+        borderRadius: 10,
+    },
+
 });
