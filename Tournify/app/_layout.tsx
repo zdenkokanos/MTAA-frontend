@@ -7,8 +7,8 @@ export default function RootLayout() {
       <Stack.Screen name="welcome" />
       <Stack.Screen name="login" />
       <Stack.Screen name="register" />
-      <Stack.Screen name="preferences-city" />
-      <Stack.Screen name="preferences-sport" />
+      <Stack.Screen name="preferencesCity" />
+      <Stack.Screen name="preferencesSport" />
       <Stack.Screen name="(tabs)" />
     </Stack>);
 }

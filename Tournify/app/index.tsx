@@ -13,6 +13,12 @@ export default function Index() {
       <Link href="/register" style={styles.button}>
         Sign Up
       </Link>
+      <Link href="/preferencesSport" style={styles.button}>
+        preferences sport
+      </Link>
+      <Link href="/preferencesCity" style={styles.button}>
+        preferences city
+      </Link>
     </View>
   );
 }
