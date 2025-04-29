@@ -1,95 +1,327 @@
 import API_BASE_URL from "@/config/config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Text, View, StyleSheet } from "react-native";
-import { useState, useEffect } from "react";
+import { Text, View, StyleSheet, ScrollView, Image } from "react-native";
+import React, { useState, useEffect } from "react";
+import TournamentCard from "@/components/tournamentCard";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
+import TicketCard from "@/components/ticketCard";
+import HistoryCard from "@/components/historyCard";
 
 export default function HomeScreen() {
-    const [userId, setUserId] = useState<string | null>(null);
-    const [userData, setUserData] = useState<any>(null);
+
+    interface UserInfo {
+        first_name: string;
+        last_name: string;
+        image_path: string | null;
+    }
+    interface TopPick {
+        tournament_name: string;
+        date: string;
+        distance: number;
+        category_image: string;
+        id: string;
+    }
+    interface Ticket {
+        date: string;
+        category_image: string;
+        id: string;
+    }
+    interface HistoryItem {
+        id: string;
+        tournament_name: string;
+        date: string;
+        position: number;
+        category_image: string;
+    }
+
+    const [history, setHistory] = useState<HistoryItem[]>([]);
+    const [topPicks, setTopPicks] = useState<TopPick[]>([]);
+    const [token, setToken] = useState<string | null>(null);
+    const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+    const [tickets, setTickets] = useState<Ticket[]>([]);
 
     useEffect(() => {
-        const getUserData = async () => {
+        const fetchData = async () => {
             try {
+                const storedToken = await AsyncStorage.getItem("token");
                 const storedUserId = await AsyncStorage.getItem("userId");
-                if (storedUserId) {
-                    setUserId(storedUserId);
-                    await fetchUserData(storedUserId); // Fetch user info immediately
+
+                if (!storedUserId || !storedToken) return;
+
+                setToken(storedToken);
+
+                // Fetch Top Picks
+                const topPicksResponse = await fetch(`${API_BASE_URL}/users/${storedUserId}/top-picks`, {
+                    headers: {
+                        Authorization: `Bearer ${storedToken}`,
+                        "Content-Type": "application/json",
+                    },
+                });
+                const topPicksData = await topPicksResponse.json();
+                if (topPicksResponse.ok) {
+                    setTopPicks(topPicksData);
+                } else {
+                    console.error("Top Picks error:", topPicksData.message);
                 }
-            } catch (error) {
-                console.error("Error getting userId:", error);
+
+                // Fetch User Info
+                const userInfoResponse = await fetch(`${API_BASE_URL}/users/${storedUserId}/info`, {
+                    headers: {
+                        Authorization: `Bearer ${storedToken}`,
+                        "Content-Type": "application/json",
+                    },
+                });
+                const userInfoData = await userInfoResponse.json();
+                if (userInfoResponse.ok) {
+                    setUserInfo(userInfoData);
+                } else {
+                    console.error("User Info error:", userInfoData.message);
+                }
+
+                // Fetch Tickets
+                const ticketsResponse = await fetch(`${API_BASE_URL}/users/${storedUserId}/tickets`, {
+                    headers: {
+                        Authorization: `Bearer ${storedToken}`,
+                        "Content-Type": "application/json",
+                    },
+                });
+                const ticketsData = await ticketsResponse.json();
+                if (ticketsResponse.ok) {
+                    setTickets(ticketsData);
+                } else {
+                    console.error("Tickets error:", ticketsData.message);
+                }
+
+                // Fetch History
+                const historyResponse = await fetch(`${API_BASE_URL}/users/${storedUserId}/tournaments/history`, {
+                    headers: {
+                        Authorization: `Bearer ${storedToken}`,
+                        "Content-Type": "application/json",
+                    },
+                });
+                const historyData = await historyResponse.json();
+                if (historyResponse.ok) {
+                    setHistory(historyData);
+                } else {
+                    console.error("History error:", historyData.message);
+                }
+
+            } catch (err) {
+                console.error("Failed to load home screen data:", err);
             }
         };
 
-        getUserData();
+        fetchData();
     }, []);
-
-    const fetchUserData = async (id: string) => {
-        try {
-            const token = await AsyncStorage.getItem("token"); // Fetch token
-            if (!token) {
-                console.error("No token found");
-                return;
-            }
-
-            const backendUrl = `${API_BASE_URL}/users/${id}/info`; // <-- fixed URL
-
-            const response = await fetch(backendUrl, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`, // <-- attach token
-                },
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                setUserData(data);
-            } else {
-                alert(data.message || "Failed to fetch user data");
-            }
-        } catch (error) {
-            console.error("Error fetching user data:", error);
-            alert("An error occurred, please try again.");
-        }
-    };
 
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.text}>Home Screen</Text>
-            <Text style={styles.text}>UserId: {userId ?? "Loading..."}</Text>
+        <SafeAreaView
+            style={styles.safeArea}
+            edges={['top', 'left', 'right']}
+        >
+            <ScrollView showsVerticalScrollIndicator={false}>
+                <View style={styles.header}>
+                    <View style={styles.profileRow}>
+                        <Image
+                            source={
+                                userInfo && userInfo.image_path !== "null" && token
+                                    ? {
+                                        uri: `${API_BASE_URL}/uploads/${userInfo.image_path}`,
+                                        headers: {
+                                            Authorization: `Bearer ${token}`,
+                                        },
+                                    }
+                                    : require("@/images/default-profile.jpg")
+                            }
+                            style={styles.avatar}
+                            onError={(error) => {
+                                console.log("Image failed to load:", error.nativeEvent.error);
+                            }}
+                        />
+                        <View>
+                            <Text style={styles.name}>
+                                {userInfo ? `${userInfo.first_name} ${userInfo.last_name}` : "Loading..."}
+                            </Text>
+                            <Text style={styles.level}>Intermediate</Text>
+                        </View>
+                        <Ionicons name="notifications-outline" size={24} color="#000" style={styles.bellIcon} />
+                    </View>
 
-            {userData ? (
-                <View style={styles.userInfo}>
-                    <Text style={styles.text}>First Name: {userData.first_name}</Text>
-                    <Text style={styles.text}>Last Name: {userData.last_name}</Text>
-                    <Text style={styles.text}>Email: {userData.email}</Text>
-                    <Text style={styles.text}>Preferred Longitude: {userData.preferred_longitude}</Text>
-                    <Text style={styles.text}>Preferred Latitude: {userData.preferred_latitude}</Text>
-                    <Text style={styles.text}>Created At: {userData.created_at}</Text>
                 </View>
-            ) : (
-                <Text style={styles.text}>Loading user data...</Text>
-            )}
-        </View>
+
+                <Text style={styles.sectionTitle}>Top Picks</Text>
+                {topPicks.length > 0 ? (
+                    <ScrollView
+                        contentContainerStyle={styles.scrollContainer}
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                    >
+                        {topPicks.map((item, index) => (
+                            <TournamentCard
+                                key={index}
+                                title={item.tournament_name}
+                                dateText={formatDateRelative(item.date)}
+                                distanceText={`${item.distance} km from you`}
+                                imageUrl={{
+                                    uri: `${API_BASE_URL}/uploads/${item.category_image}`,
+                                    headers: {
+                                        Authorization: `Bearer ${token}`,
+                                    },
+                                }}
+                                onInfoPress={() => console.log("Show info for", item.id)}
+                            />
+                        ))}
+                    </ScrollView>
+                ) : (
+                    <Text style={styles.emptyText}>No top picks found.</Text>
+                )}
+                {/* Tickets */}
+                <Text style={styles.sectionTitle}>Tickets</Text>
+                {tickets.length > 0 ? (
+                    <ScrollView
+                        contentContainerStyle={styles.horizontalList}
+                        horizontal
+                        showsHorizontalScrollIndicator={false}
+                    >
+                        {tickets.map((ticket) => (
+                            <TicketCard
+                                key={ticket.id}
+                                dateText={formatDateRelative(ticket.date)}
+                                imageUrl={{
+                                    uri: `${API_BASE_URL}/uploads/${ticket.category_image}`,
+                                    headers: {
+                                        Authorization: `Bearer ${token}`,
+                                    },
+                                }}
+                            />
+                        ))}
+                    </ScrollView>
+                ) : (
+                    <Text style={styles.emptyText}>You have no tickets yet.</Text>
+                )}
+                {/* History */}
+                <Text style={styles.sectionTitle}>History</Text>
+                {history.length > 0 ? (
+                    history.map((item) => (
+                        <HistoryCard
+                            key={item.id}
+                            title={item.tournament_name}
+                            date={formatDate(item.date)}
+                            position={item.position ? formatPosition(item.position) : null}
+                            imageUrl={{
+                                uri: `${API_BASE_URL}/uploads/${item.category_image}`,
+                                headers: {
+                                    Authorization: `Bearer ${token}`,
+                                },
+                            }}
+                            onInfoPress={() => console.log("Details for", item.id)}
+                        />
+                    ))
+                ) : (
+                    <Text style={styles.emptyText}>No tournament history yet!</Text>
+                )}
+
+            </ScrollView>
+        </SafeAreaView>
     );
+
+}
+
+function formatDateRelative(dateString: string): string {
+    const today = new Date();
+    const target = new Date(dateString);
+    const diff = Math.ceil((+target - +today) / (1000 * 60 * 60 * 24));
+    return diff <= 0 ? "Today" : `in ${diff} days`;
+}
+
+function formatDate(dateString: string): string {
+    const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString(undefined, options);
+}
+
+function formatPosition(position: number | null): string | null {
+    if (position === null || position === undefined) return null;
+
+    const lastDigit = position % 10;
+    const lastTwoDigits = position % 100;
+
+    if (lastTwoDigits >= 11 && lastTwoDigits <= 13) {
+        return `${position}th place`;
+    }
+
+    switch (lastDigit) {
+        case 1:
+            return `${position}st place`;
+        case 2:
+            return `${position}nd place`;
+        case 3:
+            return `${position}rd place`;
+        default:
+            return `${position}th place`;
+    }
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: "#4FC1FF",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 20,
+    safeArea: {
+        backgroundColor: "#fff",
+        minHeight: '100%'
     },
-    text: {
-        color: "#fff",
-        fontSize: 18,
-        marginVertical: 5,
-    },
-    userInfo: {
+    header: {
         marginTop: 20,
+        paddingHorizontal: 16,
+        paddingTop: 12,
+        paddingBottom: 10,
     },
+    profileRow: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+    },
+    avatar: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        marginRight: 12,
+    },
+    name: {
+        fontSize: 16,
+        fontWeight: "bold",
+    },
+    level: {
+        fontSize: 13,
+        color: "gray",
+        marginTop: 2,
+    },
+    bellIcon: {
+        marginLeft: "auto",
+        marginRight: 20,
+    },
+    sectionTitle: {
+        fontSize: 20,
+        fontWeight: "bold",
+        margin: 20,
+    },
+    scrollContainer: {
+        paddingHorizontal: 16,
+        flexDirection: "row",
+        gap: 16,
+    },
+    horizontalList: {
+        paddingLeft: 16,
+        gap: 16,
+    },
+    emptyText: {
+        padding: 20,
+        fontSize: 14,
+        color: "#999",
+        fontStyle: "italic",
+        marginRight: 20,
+        marginBottom: 10,
+        marginLeft: 20,
+        backgroundColor: "#eee",
+        borderRadius: 10,
+    },
+
 });
