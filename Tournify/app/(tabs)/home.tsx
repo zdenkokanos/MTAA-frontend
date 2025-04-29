@@ -1,4 +1,4 @@
-import API_BASE_URL from "../../config/config"; // If placed in "config/"
+import API_BASE_URL from "@/config/config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Text, View, StyleSheet } from "react-native";
 import { useState, useEffect } from "react";
@@ -24,18 +24,27 @@ export default function HomeScreen() {
     }, []);
 
     const fetchUserData = async (id: string) => {
-        const backendUrl = `${API_BASE_URL}/users/info/${id}`;
-
         try {
+            const token = await AsyncStorage.getItem("token"); // Fetch token
+            if (!token) {
+                console.error("No token found");
+                return;
+            }
+
+            const backendUrl = `${API_BASE_URL}/users/${id}/info`; // <-- fixed URL
+
             const response = await fetch(backendUrl, {
                 method: "GET",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`, // <-- attach token
+                },
             });
 
             const data = await response.json();
 
             if (response.ok) {
-                setUserData(data); // Store user info
+                setUserData(data);
             } else {
                 alert(data.message || "Failed to fetch user data");
             }
@@ -44,6 +53,7 @@ export default function HomeScreen() {
             alert("An error occurred, please try again.");
         }
     };
+
 
     return (
         <View style={styles.container}>
@@ -54,8 +64,6 @@ export default function HomeScreen() {
                 <View style={styles.userInfo}>
                     <Text style={styles.text}>First Name: {userData.first_name}</Text>
                     <Text style={styles.text}>Last Name: {userData.last_name}</Text>
-                    <Text style={styles.text}>Gender: {userData.gender}</Text>
-                    <Text style={styles.text}>Age: {userData.age}</Text>
                     <Text style={styles.text}>Email: {userData.email}</Text>
                     <Text style={styles.text}>Preferred Longitude: {userData.preferred_longitude}</Text>
                     <Text style={styles.text}>Preferred Latitude: {userData.preferred_latitude}</Text>

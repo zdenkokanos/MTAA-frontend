@@ -1,8 +1,13 @@
-import { Text, View, StyleSheet, TextInput, ImageBackground, Button, TouchableOpacity, TouchableWithoutFeedback, KeyboardAvoidingView, Platform, Keyboard, ScrollView } from "react-native";
+import {
+    Text, View, StyleSheet, TextInput, ImageBackground, Button,
+    TouchableOpacity, TouchableWithoutFeedback, KeyboardAvoidingView, Platform, Keyboard, ScrollView, Alert
+} from "react-native";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import StartButton from "@/components/startButton";
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import API_BASE_URL from "@/config/config";
 
 export default function LoginScreen() {
     const router = useRouter();
@@ -10,6 +15,40 @@ export default function LoginScreen() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [passwordVisible, setPasswordVisible] = useState(false);
+
+    const handleLogin = async () => {
+        if (!email || !password) {
+            Alert.alert("Missing fields", "Please enter both email and password.");
+            return;
+        }
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ email, password }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.message || "Login failed");
+            }
+
+            await AsyncStorage.setItem("token", data.token);
+            await AsyncStorage.setItem("userId", String(data.user.id));
+            router.push("/(tabs)/home");
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                Alert.alert("Login Error", error.message);
+            } else {
+                Alert.alert("Login Error", "Something went wrong.");
+            }
+        }
+    };
+
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -48,7 +87,7 @@ export default function LoginScreen() {
                         <TouchableOpacity onPress={() => alert("Forgot Password?")}>
                             <Text style={styles.forgotPassword}>Forgot Password?</Text>
                         </TouchableOpacity>
-                        <StartButton title="Sign in" onPress={() => router.push("/(tabs)/home")} />
+                        <StartButton title="Sign in" onPress={handleLogin} />
                         <Text style={styles.signUpText}>
                             Don't have an account? <Text style={styles.signUpLink} onPress={() => router.push("/register")}>Sign up.</Text>
                         </Text>
