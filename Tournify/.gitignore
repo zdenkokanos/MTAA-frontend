@@ -43,4 +43,4 @@ dist/
 web-build/
 
 # Config
-/config/
+config/
