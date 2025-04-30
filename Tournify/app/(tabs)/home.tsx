@@ -1,7 +1,7 @@
 import API_BASE_URL from "@/config/config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Text, View, StyleSheet, ScrollView, Image } from "react-native";
-import React, { useState, useEffect } from "react";
+import { Text, View, StyleSheet, ScrollView, Image, FlatList, NativeSyntheticEvent, NativeScrollEvent, Dimensions } from "react-native";
+import React, { useState, useEffect, useRef } from "react";
 import TournamentCard from "@/components/tournamentCard";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -115,6 +115,16 @@ export default function HomeScreen() {
         fetchData();
     }, []);
 
+    const screenWidth = Dimensions.get('window').width;
+    const CARD_WIDTH = screenWidth * 0.95;
+    const CARD_GAP = 16;
+    const [activeIndex, setActiveIndex] = useState(0);
+    const flatListRef = useRef<FlatList>(null);
+
+    const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+        const index = Math.round(event.nativeEvent.contentOffset.x / screenWidth);
+        setActiveIndex(index);
+    };
 
     return (
         <SafeAreaView
@@ -153,30 +163,52 @@ export default function HomeScreen() {
 
                 <Text style={styles.sectionTitle}>Top Picks</Text>
                 {topPicks.length > 0 ? (
-                    <ScrollView
-                        contentContainerStyle={styles.scrollContainer}
+                    <FlatList
+                        ref={flatListRef}
+                        data={topPicks}
                         horizontal
+                        keyExtractor={(item) => item.id}
+                        renderItem={({ item }) => (
+                            <View style={{ width: CARD_WIDTH, marginRight: CARD_GAP }}>
+                                <TournamentCard
+                                    title={item.tournament_name}
+                                    dateText={formatDateRelative(item.date)}
+                                    distanceText={`${item.distance} km from you`}
+                                    imageUrl={{
+                                        uri: `${API_BASE_URL}/uploads/${item.category_image}`,
+                                        headers: { Authorization: `Bearer ${token}` },
+                                    }}
+                                    tournamentId={item.id}
+                                />
+                            </View>
+                        )}
                         showsHorizontalScrollIndicator={false}
-                    >
-                        {topPicks.map((item, index) => (
-                            <TournamentCard
-                                key={index}
-                                title={item.tournament_name}
-                                dateText={formatDateRelative(item.date)}
-                                distanceText={`${item.distance} km from you`}
-                                imageUrl={{
-                                    uri: `${API_BASE_URL}/uploads/${item.category_image}`,
-                                    headers: {
-                                        Authorization: `Bearer ${token}`,
-                                    },
-                                }}
-                                onInfoPress={() => console.log("Show info for", item.id)}
-                            />
-                        ))}
-                    </ScrollView>
+                        pagingEnabled={false} // must be false for snapToInterval to work
+                        snapToAlignment="start"
+                        snapToInterval={CARD_WIDTH + CARD_GAP}
+                        decelerationRate="fast"
+                        onScroll={handleScroll}
+                        scrollEventThrottle={16}
+                        contentContainerStyle={{
+                            paddingHorizontal: (screenWidth - CARD_WIDTH) / 2,
+                        }}
+                    />
                 ) : (
                     <Text style={styles.emptyText}>No top picks found.</Text>
                 )}
+                <View style={styles.dotsContainer}>
+                    {topPicks.map((_, index) => (
+                        <Text
+                            key={index}
+                            style={[
+                                styles.dot,
+                                index === activeIndex ? styles.activeDot : styles.inactiveDot,
+                            ]}
+                        >
+                            ●
+                        </Text>
+                    ))}
+                </View>
                 {/* Tickets */}
                 <Text style={styles.sectionTitle}>Tickets</Text>
                 {tickets.length > 0 ? (
@@ -232,8 +264,18 @@ export default function HomeScreen() {
 function formatDateRelative(dateString: string): string {
     const today = new Date();
     const target = new Date(dateString);
-    const diff = Math.ceil((+target - +today) / (1000 * 60 * 60 * 24));
-    return diff <= 0 ? "Today" : `in ${diff} days`;
+
+    // Strip time from both dates to compare pure days
+    const utcToday = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
+    const utcTarget = Date.UTC(target.getFullYear(), target.getMonth(), target.getDate());
+
+    const diffDays = Math.ceil((utcTarget - utcToday) / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 0) return "In the past";
+    if (diffDays === 0) return "Today";
+    if (diffDays === 1) return "Tomorrow";
+
+    return `in ${diffDays} days`;
 }
 
 function formatDate(dateString: string): string {
@@ -322,6 +364,23 @@ const styles = StyleSheet.create({
         marginLeft: 20,
         backgroundColor: "#eee",
         borderRadius: 10,
+    },
+    // Dots
+    dotsContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 12,
+    },
+    dot: {
+        fontSize: 10,
+        marginHorizontal: 4,
+    },
+    activeDot: {
+        color: '#000',
+    },
+    inactiveDot: {
+        color: '#ccc',
     },
 
 });

@@ -1,15 +1,19 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity, ImageBackground } from "react-native";
+import { View, Text, StyleSheet, Image, TouchableOpacity, ImageBackground, Dimensions } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from 'expo-router';
 
 interface TournamentCardProps {
     title: string;
     dateText: string;         // e.g., "in 10 days"
     distanceText: string;     // e.g., "20 km from you"
     imageUrl: any;         // e.g., image URL or require('...') local path
-    onInfoPress: () => void;
+    tournamentId: string;
 }
 
-const TournamentCard = ({ title, dateText, distanceText, imageUrl, onInfoPress }: TournamentCardProps) => {
+const screenWidth = Dimensions.get('window').width;
+
+const TournamentCard = ({ title, dateText, distanceText, imageUrl, tournamentId }: TournamentCardProps) => {
+    const router = useRouter();
     return (
         <View style={styles.card}>
             <ImageBackground source={imageUrl} style={styles.image} imageStyle={{ borderRadius: 12 }}
@@ -32,7 +36,10 @@ const TournamentCard = ({ title, dateText, distanceText, imageUrl, onInfoPress }
 
                         <View style={{ flex: 1 }} />
 
-                        <TouchableOpacity style={styles.infoButton} onPress={onInfoPress}>
+                        <TouchableOpacity
+                            style={styles.infoButton}
+                            onPress={() => router.push(`/tournament/${tournamentId}`)}
+                        >
                             <Text style={styles.infoText}>Info</Text>
                         </TouchableOpacity>
                     </View>
@@ -52,13 +59,15 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     card: {
+        width: screenWidth * 0.95, // 95% of screen width
+        alignSelf: 'center',
         borderRadius: 20,
-        overflow: "hidden",
+        overflow: 'hidden',
         elevation: 3,
     },
     image: {
         width: "100%",
-        height: 194,
+        height: 210,
         justifyContent: "flex-end",
     },
     overlay: {
