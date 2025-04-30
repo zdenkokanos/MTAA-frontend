@@ -25,7 +25,7 @@ export default function PreferencesSportScreen() {
         const data = await response.json();
   
         if (!response.ok) {
-          throw new Error(data.message || "Nepodarilo sa načítať športy.");
+          throw new Error(data.message || "Unable to load sports.");
         }
 
         setSportsData(data); 
