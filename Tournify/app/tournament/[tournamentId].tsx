@@ -19,6 +19,41 @@ export default function TournamentDetailScreen() {
 
     const router = useRouter();
 
+    const handleContinue = async () => {
+        if (!selectedOption || !teamInput || !token) return;
+
+        const endpoint = selectedOption === "new"
+            ? `${API_BASE_URL}/tournaments/${tournamentId}/register`
+            : `${API_BASE_URL}/tournaments/${tournamentId}/join_team`;
+
+        const payload = selectedOption === "new"
+            ? { team_name: teamInput }
+            : { code: teamInput };
+
+        try {
+            const response = await fetch(endpoint, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify(payload),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                console.log("Success:", data);
+                // TODO: Navigate to confirmation or success screen
+            } else {
+                console.error("Error:", data.message);
+            }
+        } catch (error) {
+            console.error("Request failed:", error);
+        }
+    };
+
+    // Fetch tournament data
     useEffect(() => {
         const fetchTournament = async () => {
             try {
@@ -36,7 +71,7 @@ export default function TournamentDetailScreen() {
                 ]);
 
                 const tournamentData = await tournamentRes.json();
-                const teamCountData = await teamCountRes.json();
+                const teamCountData = teamCountRes.status !== 204 ? await teamCountRes.json() : {};
 
                 if (tournamentRes.ok) {
                     setTournament(tournamentData);
@@ -95,6 +130,7 @@ export default function TournamentDetailScreen() {
             enableOnAndroid
             extraScrollHeight={40} // Pushes the input above the keyboard
         >
+            {/* Image and Back Button */}
             <ScrollView style={{ flex: 1, backgroundColor: '#fff' }}
                 keyboardShouldPersistTaps="handled"
                 contentContainerStyle={{ backgroundColor: '#fff', flexGrow: 1 }}
@@ -114,6 +150,7 @@ export default function TournamentDetailScreen() {
                     </SafeAreaView>
                 </View>
 
+                {/* White Sheet */}
                 <View style={styles.sheet}>
                     <View style={styles.swipeBar} />
 
@@ -124,6 +161,7 @@ export default function TournamentDetailScreen() {
 
                     <Text style={styles.dateUnderTitle}>{formattedDate}</Text>
 
+                    {/* Stats */}
                     <View style={styles.statsRow}>
                         <View style={styles.stat}>
                             <Text style={styles.statNumber}>{teamsCount ?? "0"}</Text>
@@ -139,6 +177,7 @@ export default function TournamentDetailScreen() {
                         </View>
                     </View>
 
+                    {/* Description */}
                     <Text style={styles.description}>
                         {tournament.additional_info
                             ? isExpanded || !shouldShowReadMore
@@ -146,18 +185,22 @@ export default function TournamentDetailScreen() {
                                 : shortDescription + '...'
                             : 'No description available.'}
                         {shouldShowReadMore && (
-                            <Text
-                                style={[
-                                    styles.readMoreInline,
-                                    isExpanded ? styles.readMoreLess : styles.readMoreMore,
-                                ]}
-                                onPress={() => setIsExpanded(prev => !prev)}
-                            >
-                                {isExpanded ? ' Show less' : ' Read more'}
-                            </Text>
+                            <>
+                                {'   '}
+                                <Text
+                                    style={[
+                                        styles.readMoreInline,
+                                        isExpanded ? styles.readMoreLess : styles.readMoreMore,
+                                    ]}
+                                    onPress={() => setIsExpanded(prev => !prev)}
+                                >
+                                    {isExpanded ? 'Show less' : 'Read more'}
+                                </Text>
+                            </>
                         )}
                     </Text>
 
+                    {/* Team Selection Buttons*/}
                     <View style={styles.teamButtons}>
                         <TouchableOpacity
                             style={[
@@ -184,6 +227,8 @@ export default function TournamentDetailScreen() {
                             </Text>
                         </TouchableOpacity>
                     </View>
+
+                    {/* Input Field */}
                     {selectedOption && (
                         <View style={styles.inputSection}>
                             <Text style={styles.inputLabel}>
@@ -210,17 +255,20 @@ export default function TournamentDetailScreen() {
                         </View>
                     )}
 
-
+                    {/* Legal Text */}
                     <Text style={styles.legalText}>
-                        By clicking the Continue button, you agree to the collection and processing of your personal data for the purpose of tournament registration and management, in accordance with our Privacy Policy.
+                        By clicking the Continue button, you agree to the collection and processing of your personal
+                        data for the purpose of tournament registration and management, in accordance with our Privacy Policy.
                     </Text>
 
+                    {/* Continue Button */}
                     <TouchableOpacity
                         style={[
                             styles.continueButton,
                             !selectedOption && styles.continueButtonDisabled,
                         ]}
                         disabled={!selectedOption}
+                        onPress={handleContinue}
                     >
                         <Text style={styles.continueText}>Continue</Text>
                     </TouchableOpacity>
@@ -307,6 +355,7 @@ const styles = StyleSheet.create({
     readMoreInline: {
         fontWeight: 'bold',
         marginLeft: 4,
+        textDecorationLine: 'underline',
     },
     readMoreMore: {
         color: '#007AFF', // blue
