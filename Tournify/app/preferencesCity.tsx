@@ -1,29 +1,90 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TextInput, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import StartButton from '../components/startButton';
+import API_BASE_URL from "../config/config";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
+// Zustand
+import { useSignUpStore } from "@/stores/signUpStore";
 
-
-export default function CityPreferencesScreen () {
+export default function CityPreferencesScreen() {
 
     const router = useRouter();
-    const [city, setCity] = useState('');
     const [error, setError] = useState('');
 
+    const { // Zustand store
+        firstName,
+        lastName,
+        email,
+        password,
+        profileImage,
+        preferredLocation,
+        preferredLongitude,
+        preferredLatitude,
+        preferences,
+        setField,
+    } = useSignUpStore();
+
+    const { reset } = useSignUpStore();
+
+    useEffect(() => {
+        setField("preferredLongitude", -122.4194);
+        setField("preferredLatitude", 37.7749);
+    }, []); // empty dependency array ensures this only runs once on mount
 
 
-    const handleContinue = () => {
-        if (!city.trim()) {
-            setError('Please enter your city.');
-        } else {
-            setError('');
-            router.push('/(tabs)/home');
+    const handleSignUp = async () => {
+        try {
+            const formData = new FormData();
+
+            formData.append("first_name", firstName);
+            formData.append("last_name", lastName);
+            formData.append("email", email);
+            formData.append("password", password);
+            formData.append("preferred_location", preferredLocation);
+            formData.append("preferred_longitude", preferredLongitude.toString());
+            formData.append("preferred_latitude", preferredLatitude.toString());
+            preferences.forEach(pref =>
+                formData.append("preferences[]", pref.toString())
+            );
+
+            if (profileImage) {
+                const fileName = profileImage.split("/").pop() || "profile.jpg";
+                const fileType = fileName.split(".").pop();
+                formData.append("image", {
+                    uri: profileImage,
+                    type: `image/${fileType}`,
+                    name: fileName,
+                } as any);
+            }
+
+            const response = await fetch(`${API_BASE_URL}/auth/register`, {
+                method: "POST",
+                headers: {
+                    // Don't set Content-Type! Let fetch set the boundary.
+                    Authorization: `Bearer ${await AsyncStorage.getItem("token")}`, // Optional, if needed
+                },
+                body: formData,
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                await AsyncStorage.setItem("userId", JSON.stringify(data.user.id));
+                await AsyncStorage.setItem("token", data.token);
+                reset(); // Reset the store after successful sign up
+                router.replace("/(tabs)/home");
+            } else {
+                alert(data.message || "Sign up failed");
+            }
+        } catch (error) {
+            console.error("Sign up error:", error);
+            alert("An error occurred. Please try again.");
         }
     };
-
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -36,27 +97,27 @@ export default function CityPreferencesScreen () {
                 style={styles.flex}
             >
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                <View style={styles.container}>
-                    
+                    <View style={styles.container}>
 
-                    <Text style={styles.label}>Your City</Text>
-                    <View style={styles.inputWrapper}>
-                    <TextInput
-                        style={styles.input}
-                        placeholder="Enter your city"
-                        value={city}
-                        onChangeText={setCity}
-                        placeholderTextColor="#999"
-                    />
-                    <Ionicons name="location-outline" size={20} color="#222" style={styles.icon} />
+
+                        <Text style={styles.label}>Your City</Text>
+                        <View style={styles.inputWrapper}>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="Enter your city"
+                                value={preferredLocation}
+                                onChangeText={(text) => setField('preferredLocation', text)}
+                                placeholderTextColor="#999"
+                            />
+                            <Ionicons name="location-outline" size={20} color="#222" style={styles.icon} />
+                        </View>
+
+                        {error ? <Text style={styles.error}>{error}</Text> : null}
+
+                        <View style={styles.buttonWrapper}>
+                            <StartButton title="Continue" onPress={handleSignUp} />
+                        </View>
                     </View>
-
-                    {error ? <Text style={styles.error}>{error}</Text> : null}
-
-                    <View style={styles.buttonWrapper}>
-                    <StartButton title="Continue" onPress={handleContinue} />
-                    </View>
-                </View>
                 </TouchableWithoutFeedback>
             </KeyboardAvoidingView>
         </SafeAreaView>
@@ -65,11 +126,11 @@ export default function CityPreferencesScreen () {
 
 const styles = StyleSheet.create({
     safeArea: {
-      flex: 1,
-      backgroundColor: '#fff',
+        flex: 1,
+        backgroundColor: '#fff',
     },
     flex: {
-      flex: 1,
+        flex: 1,
     },
     heading: {
         fontSize: 24,
@@ -77,9 +138,9 @@ const styles = StyleSheet.create({
         marginTop: 20,
     },
     container: {
-      flex: 1,
-      padding: 24,
-      justifyContent: 'center',
+        flex: 1,
+        padding: 24,
+        justifyContent: 'center',
     },
     bold: {
         fontSize: 32,
@@ -116,6 +177,6 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         textAlign: 'center',
     },
-    
-    
+
+
 });

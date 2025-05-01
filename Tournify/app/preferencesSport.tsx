@@ -8,12 +8,21 @@ import SportCard from '../components/registration/sportCard';
 import StartButton from '../components/startButton';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+// Zustand
+import { useSignUpStore } from "@/stores/signUpStore";
+
 export default function PreferencesSportScreen() {
   const [sportsData, setSportsData] = useState<any[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
   const [token, setToken] = useState<string | null>(null);
   const router = useRouter();
 
+  const { // Zustand store
+    preferences,
+    setField,
+  } = useSignUpStore();
+
+  // Fetch sports categories from the API
   useEffect(() => {
     const fetchSports = async () => {
       const storedToken = await AsyncStorage.getItem("token");
@@ -44,12 +53,23 @@ export default function PreferencesSportScreen() {
   }, []);
 
 
-  const toggleSelect = (title: string) => {
-    if (selected.includes(title)) {
-      setSelected(prev => prev.filter(item => item !== title));
+  const toggleSelect = (id: string) => {
+    if (selected.includes(id)) {
+      setSelected(prev => prev.filter(item => item !== id));
     } else {
-      setSelected(prev => [...prev, title]);
+      setSelected(prev => [...prev, id]);
     }
+  };
+
+  // Handle the continue button press and check if at least one sport is selected
+  const handleContinue = () => {
+    if (selected.length === 0) {
+      alert("Please select at least one sport.");
+      return;
+    }
+    setField("preferences", selected);
+    // Navigate to the next screen
+    router.replace("/preferencesCity");
   };
 
   return (
@@ -72,8 +92,8 @@ export default function PreferencesSportScreen() {
                 uri: `${API_BASE_URL}/uploads/${item.category_image}`,
                 headers: { Authorization: `Bearer ${token}` },
               }}
-              selected={selected.includes(item.category_name)}
-              onPress={() => toggleSelect(item.category_name)}
+              selected={selected.includes(item.id)}
+              onPress={() => toggleSelect(item.id)}
             />
           )}
           keyExtractor={item => item.id.toString()}
@@ -84,7 +104,7 @@ export default function PreferencesSportScreen() {
 
       </View>
       <View style={styles.buttonContainer}>
-        <StartButton title="Continue" onPress={() => router.push('/preferencesCity')} />
+        <StartButton title="Continue" onPress={handleContinue} />
       </View>
     </SafeAreaView>
   );

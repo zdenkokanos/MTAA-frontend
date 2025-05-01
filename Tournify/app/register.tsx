@@ -3,27 +3,28 @@ import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import StartButton from "@/components/startButton";
-import API_BASE_URL from "../config/config";
 import * as ImagePicker from "expo-image-picker";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { SafeAreaView } from "react-native-safe-area-context";
+
+// Zustand
+import { useSignUpStore } from "@/stores/signUpStore";
 
 export default function SignUpScreen() {
     const router = useRouter();
 
-    const [first_name, setFirstName] = useState("");
-    const [last_name, setLastName] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [passwordVisible, setPasswordVisible] = useState(false);
-    const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
-    const [profileImage, setProfileImage] = useState<string | null>(null);
-    const preferredLocation = "summertime";
-    const preferredLongitude = -122.4194;
-    const preferredLatitude = 37.7749;
-    const selectedPreferences = ["1", "2", "3"]; // Example preferences, replace with actual data
+    const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false)
+
+    const { // Zustand store
+        firstName,
+        lastName,
+        email,
+        password,
+        profileImage,
+        setField,
+    } = useSignUpStore();
 
     const pickImage = async () => {
         const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -40,64 +41,23 @@ export default function SignUpScreen() {
         });
 
         if (!result.canceled) {
-            setProfileImage(result.assets[0].uri);
+            setField("profileImage", result.assets[0].uri);
         }
     };
 
-    const handleSignUp = async () => {
-        if (password !== confirmPassword) {
-            alert("Passwords do not match");
+    const handleContinue = () => {
+        if (!firstName.trim() || !lastName.trim() || !email.trim() || !password.trim()) {
+            alert("Please fill in all required fields.");
             return;
         }
 
-        try {
-            const formData = new FormData();
-
-            formData.append("first_name", first_name);
-            formData.append("last_name", last_name);
-            formData.append("email", email);
-            formData.append("password", password);
-            formData.append("preferred_location", preferredLocation);
-            formData.append("preferred_longitude", preferredLongitude.toString());
-            formData.append("preferred_latitude", preferredLatitude.toString());
-            selectedPreferences.forEach(pref =>
-                formData.append("preferences[]", pref.toString())
-            );
-
-            if (profileImage) {
-                const fileName = profileImage.split("/").pop() || "profile.jpg";
-                const fileType = fileName.split(".").pop();
-                formData.append("image", {
-                    uri: profileImage,
-                    type: `image/${fileType}`,
-                    name: fileName,
-                } as any);
-            }
-
-            const response = await fetch(`${API_BASE_URL}/auth/register`, {
-                method: "POST",
-                headers: {
-                    // Don't set Content-Type! Let fetch set the boundary.
-                    Authorization: `Bearer ${await AsyncStorage.getItem("token")}`, // Optional, if needed
-                },
-                body: formData,
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                await AsyncStorage.setItem("userId", JSON.stringify(data.user.id));
-                await AsyncStorage.setItem("token", data.token);
-                router.push("/(tabs)/home");
-            } else {
-                alert(data.message || "Sign up failed");
-            }
-        } catch (error) {
-            console.error("Sign up error:", error);
-            alert("An error occurred. Please try again.");
+        if (password !== confirmPassword) {
+            alert("Passwords do not match.");
+            return;
         }
-    };
 
+        router.replace("/preferencesSport"); // go to next screen
+    };
 
     return (
         <KeyboardAvoidingView
@@ -130,8 +90,8 @@ export default function SignUpScreen() {
                                     style={styles.input}
                                     placeholder="First Name"
                                     placeholderTextColor="#888"
-                                    value={first_name}
-                                    onChangeText={setFirstName}
+                                    value={firstName}
+                                    onChangeText={(text) => setField('firstName', text)}
                                     autoCapitalize="words"
                                 />
                             </View>
@@ -142,8 +102,8 @@ export default function SignUpScreen() {
                                     style={styles.input}
                                     placeholder="Last Name"
                                     placeholderTextColor="#888"
-                                    value={last_name}
-                                    onChangeText={setLastName}
+                                    value={lastName}
+                                    onChangeText={(text) => setField('lastName', text)}
                                     autoCapitalize="words"
                                 />
                             </View>
@@ -155,7 +115,7 @@ export default function SignUpScreen() {
                                     placeholder="Email"
                                     placeholderTextColor="#888"
                                     value={email}
-                                    onChangeText={setEmail}
+                                    onChangeText={(text) => setField('email', text)}
                                     autoCapitalize="none"
                                     keyboardType="email-address"
                                     textContentType="emailAddress"
@@ -170,7 +130,7 @@ export default function SignUpScreen() {
                                     placeholder="Password"
                                     placeholderTextColor="#888"
                                     value={password}
-                                    onChangeText={setPassword}
+                                    onChangeText={(text) => setField('password', text)}
                                     secureTextEntry={!passwordVisible}
                                     textContentType="newPassword"
                                     autoComplete="password"
@@ -197,7 +157,7 @@ export default function SignUpScreen() {
                                 </TouchableOpacity>
                             </View>
 
-                            <StartButton title="Sign up" onPress={handleSignUp} />
+                            <StartButton title="Sign up" onPress={handleContinue} />
 
                             <Text style={styles.signUpText}>
                                 I have an account, <Text style={styles.signUpLink} onPress={() => router.push("/login")}>sign in.</Text>
