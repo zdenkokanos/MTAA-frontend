@@ -23,7 +23,7 @@ export default function SignUpScreen() {
     const preferredLocation = "summertime";
     const preferredLongitude = -122.4194;
     const preferredLatitude = 37.7749;
-    const selectedPreferences = [1, 2, 3];
+    const selectedPreferences = ["1", "2", "3"]; // Example preferences, replace with actual data
 
     const pickImage = async () => {
         const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -60,7 +60,9 @@ export default function SignUpScreen() {
             formData.append("preferred_location", preferredLocation);
             formData.append("preferred_longitude", preferredLongitude.toString());
             formData.append("preferred_latitude", preferredLatitude.toString());
-            formData.append("preferences", JSON.stringify(selectedPreferences)); // if needed by backend
+            selectedPreferences.forEach(pref =>
+                formData.append("preferences[]", pref.toString())
+            );
 
             if (profileImage) {
                 const fileName = profileImage.split("/").pop() || "profile.jpg";
