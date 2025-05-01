@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, SafeAreaView, ActivityIndicator, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, SafeAreaView, ActivityIndicator, TextInput, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -44,7 +44,13 @@ export default function TournamentDetailScreen() {
 
             if (response.ok) {
                 console.log("Success:", data);
-                // TODO: Navigate to confirmation or success screen
+                router.replace({
+                    pathname: "/ticket/[ticketId]",
+                    params: { ticketId: data.ticketId.toString() },
+                });
+            } else if (response.status === 400) {
+                console.error("Bad Request:", data.message);
+                Alert.alert("Error", data.message);
             } else {
                 console.error("Error:", data.message);
             }
