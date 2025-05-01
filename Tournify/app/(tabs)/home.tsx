@@ -220,6 +220,7 @@ export default function HomeScreen() {
                         {tickets.map((ticket) => (
                             <TicketCard
                                 key={ticket.id}
+                                ticketId={ticket.id}
                                 dateText={formatDateRelative(ticket.date)}
                                 imageUrl={{
                                     uri: `${API_BASE_URL}/uploads/${ticket.category_image}`,

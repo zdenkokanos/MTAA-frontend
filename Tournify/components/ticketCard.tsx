@@ -1,24 +1,37 @@
-import { View, Text, StyleSheet, ImageBackground } from "react-native";
+import { View, Text, StyleSheet, ImageBackground, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons"; // For icon placeholder, or use a custom QR icon
+import { useRouter } from "expo-router";
 
 interface TicketCardProps {
+    ticketId: string;      // Unique ticket ID
     dateText: string;       // e.g., "in 10 days"
     imageUrl: any;          // require(...) or { uri: ... }
 }
 
-const TicketCard = ({ dateText, imageUrl }: TicketCardProps) => {
+const TicketCard = ({ ticketId, dateText, imageUrl }: TicketCardProps) => {
+    const router = useRouter();
+
+    const handlePress = () => {
+        router.push({
+            pathname: "/ticket/[ticketId]",
+            params: { ticketId },
+        });
+    };
+
     return (
-        <ImageBackground
-            source={imageUrl}
-            style={styles.card}
-            imageStyle={styles.image}
-        >
-            <View style={styles.darkOverlay} />
-            <View style={styles.overlay}>
-                <Ionicons name="qr-code-outline" size={50} color="#fff" />
-                <Text style={styles.text}>{dateText}</Text>
-            </View>
-        </ImageBackground>
+        <TouchableOpacity onPress={handlePress} activeOpacity={0.85}>
+            <ImageBackground
+                source={imageUrl}
+                style={styles.card}
+                imageStyle={styles.image}
+            >
+                <View style={styles.darkOverlay} />
+                <View style={styles.overlay}>
+                    <Ionicons name="qr-code-outline" size={50} color="#fff" />
+                    <Text style={styles.text}>{dateText}</Text>
+                </View>
+            </ImageBackground>
+        </TouchableOpacity>
     );
 };
 
