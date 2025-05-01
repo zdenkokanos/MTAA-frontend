@@ -39,7 +39,7 @@ export default function LoginScreen() {
 
             await AsyncStorage.setItem("token", data.token);
             await AsyncStorage.setItem("userId", String(data.user.id));
-            router.push("/(tabs)/home");
+            router.replace("/(tabs)/home");
         } catch (error: unknown) {
             if (error instanceof Error) {
                 Alert.alert("Login Error", error.message);

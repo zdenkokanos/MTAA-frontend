@@ -148,7 +148,7 @@ export default function HomeScreen() {
                     <View style={styles.profileRow}>
                         <Image
                             source={
-                                userInfo && userInfo.image_path !== "null" && token
+                                userInfo && userInfo.image_path !== "null" && userInfo.image_path && token
                                     ? {
                                         uri: `${API_BASE_URL}/uploads/${userInfo.image_path}`,
                                         headers: {
