@@ -3,11 +3,12 @@ module.exports = function (api) {
     return {
       presets: ['babel-preset-expo'],
       plugins: [
-        ['dotenv-import', {
+        ['module:react-native-dotenv', {
           moduleName: '@env',
           path: '.env',
-          allowUndefined: true
-        }]
+          safe: false,
+          allowUndefined: true,
+        }],
       ],
     };
   };

@@ -7,6 +7,9 @@ import { Ionicons } from '@expo/vector-icons';
 import StartButton from '../components/startButton';
 import API_BASE_URL from "../config/config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { GOOGLE_MAPS_API_KEY } from '@env';
+import 'react-native-get-random-values';
+
 
 // Zustand
 import { useSignUpStore } from "@/stores/signUpStore";
@@ -87,6 +90,8 @@ export default function CityPreferencesScreen() {
         }
     };
 
+    console.log(GOOGLE_MAPS_API_KEY);
+
     return (
         <SafeAreaView style={styles.safeArea}>
             <Text style={styles.heading}>
@@ -112,6 +117,35 @@ export default function CityPreferencesScreen() {
                             />
                             <Ionicons name="location-outline" size={20} color="#222" style={styles.icon} />
                         </View>
+                        <GooglePlacesAutocomplete
+                            placeholder="Enter your city"
+                            onPress={(data, details) => {
+                                if (!details) return;
+
+                                const cityName = data.description;
+                                const { lat, lng } = details.geometry.location;
+
+                                setField("preferredLocation", cityName);
+                                setField("preferredLatitude", lat);
+                                setField("preferredLongitude", lng);
+                            }}
+
+                            fetchDetails={true}
+                            query={{
+                                key: GOOGLE_MAPS_API_KEY,
+                                language: 'en',
+                                types: '(cities)',
+                            }}
+                            styles={{
+                                textInput: {
+                                    backgroundColor: '#f2f2f2',
+                                    borderRadius: 12,
+                                    paddingHorizontal: 16,
+                                    height: 48,
+                                },
+                                container: { flex: 0 },
+                            }}
+                        />
 
                         {error ? <Text style={styles.error}>{error}</Text> : null}
 
