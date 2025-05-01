@@ -54,7 +54,7 @@ export default function CityPreferencesScreen () {
                     {error ? <Text style={styles.error}>{error}</Text> : null}
 
                     <View style={styles.buttonWrapper}>
-                    <StartButton title="Continue" onPress={handleContinue} />
+                        <StartButton title="Continue" onPress={handleContinue} />
                     </View>
                 </View>
                 </TouchableWithoutFeedback>

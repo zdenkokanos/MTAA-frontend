@@ -10,6 +10,7 @@ import LevelPicker from '@/components/create/levelPicker';
 import CategoryPicker from '@/components/create/categoryPicker';
 import DateTimePickerInput from '@/components/create/dateTimePicker';
 import TimePickerInput from '@/components/create/timePicker';
+import StartButton from '@/components/startButton';
 
 export default function CreateTournament() {
 
@@ -19,6 +20,8 @@ export default function CreateTournament() {
     const [sport, setSport] = useState('');
     const [tournamentDate, setTournamentDate] = useState(new Date());
     const [tournamentTime, setTournamentTime] = useState(new Date());
+    const [additionalInfo, setAdditionalInfo] = useState('');
+
 
     const [teamSize, setTeamSize] =  useState('');
     const gameOptions = ['indoor', 'outdoor', 'other'] as const;
@@ -36,6 +39,10 @@ export default function CreateTournament() {
         { label: 'Pro', value: 'pro' },
         { label: 'Open', value: 'open' },
       ];
+
+    const handleContinue = () => {
+        console.log("React native!")
+    };
     
 
     return (
@@ -87,10 +94,10 @@ export default function CreateTournament() {
 
                     {/* Tournament date and time */}
                     <View style={styles.inputRow}>
-                        <View style={{ width: '50%' }}>
+                        <View style={{ width: '50%'}}>
                             <DateTimePickerInput date={tournamentDate} setDate={setTournamentDate} />
                         </View>
-                        <View style={{ width: '50%' }}>
+                        <View style={{ width: '50%', paddingLeft: 5}}>
                             <TimePickerInput time={tournamentTime} setTime={setTournamentTime} />
                         </View>
                     </View>
@@ -124,7 +131,7 @@ export default function CreateTournament() {
                                     style={styles.numInput}
                                     keyboardType="numeric" 
                                 />
-                                <FontAwesome6 name="keyboard" size={20} color="black" style={styles.inputIcon} />
+                                <FontAwesome6 name="people-group" size={20} color="black" />
                             </View>
                         </View>
                     </View>
@@ -193,6 +200,28 @@ export default function CreateTournament() {
                         </View>
                     </View>
 
+                    {/* Additional info */}
+                    <View>
+                        <Text style={styles.label}>Additional info</Text>
+                        <View style={styles.textAreaWrapper}>
+                            <TextInput
+                            placeholder="Enter additional information..."
+                            value={additionalInfo}
+                            onChangeText={setAdditionalInfo}
+                            style={styles.textArea}
+                            multiline
+                            numberOfLines={6}
+                            placeholderTextColor="#888"
+                            />
+                            <FontAwesome6 name="keyboard" size={20} color="black" style={styles.inputIcon} />
+                        </View>
+                    </View>
+
+
+                    {/* submit  */}
+                    <View style={styles.buttonWrapper}>
+                        <StartButton title="Submit" onPress={handleContinue} />
+                    </View>
 
 
 
@@ -327,6 +356,40 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#000',
     },
+    buttonWrapper: {
+        width: '100%',
+        marginTop: 30
+    },
+    error: {
+        color: '#d9534f',
+        fontSize: 14,
+        marginBottom: 10,
+        textAlign: 'center',
+    },
+    textAreaWrapper: {
+        backgroundColor: '#eee',
+        borderRadius: 15,
+        paddingHorizontal: 12,
+        paddingVertical: 10,
+        flexDirection: 'row',
+        alignItems: 'flex-start',
+        position: 'relative',
+      },
+      
+      textArea: {
+        flex: 1,
+        fontSize: 16,
+        color: '#000',
+        textAlignVertical: 'top', // needed for android
+        minHeight: 100,
+      },
+      
+      textAreaUnderline: {
+        height: 2,
+        backgroundColor: '#444',
+        marginTop: 4,
+        width: '100%',
+      },    
       
       
 });

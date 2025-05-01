@@ -29,12 +29,7 @@ export default function DateTimePickerInput({
         style={styles.inputWrapper}
       >
         <Text style={styles.inputText}>{format(date, 'dd.MM.yyyy')}</Text>
-        <FontAwesome6
-          name="calendar-days"
-          size={20}
-          color="black"
-          style={styles.inputIcon}
-        />
+        <FontAwesome6 name="calendar-minus" size={20} color="black" />
       </TouchableOpacity>
 
       {showModal && (
