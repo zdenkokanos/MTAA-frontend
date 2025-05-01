@@ -11,26 +11,26 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { format } from 'date-fns';
 
-export default function DateTimePickerInput({
-  date,
-  setDate,
+export default function TimePickerInput({
+  time,
+  setTime,
 }: {
-  date: Date;
-  setDate: (value: Date) => void;
+  time: Date;
+  setTime: (value: Date) => void;
 }) {
   const [showModal, setShowModal] = useState(false);
-  const [tempDate, setTempDate] = useState(date);
+  const [tempTime, setTempTime] = useState(time);
 
   return (
     <View>
-      <Text style={styles.label}>Date</Text>
+      <Text style={styles.label}>Time</Text>
       <TouchableOpacity
         onPress={() => setShowModal(true)}
         style={styles.inputWrapper}
       >
-        <Text style={styles.inputText}>{format(date, 'dd.MM.yyyy')}</Text>
+        <Text style={styles.inputText}>{format(time, 'HH:mm')}</Text>
         <FontAwesome6
-          name="calendar-days"
+          name="clock"
           size={20}
           color="black"
           style={styles.inputIcon}
@@ -41,30 +41,24 @@ export default function DateTimePickerInput({
         <Modal transparent animationType="slide">
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
-              <View style={styles.modalHeader}>
-                <TouchableOpacity
-                  onPress={() => {
+                <View style={styles.modalHeader}>
+                    <TouchableOpacity onPress={() => {
                     setShowModal(false);
-                    setDate(tempDate);
-                  }}
-                >
-                  <Text style={styles.doneText}>Done</Text>
-                </TouchableOpacity>
-              </View>
-              <View style={styles.pickerWrapper}>
-                <Text style={styles.dayLabel}>
-                  {format(tempDate, 'EEEE, d MMMM yyyy')}
-                </Text>
-
+                    setTime(tempTime);
+                    }}>
+                    <Text style={styles.doneText}>Done</Text>
+                    </TouchableOpacity>
+                </View>
+                <View style={styles.pickerWrapper}>
                 <DateTimePicker
-                  value={tempDate}
-                  mode="date"
-                  display="spinner"
-                  onChange={(event, selectedDate) => {
-                    if (selectedDate) setTempDate(selectedDate);
-                  }}
+                    value={tempTime}
+                    mode="time"
+                    display="spinner"
+                    onChange={(event, selectedTime) => {
+                    if (selectedTime) setTempTime(selectedTime);
+                    }}
                 />
-              </View>
+                </View>
             </View>
           </View>
         </Modal>
@@ -117,23 +111,17 @@ const styles = StyleSheet.create({
     padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: '#ddd',
-    marginRight: 15,
   },
   doneText: {
     fontSize: 16,
     fontWeight: '600',
     color: '#007AFF',
+    paddingRight: 15,
   },
   pickerWrapper: {
+    width: '100%',
     alignItems: 'center',
+    justifyContent: 'center',
     paddingVertical: 10,
-  },
-  dayLabel: {
-    fontSize: 16,
-    fontWeight: '500',
-    marginBottom: 10,
-    color: '#333',
-  },
-  
+  }
 });
-

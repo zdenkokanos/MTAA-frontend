@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Text, View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, SafeAreaView, TextInput } from "react-native";
+import { Text, View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, SafeAreaView, TextInput, TouchableOpacity } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Picker } from '@react-native-picker/picker';
+import { LinearGradient } from 'expo-linear-gradient';
 
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
@@ -9,6 +9,7 @@ import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import LevelPicker from '@/components/create/levelPicker';
 import CategoryPicker from '@/components/create/categoryPicker';
 import DateTimePickerInput from '@/components/create/dateTimePicker';
+import TimePickerInput from '@/components/create/timePicker';
 
 export default function CreateTournament() {
 
@@ -17,7 +18,15 @@ export default function CreateTournament() {
     const [level, setLevel] = useState('');
     const [sport, setSport] = useState('');
     const [tournamentDate, setTournamentDate] = useState(new Date());
+    const [tournamentTime, setTournamentTime] = useState(new Date());
+
     const [teamSize, setTeamSize] =  useState('');
+    const gameOptions = ['indoor', 'outdoor', 'other'] as const;
+    const [gameSetting, setGameSetting] = useState('');
+    const [customSetting, setCustomSetting] = useState('');
+    const [entryFee, setEntryFee] = useState('');
+    const [prizeDescription, setPrizeDescription] = useState('');
+
 
     
     const levels = [
@@ -32,13 +41,13 @@ export default function CreateTournament() {
     return (
         <SafeAreaView style={styles.safeArea}>
             <KeyboardAvoidingView style={styles.wrapper} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+                <View style={styles.mainTitle}>
+                    <MaterialIcons style={styles.icon} name="edit" size={24} color="black" />
+                    <Text style={styles.title}>Create Tournament</Text>
+                </View>
                 <ScrollView contentContainerStyle={styles.container}>
                     
-                    <View style={styles.row}>
-                        <MaterialIcons style={styles.icon} name="edit" size={24} color="black" />
-                        <Text style={styles.title}>Create Tournament</Text>
-                    </View>
-
+                    {/* Tournament name */}
                     <View>
                         <Text style={styles.label}>Tournament Name</Text>
                         <View style={styles.inputWrapper}>
@@ -52,6 +61,7 @@ export default function CreateTournament() {
                         </View>
                     </View>
 
+                    {/* Tournament category and level */}
                     <View style={styles.inputRow}>
                         <View style={{ width: Platform.OS === 'ios' ? "60%" : '50%'}}>
                             <CategoryPicker sport={sport} setSport={setSport} />
@@ -61,6 +71,7 @@ export default function CreateTournament() {
                         </View>
                     </View>
 
+                    {/* Tournament place */}
                     <View>
                         <Text style={styles.label}>Event place</Text>
                         <View style={styles.inputWrapper}>
@@ -74,23 +85,116 @@ export default function CreateTournament() {
                         </View>
                     </View>
 
+                    {/* Tournament date and time */}
                     <View style={styles.inputRow}>
-                        <View style={{ width: '60%'}}>
+                        <View style={{ width: '50%' }}>
                             <DateTimePickerInput date={tournamentDate} setDate={setTournamentDate} />
                         </View>
-                        <View style={{ width: '40%' }}>
+                        <View style={{ width: '50%' }}>
+                            <TimePickerInput time={tournamentTime} setTime={setTournamentTime} />
+                        </View>
+                    </View>
+
+
+                    {/* Team size and entry fee */}
+                    <View style={styles.inputRow}>
+                        <View style={{ width: '50%', paddingRight: 5}}>
+                        <Text style={styles.label}>Entry fee</Text>
+                            <View style={styles.inputWrapper}>
+                                <TextInput
+                                    placeholder="5.00"
+                                    value={entryFee}
+                                    onChangeText={setEntryFee}
+                                    style={styles.input}
+                                    keyboardType="numeric"
+                                    placeholderTextColor="#888"
+                                />
+                                <View style={styles.euroCircle}>
+                                    <Text style={styles.euroText}>€</Text>
+                                </View>
+                            </View>
+                        </View>
+                        <View style={{ width: '50%', paddingLeft: 5}}>
                             <Text style={styles.label}>Team Size</Text>
-                            <TextInput
-                                placeholder="2"
-                                value={teamSize}
-                                onChangeText={setTeamSize}
-                                style={styles.numInput}
-                                keyboardType="numeric" 
-                            />
+                            <View style={styles.inputWrapper}>
+                                <TextInput
+                                    placeholder="2"
+                                    value={teamSize}
+                                    onChangeText={setTeamSize}
+                                    style={styles.numInput}
+                                    keyboardType="numeric" 
+                                />
+                                <FontAwesome6 name="keyboard" size={20} color="black" style={styles.inputIcon} />
+                            </View>
+                        </View>
+                    </View>
+
+                    {/* Game setting */}
+                    <View>
+                        <Text style={styles.label}>Game Setting</Text>
+                        <View style={styles.gameSettingRow}>
+                            {gameOptions.map(option => {
+                            const isActive = gameSetting === option;
+
+                            return (
+                                <TouchableOpacity
+                                key={option}
+                                onPress={() => setGameSetting(option)}
+                                style={{ flex: 1 }}
+                                >
+                                {isActive ? (
+                                    <LinearGradient
+                                    colors={["#64CA76", "#2E8B57"]}
+                                    start={{ x: 0, y: 0 }}
+                                    end={{ x: 1, y: 1 }}
+                                    style={styles.optionButton}
+                                    >
+                                    <Text style={[styles.optionText, styles.optionTextActive]}>
+                                        {option}
+                                    </Text>
+                                    </LinearGradient>
+                                ) : (
+                                    <View style={styles.optionButton}>
+                                    <Text style={styles.optionText}>{option}</Text>
+                                    </View>
+                                )}
+                                </TouchableOpacity>
+                            );
+                            })}
                         </View>
 
-
+                        {gameSetting === 'other' && (
+                            <View style={[styles.inputWrapper, { marginTop: 10 }]}>
+                            <TextInput
+                                placeholder="Enter custom setting"
+                                value={customSetting}
+                                onChangeText={setCustomSetting}
+                                style={styles.input}
+                                placeholderTextColor="#888"
+                            />
+                            </View>
+                        )}
                     </View>
+
+                    {/* Prize description */}
+                    <View style={styles.inputRow}>
+                        <View style={{ width: '100%' }}>
+                            <Text style={styles.label}>Prize Description</Text>
+                            <View style={styles.inputWrapper}>
+                            <TextInput
+                                placeholder="T-shirt merch"
+                                value={prizeDescription}
+                                onChangeText={setPrizeDescription}
+                                style={styles.input}
+                                placeholderTextColor="#888"
+                            />
+                            <FontAwesome6 name="keyboard" size={20} color="black" style={styles.inputIcon} />
+                            </View>
+                        </View>
+                    </View>
+
+
+
 
 
 
@@ -112,6 +216,12 @@ const styles = StyleSheet.create({
       },
     container: {
         padding: 24,
+    },
+    mainTitle: {
+        flexDirection: 'row',
+        textAlignVertical: 'center',
+        marginTop: 20,
+        marginLeft: 25,
     },
     title: {
         fontSize: 24,
@@ -137,6 +247,7 @@ const styles = StyleSheet.create({
     inputWrapper: {
         flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'space-between',
         backgroundColor: '#eee',
         borderRadius: 10,
         paddingHorizontal: 12,
@@ -168,13 +279,54 @@ const styles = StyleSheet.create({
     numInput: {
         backgroundColor: '#eee',
         borderRadius: 10,
-        paddingHorizontal: 12,
+        paddingHorizontal: 20,
         paddingVertical: 10,
         height: 50,
         fontSize: 16,
         color: '#000',
-        textAlign: 'center',
+        textAlign: 'left',
         marginLeft: 5,
-
-    }
+    },
+    gameSettingRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        gap: 10,
+        marginTop: 5,
+    },
+    optionButton: {
+        paddingVertical: 12,
+        backgroundColor: '#eee',
+        borderRadius: 25,
+        width: '100%',
+        justifyContent: 'center', 
+        alignItems: 'center'
+    },
+    optionButtonActive: {
+        backgroundColor: '#64CA76',
+    },
+    optionText: {
+        fontSize: 14,
+        color: '#666',
+    },
+    optionTextActive: {
+        fontWeight: '600',
+        color: '#000',
+    },
+    euroCircle: {
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        borderWidth: 2,
+        borderColor: '#000',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginLeft: 8,
+    },
+    euroText: {
+        fontSize: 14,
+        fontWeight: 'bold',
+        color: '#000',
+    },
+      
+      
 });
