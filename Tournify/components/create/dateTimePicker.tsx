@@ -55,6 +55,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 10,
     height: 50,
+    marginRight: 5,
   },
   inputText: {
     flex: 1,

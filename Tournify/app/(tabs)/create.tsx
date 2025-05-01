@@ -17,6 +17,7 @@ export default function CreateTournament() {
     const [level, setLevel] = useState('');
     const [sport, setSport] = useState('');
     const [tournamentDate, setTournamentDate] = useState(new Date());
+    const [teamSize, setTeamSize] =  useState('');
 
     
     const levels = [
@@ -74,12 +75,21 @@ export default function CreateTournament() {
                     </View>
 
                     <View style={styles.inputRow}>
-                        <View style={{ width: '60%' }}>
+                        <View style={{ width: '60%'}}>
                             <DateTimePickerInput date={tournamentDate} setDate={setTournamentDate} />
                         </View>
                         <View style={{ width: '40%' }}>
-                            {/* sem napr. team size input */}
+                            <Text style={styles.label}>Team Size</Text>
+                            <TextInput
+                                placeholder="2"
+                                value={teamSize}
+                                onChangeText={setTeamSize}
+                                style={styles.numInput}
+                                keyboardType="numeric" 
+                            />
                         </View>
+
+
                     </View>
 
 
@@ -154,5 +164,17 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between', 
         alignItems: 'baseline',
+    },
+    numInput: {
+        backgroundColor: '#eee',
+        borderRadius: 10,
+        paddingHorizontal: 12,
+        paddingVertical: 10,
+        height: 50,
+        fontSize: 16,
+        color: '#000',
+        textAlign: 'center',
+        marginLeft: 5,
+
     }
 });
