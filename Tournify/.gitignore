@@ -36,7 +36,7 @@ yarn-error.*
 *.tsbuildinfo
 
 app-example
-
+# macOS
 # Expo
 .expo
 dist/
@@ -44,3 +44,6 @@ web-build/
 
 # Config
 config/
+
+# Environment
+.env
