@@ -8,12 +8,16 @@ import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 
 import LevelPicker from '@/components/create/levelPicker';
 import CategoryPicker from '@/components/create/categoryPicker';
+import DateTimePickerInput from '@/components/create/dateTimePicker';
 
 export default function CreateTournament() {
 
     const [tournamentName, setTournamentName] = useState('');
+    const [tournamentPlace, setTournamentPlace] = useState('');
     const [level, setLevel] = useState('');
     const [sport, setSport] = useState('');
+    const [tournamentDate, setTournamentDate] = useState(new Date());
+
     
     const levels = [
         { label: 'Beginner', value: 'beginner' },
@@ -56,6 +60,27 @@ export default function CreateTournament() {
                         </View>
                     </View>
 
+                    <View>
+                        <Text style={styles.label}>Event place</Text>
+                        <View style={styles.inputWrapper}>
+                            <TextInput
+                                placeholder="Enter tournament place"
+                                style={styles.input}
+                                value={tournamentPlace}
+                                onChangeText={setTournamentPlace}
+                            />
+                            <FontAwesome6 name="location-dot" size={20} color="black" />
+                        </View>
+                    </View>
+
+                    <View style={styles.inputRow}>
+                        <View style={{ width: '60%' }}>
+                            <DateTimePickerInput date={tournamentDate} setDate={setTournamentDate} />
+                        </View>
+                        <View style={{ width: '40%' }}>
+                            {/* sem napr. team size input */}
+                        </View>
+                    </View>
 
 
 
@@ -107,7 +132,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 12,
         paddingVertical: 10,
         height: 50,
-        color: '#f00',
     },
     input: {
         flex: 1,

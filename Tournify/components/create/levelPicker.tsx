@@ -45,7 +45,7 @@ type LevelPickerProps = {
         onPress={() => setModalVisible(true)}
         style={styles.selector}
       >
-        <Text style={{ color: level ? '#000' : '#888' }}>
+        <Text style={{ color: level ? '#000' : '#aaa' }}>
           {level ? levels.find((l) => l.value === level)?.label : 'Choose level'}
         </Text>
       </TouchableOpacity>
@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#eee',
     padding: 15,
     borderRadius: 12,
-    marginHorizontal: 10,
+    marginLeft: 5,
   },
   androidPickerWrapper: {
     backgroundColor: '#f2f2f2',

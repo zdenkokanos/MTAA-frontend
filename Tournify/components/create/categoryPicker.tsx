@@ -76,7 +76,7 @@ export default function SportPicker({ sport, setSport }: SportPickerProps) {
         onPress={() => setModalVisible(true)}
         style={styles.selector}
       >
-        <Text style={{ color: sport ? '#000' : '#888' }}>
+        <Text style={{ color: sport ? '#000' : '#aaa' }}>
           { sport ? sports.find((s) => s.category_name === sport)?.category_name : 'Choose category' }
         </Text>
 
@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
     marginBottom: 5,
-    marginLeft: 5,
+    marginLeft: 15,
     color: '#222',
     marginTop: 10,
   },
@@ -126,7 +126,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#eee',
     padding: 15,
     borderRadius: 12,
-    marginHorizontal: 5,
+    marginRight: 5,
   },
   androidPickerWrapper: {
     backgroundColor: '#eee',
