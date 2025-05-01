@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TextInput, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import { useRouter } from 'expo-router';
@@ -10,16 +10,14 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { GOOGLE_MAPS_API_KEY } from '@env';
 import 'react-native-get-random-values';
 
-
 // Zustand
 import { useSignUpStore } from "@/stores/signUpStore";
 
 export default function CityPreferencesScreen() {
-
     const router = useRouter();
     const [error, setError] = useState('');
 
-    const { // Zustand store
+    const {
         firstName,
         lastName,
         email,
@@ -30,15 +28,13 @@ export default function CityPreferencesScreen() {
         preferredLatitude,
         preferences,
         setField,
+        reset
     } = useSignUpStore();
-
-    const { reset } = useSignUpStore();
 
     useEffect(() => {
         setField("preferredLongitude", -122.4194);
         setField("preferredLatitude", 37.7749);
-    }, []); // empty dependency array ensures this only runs once on mount
-
+    }, []);
 
     const handleSignUp = async () => {
         try {
@@ -68,8 +64,7 @@ export default function CityPreferencesScreen() {
             const response = await fetch(`${API_BASE_URL}/auth/register`, {
                 method: "POST",
                 headers: {
-                    // Don't set Content-Type! Let fetch set the boundary.
-                    Authorization: `Bearer ${await AsyncStorage.getItem("token")}`, // Optional, if needed
+                    Authorization: `Bearer ${await AsyncStorage.getItem("token")}`,
                 },
                 body: formData,
             });
@@ -79,7 +74,7 @@ export default function CityPreferencesScreen() {
             if (response.ok) {
                 await AsyncStorage.setItem("userId", JSON.stringify(data.user.id));
                 await AsyncStorage.setItem("token", data.token);
-                reset(); // Reset the store after successful sign up
+                reset();
                 router.replace("/(tabs)/home");
             } else {
                 alert(data.message || "Sign up failed");
@@ -89,8 +84,6 @@ export default function CityPreferencesScreen() {
             alert("An error occurred. Please try again.");
         }
     };
-
-    console.log(GOOGLE_MAPS_API_KEY);
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -104,32 +97,19 @@ export default function CityPreferencesScreen() {
             >
                 <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                     <View style={styles.container}>
-
-
                         <Text style={styles.label}>Your City</Text>
-                        <View style={styles.inputWrapper}>
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Enter your city"
-                                value={preferredLocation}
-                                onChangeText={(text) => setField('preferredLocation', text)}
-                                placeholderTextColor="#999"
-                            />
-                            <Ionicons name="location-outline" size={20} color="#222" style={styles.icon} />
-                        </View>
+
                         <GooglePlacesAutocomplete
                             placeholder="Enter your city"
                             onPress={(data, details) => {
                                 if (!details) return;
-
                                 const cityName = data.description;
                                 const { lat, lng } = details.geometry.location;
-
                                 setField("preferredLocation", cityName);
                                 setField("preferredLatitude", lat);
                                 setField("preferredLongitude", lng);
+                                setError("");
                             }}
-
                             fetchDetails={true}
                             query={{
                                 key: GOOGLE_MAPS_API_KEY,
@@ -142,8 +122,9 @@ export default function CityPreferencesScreen() {
                                     borderRadius: 12,
                                     paddingHorizontal: 16,
                                     height: 48,
+                                    fontSize: 16,
                                 },
-                                container: { flex: 0 },
+                                container: { marginBottom: 16 },
                             }}
                         />
 
@@ -156,7 +137,7 @@ export default function CityPreferencesScreen() {
                 </TouchableWithoutFeedback>
             </KeyboardAvoidingView>
         </SafeAreaView>
-    )
+    );
 }
 
 const styles = StyleSheet.create({
@@ -172,39 +153,23 @@ const styles = StyleSheet.create({
         marginLeft: 20,
         marginTop: 20,
     },
+    bold: {
+        fontSize: 32,
+        fontWeight: 'bold',
+    },
     container: {
         flex: 1,
         padding: 24,
         justifyContent: 'center',
-    },
-    bold: {
-        fontSize: 32,
-        fontWeight: 'bold',
     },
     label: {
         marginBottom: 6,
         color: '#333',
         fontSize: 14,
     },
-    inputWrapper: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#f2f2f2',
-        borderRadius: 12,
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        marginBottom: 15,
-    },
-    input: {
-        flex: 1,
-        fontSize: 16,
-        color: '#000',
-    },
-    icon: {
-        marginLeft: 8,
-    },
     buttonWrapper: {
         alignItems: 'center',
+        marginTop: 10,
     },
     error: {
         color: '#d9534f',
@@ -212,6 +177,4 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         textAlign: 'center',
     },
-
-
 });
