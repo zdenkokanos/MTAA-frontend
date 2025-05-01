@@ -7,6 +7,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import TicketCard from "@/components/ticketCard";
 import HistoryCard from "@/components/historyCard";
+import { useIsFocused } from '@react-navigation/native';
 
 export default function HomeScreen() {
 
@@ -41,79 +42,90 @@ export default function HomeScreen() {
     const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
     const [tickets, setTickets] = useState<Ticket[]>([]);
 
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const storedToken = await AsyncStorage.getItem("token");
-                const storedUserId = await AsyncStorage.getItem("userId");
+    const isFocused = useIsFocused();
 
-                if (!storedUserId || !storedToken) return;
+    const fetchData = async () => {
+        try {
+            const storedToken = await AsyncStorage.getItem("token");
+            const storedUserId = await AsyncStorage.getItem("userId");
 
-                setToken(storedToken);
+            if (!storedUserId || !storedToken) return;
 
-                // Fetch Top Picks
-                const topPicksResponse = await fetch(`${API_BASE_URL}/users/${storedUserId}/top-picks`, {
-                    headers: {
-                        Authorization: `Bearer ${storedToken}`,
-                        "Content-Type": "application/json",
-                    },
-                });
-                const topPicksData = await topPicksResponse.json();
-                if (topPicksResponse.ok) {
-                    setTopPicks(topPicksData);
-                } else {
-                    console.error("Top Picks error:", topPicksData.message);
-                }
+            setToken(storedToken);
 
-                // Fetch User Info
-                const userInfoResponse = await fetch(`${API_BASE_URL}/users/${storedUserId}/info`, {
-                    headers: {
-                        Authorization: `Bearer ${storedToken}`,
-                        "Content-Type": "application/json",
-                    },
-                });
-                const userInfoData = await userInfoResponse.json();
-                if (userInfoResponse.ok) {
-                    setUserInfo(userInfoData);
-                } else {
-                    console.error("User Info error:", userInfoData.message);
-                }
-
-                // Fetch Tickets
-                const ticketsResponse = await fetch(`${API_BASE_URL}/users/${storedUserId}/tickets`, {
-                    headers: {
-                        Authorization: `Bearer ${storedToken}`,
-                        "Content-Type": "application/json",
-                    },
-                });
-                const ticketsData = await ticketsResponse.json();
-                if (ticketsResponse.ok) {
-                    setTickets(ticketsData);
-                } else {
-                    console.error("Tickets error:", ticketsData.message);
-                }
-
-                // Fetch History
-                const historyResponse = await fetch(`${API_BASE_URL}/users/${storedUserId}/tournaments/history`, {
-                    headers: {
-                        Authorization: `Bearer ${storedToken}`,
-                        "Content-Type": "application/json",
-                    },
-                });
-                const historyData = await historyResponse.json();
-                if (historyResponse.ok) {
-                    setHistory(historyData);
-                } else {
-                    console.error("History error:", historyData.message);
-                }
-
-            } catch (err) {
-                console.error("Failed to load home screen data:", err);
+            // Fetch Top Picks
+            const topPicksResponse = await fetch(`${API_BASE_URL}/users/${storedUserId}/top-picks`, {
+                headers: {
+                    Authorization: `Bearer ${storedToken}`,
+                    "Content-Type": "application/json",
+                },
+            });
+            const topPicksData = await topPicksResponse.json();
+            if (topPicksResponse.ok) {
+                setTopPicks(topPicksData);
+            } else {
+                console.error("Top Picks error:", topPicksData.message);
             }
-        };
 
+            // Fetch User Info
+            const userInfoResponse = await fetch(`${API_BASE_URL}/users/${storedUserId}/info`, {
+                headers: {
+                    Authorization: `Bearer ${storedToken}`,
+                    "Content-Type": "application/json",
+                },
+            });
+            const userInfoData = await userInfoResponse.json();
+            if (userInfoResponse.ok) {
+                setUserInfo(userInfoData);
+            } else {
+                console.error("User Info error:", userInfoData.message);
+            }
+
+            // Fetch Tickets
+            const ticketsResponse = await fetch(`${API_BASE_URL}/users/${storedUserId}/tickets`, {
+                headers: {
+                    Authorization: `Bearer ${storedToken}`,
+                    "Content-Type": "application/json",
+                },
+            });
+            const ticketsData = await ticketsResponse.json();
+            if (ticketsResponse.ok) {
+                setTickets(ticketsData);
+            } else {
+                console.error("Tickets error:", ticketsData.message);
+            }
+
+            // Fetch History
+            const historyResponse = await fetch(`${API_BASE_URL}/users/${storedUserId}/tournaments/history`, {
+                headers: {
+                    Authorization: `Bearer ${storedToken}`,
+                    "Content-Type": "application/json",
+                },
+            });
+            const historyData = await historyResponse.json();
+            if (historyResponse.ok) {
+                setHistory(historyData);
+            } else {
+                console.error("History error:", historyData.message);
+            }
+
+        } catch (err) {
+            console.error("Failed to load home screen data:", err);
+        }
+    };
+
+    // Initial fetch
+    useEffect(() => {
         fetchData();
     }, []);
+
+    // Refetch when screen is focused
+    useEffect(() => {
+        if (isFocused) {
+            fetchData();
+        }
+    }, [isFocused]);
+
 
     const screenWidth = Dimensions.get('window').width;
     const CARD_WIDTH = screenWidth * 0.95;

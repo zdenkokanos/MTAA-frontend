@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, ActivityIndicator, Image, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, ActivityIndicator, Image, TouchableOpacity, Platform } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import Toast from 'react-native-toast-message';
 import React, { useEffect, useState } from 'react';
@@ -8,6 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
+import { Linking } from 'react-native';
 
 export default function TicketDetailScreen() {
     const { ticketId } = useLocalSearchParams();
@@ -19,7 +20,18 @@ export default function TicketDetailScreen() {
     const [teamsCount, setTeamsCount] = useState<number | null>(null);
     const [enrolledTeams, setEnrolledTeams] = useState([]);
 
+    const openInMaps = (lat: number, lng: number, label = 'Location') => {
+        const scheme = Platform.select({
+            ios: `http://maps.apple.com/?ll=${lat},${lng}&q=${encodeURIComponent(label)}`,
+            android: `geo:${lat},${lng}?q=${lat},${lng}(${encodeURIComponent(label)})`,
+        });
 
+        if (scheme) {
+            Linking.openURL(scheme).catch(err => {
+                console.error('Error opening map app:', err);
+            });
+        }
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -34,10 +46,12 @@ export default function TicketDetailScreen() {
                     headers: { Authorization: `Bearer ${token}` },
                 });
 
+
                 const ticketData = await ticketRes.json();
                 const ticketInfo = ticketData[0];
                 setTicket(ticketInfo);
 
+                console.log("Fetched ticketData:", ticketData);
                 // If ticket is valid, fetch tournament + team count
                 if (ticketInfo?.tournament_id) {
                     const [tournamentRes, teamCountRes] = await Promise.all([
@@ -116,7 +130,13 @@ export default function TicketDetailScreen() {
                     style={styles.image}
                 />
                 <SafeAreaView style={styles.safeAreaBack}>
-                    <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+                    <TouchableOpacity style={styles.backButton} onPress={() => {
+                        if (router.canGoBack()) {
+                            router.back();
+                        } else {
+                            router.replace("/(tabs)/home");
+                        }
+                    }}>
                         <Ionicons name="arrow-back" size={24} color="white" />
                     </TouchableOpacity>
                 </SafeAreaView>
@@ -124,10 +144,11 @@ export default function TicketDetailScreen() {
 
             <ScrollView style={styles.sheet}
                 keyboardShouldPersistTaps="handled"
-                contentContainerStyle={{ backgroundColor: '#fff', flexGrow: 1 }}
+                contentContainerStyle={{ backgroundColor: '#fff', paddingBottom: 50 }}
                 showsVerticalScrollIndicator={false}
             >
                 {/* White Sheet */}
+
                 <View style={styles.swipeBar} />
                 <View style={styles.qrWrapper}>
                     <QRCode value={ticket.ticket} size={180} />
@@ -200,27 +221,32 @@ export default function TicketDetailScreen() {
                 </Text>
 
                 {tournament.latitude && tournament.longitude && (
-                    <MapView
-                        style={styles.map}
-                        initialRegion={{
-                            latitude: tournament.latitude,
-                            longitude: tournament.longitude,
-                            latitudeDelta: 0.01,
-                            longitudeDelta: 0.01,
-                        }}
-                        scrollEnabled={false}
-                        zoomEnabled={false}
-                        pitchEnabled={false}
-                        rotateEnabled={false}
+                    <TouchableOpacity
+                        activeOpacity={0.9}
+                        onPress={() => openInMaps(tournament.latitude, tournament.longitude, tournament.tournament_name)}
                     >
-                        <Marker
-                            coordinate={{
+                        <MapView
+                            style={styles.map}
+                            initialRegion={{
                                 latitude: tournament.latitude,
                                 longitude: tournament.longitude,
+                                latitudeDelta: 0.01,
+                                longitudeDelta: 0.01,
                             }}
-                            title={tournament.tournament_name}
-                        />
-                    </MapView>
+                            scrollEnabled={false}
+                            zoomEnabled={false}
+                            pitchEnabled={false}
+                            rotateEnabled={false}
+                        >
+                            <Marker
+                                coordinate={{
+                                    latitude: tournament.latitude,
+                                    longitude: tournament.longitude,
+                                }}
+                                title={tournament.tournament_name}
+                            />
+                        </MapView>
+                    </TouchableOpacity>
                 )}
 
                 <Text style={styles.enrolledTitle}>Enrolled Teams</Text>
