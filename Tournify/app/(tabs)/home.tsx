@@ -1,13 +1,16 @@
 import API_BASE_URL from "@/config/config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Text, View, StyleSheet, ScrollView, Image, FlatList, NativeSyntheticEvent, NativeScrollEvent, Dimensions } from "react-native";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import TournamentCard from "@/components/tournamentCard";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import TicketCard from "@/components/ticketCard";
 import HistoryCard from "@/components/historyCard";
 import { useIsFocused } from '@react-navigation/native';
+import { useTheme } from "@/themes/theme";
+
+
 
 export default function HomeScreen() {
 
@@ -138,6 +141,9 @@ export default function HomeScreen() {
         setActiveIndex(index);
     };
 
+    const theme = useTheme();
+    const styles = useMemo(() => getStyles(theme), [theme]);
+
     return (
         <SafeAreaView
             style={styles.safeArea}
@@ -168,7 +174,7 @@ export default function HomeScreen() {
                             </Text>
                             <Text style={styles.level}>Intermediate</Text>
                         </View>
-                        <Ionicons name="notifications-outline" size={24} color="#000" style={styles.bellIcon} />
+                        <Ionicons name="notifications-outline" size={24} style={styles.bellIcon} />
                     </View>
 
                 </View>
@@ -318,10 +324,11 @@ function formatPosition(position: number | null): string | null {
     }
 }
 
-const styles = StyleSheet.create({
+
+const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     safeArea: {
-        backgroundColor: "#fff",
-        minHeight: '100%'
+        backgroundColor: theme.background,
+        minHeight: '100%',
     },
     header: {
         marginTop: 20,
@@ -343,20 +350,23 @@ const styles = StyleSheet.create({
     name: {
         fontSize: 16,
         fontWeight: "bold",
+        color: theme.text,
     },
     level: {
         fontSize: 13,
-        color: "gray",
+        color: theme.mutedText,
         marginTop: 2,
     },
     bellIcon: {
         marginLeft: "auto",
         marginRight: 20,
+        color: theme.text,
     },
     sectionTitle: {
         fontSize: 20,
         fontWeight: "bold",
         margin: 20,
+        color: theme.text,
     },
     scrollContainer: {
         paddingHorizontal: 16,
@@ -370,15 +380,14 @@ const styles = StyleSheet.create({
     emptyText: {
         padding: 20,
         fontSize: 14,
-        color: "#999",
+        color: theme.mutedText,
         fontStyle: "italic",
         marginRight: 20,
         marginBottom: 10,
         marginLeft: 20,
-        backgroundColor: "#eee",
+        backgroundColor: theme.card,
         borderRadius: 10,
     },
-    // Dots
     dotsContainer: {
         flexDirection: 'row',
         justifyContent: 'center',
@@ -388,12 +397,12 @@ const styles = StyleSheet.create({
     dot: {
         fontSize: 10,
         marginHorizontal: 4,
+        color: theme.dotInactive,
     },
     activeDot: {
-        color: '#000',
+        color: theme.dotActive,
     },
     inactiveDot: {
-        color: '#ccc',
+        color: theme.dotInactive,
     },
-
 });

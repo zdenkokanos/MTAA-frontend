@@ -3,11 +3,12 @@ import {
     TouchableOpacity, TouchableWithoutFeedback, KeyboardAvoidingView, Platform, Keyboard, ScrollView, Alert
 } from "react-native";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import StartButton from "@/components/startButton";
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "@/config/config";
+import { useTheme } from "@/themes/theme";
 
 export default function LoginScreen() {
     const router = useRouter();
@@ -49,6 +50,8 @@ export default function LoginScreen() {
         }
     };
 
+    const theme = useTheme();
+    const styles = useMemo(() => getStyles(theme), [theme]);
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -99,7 +102,7 @@ export default function LoginScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     text: {
         fontFamily: "Inter",
         fontWeight: "bold",
@@ -107,28 +110,30 @@ const styles = StyleSheet.create({
         margin: 20,
         marginTop: 50,
         marginBottom: 40,
+        color: theme.text,
     },
     container: {
         alignItems: "center",
         justifyContent: "center",
         flex: 1,
-        backgroundColor: "#fff",
+        backgroundColor: theme.background,
     },
     input: {
         flex: 1,
         height: 40,
         paddingHorizontal: 10,
+        color: theme.text,
     },
     inputContainer: {
         flexDirection: "row",
         alignItems: "center",
         borderWidth: 1,
-        borderColor: "#ccc",
+        borderColor: theme.inputBorder,
         borderRadius: 8,
         paddingHorizontal: 10,
         marginBottom: 20,
         width: "80%",
-        backgroundColor: "#fff",
+        backgroundColor: theme.inputBackground,
     },
     inputIcon: {
         marginRight: 10,
@@ -136,6 +141,7 @@ const styles = StyleSheet.create({
     signUpText: {
         marginTop: 20,
         fontSize: 14,
+        color: theme.text,
     },
     signUpLink: {
         color: "#2F80ED",
