@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Text, View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, SafeAreaView, TextInput, TouchableOpacity } from "react-native";
+import { Text, View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, SafeAreaView, TextInput, TouchableOpacity, Alert } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { format } from 'date-fns';
 import API_BASE_URL from "@/config/config";
 
+import LottieView from 'lottie-react-native';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 
@@ -13,6 +14,7 @@ import CategoryPicker from '@/components/create/categoryPicker';
 import DateTimePickerInput from '@/components/create/dateTimePicker';
 import TimePickerInput from '@/components/create/timePicker';
 import StartButton from '@/components/startButton';
+import AnimationCreateTournament from '@/components/create/animationCreateTournament';
 
 export default function CreateTournament() {
 
@@ -33,7 +35,7 @@ export default function CreateTournament() {
     const [prizeDescription, setPrizeDescription] = useState('');
     const [additionalInfo, setAdditionalInfo] = useState('');
 
-    
+    const [showSuccess, setShowSuccess] = useState(false);
 
 
     
@@ -48,15 +50,50 @@ export default function CreateTournament() {
       const handleSubmit = async () => {
         const token = await AsyncStorage.getItem('token');
 
-        try {
-            const dateCombined = format(new Date(
-                tournamentDate.getFullYear(),
-                tournamentDate.getMonth(),
-                tournamentDate.getDate(),
-                tournamentTime.getHours(),
-                tournamentTime.getMinutes()
-            ), 'yyyy-MM-dd HH:mm:ss');
+        if (!tournamentName || tournamentName.trim().length < 3) {
+            Alert.alert('Validation Error', 'Please enter a valid tournament name (at least 3 characters).');
+            return;
+        }
+        if (sportId <= 0) {
+            Alert.alert('Validation Error', 'Please select a sport.');
+            return;
+        }
+        if (!level) {
+            Alert.alert('Validation Error', 'Please select level.');
+            return;
+        }
+        if (!tournamentPlace || tournamentPlace.trim().length === 0) {
+            Alert.alert('Validation Error', 'Please enter a location.');
+            return;
+        }
+        if (isNaN(parseFloat(entryFee)) || parseFloat(entryFee) < 0) {
+            Alert.alert('Validation Error', 'Enter valid fee value.');
+            return;
+        }
+        if (isNaN(parseInt(teamSize)) || parseInt(teamSize) < 1) {
+            Alert.alert('Validation Error', 'Team size must be at least 1.');
+            return;
+        }
+        if (!gameSetting) {
+            Alert.alert('Validation Error', 'Please select a game setting.');
+            return;
+        }
+        const combinedDateTime = new Date(
+            tournamentDate.getFullYear(),
+            tournamentDate.getMonth(),
+            tournamentDate.getDate(),
+            tournamentTime.getHours(),
+            tournamentTime.getMinutes()
+        );
 
+        if (combinedDateTime.getTime() < Date.now()) {
+            Alert.alert('Validation Error', 'Tournament date and time must be in the future.');
+            return;
+        }
+
+        try {
+            const dateCombined = format(combinedDateTime, 'yyyy-MM-dd HH:mm:ss');
+            
             const body = {
                 tournament_name: tournamentName,
                 category_id: sportId,
@@ -88,12 +125,15 @@ export default function CreateTournament() {
               if (!response.ok) {
                 throw new Error(result.message || 'Failed to create tournament');
               }
+
+              setShowSuccess(true);
               console.log('Tournament created successfully:', result);
 
         } catch (error) {
             console.error('Error creating tournament:', error);
         }
     };
+      
     
     
 
@@ -274,6 +314,7 @@ export default function CreateTournament() {
                         <StartButton title="Submit" onPress={handleSubmit} />
                     </View>
 
+                    <AnimationCreateTournament show={showSuccess} onHide={() => setShowSuccess(false)} />
 
 
 
