@@ -1,29 +1,31 @@
-import { Text, View, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, TouchableWithoutFeedback, Platform, ScrollView, Keyboard, Image } from "react-native";
+import { Text, View, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Keyboard, Image, TouchableWithoutFeedback } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
 import StartButton from "@/components/startButton";
-import API_BASE_URL from "../config/config";
 import * as ImagePicker from "expo-image-picker";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { SafeAreaView } from "react-native-safe-area-context";
+
+// Zustand
+import { useSignUpStore } from "@/stores/signUpStore";
 
 export default function SignUpScreen() {
     const router = useRouter();
 
-    const [first_name, setFirstName] = useState("");
-    const [last_name, setLastName] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [passwordVisible, setPasswordVisible] = useState(false);
-    const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
-    const [profileImage, setProfileImage] = useState<string | null>(null);
-    const preferredLocation = "summertime";
-    const preferredLongitude = -122.4194;
-    const preferredLatitude = 37.7749;
-    const selectedPreferences = [1, 2, 3];
+    const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false)
 
-    // Funkcia pre výber profilového obrázka
+    const { // Zustand store
+        firstName,
+        lastName,
+        email,
+        password,
+        profileImage,
+        setField,
+    } = useSignUpStore();
+
     const pickImage = async () => {
         const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
         if (!permissionResult.granted) {
@@ -38,151 +40,133 @@ export default function SignUpScreen() {
             quality: 0.5,
         });
 
-        if (!result.canceled) {  // sets preview of profile image
-            setProfileImage(result.assets[0].uri);
+        if (!result.canceled) {
+            setField("profileImage", result.assets[0].uri);
         }
     };
 
-    const handleSignUp = async () => {
-        if (password !== confirmPassword) {
-            alert("Passwords do not match");
+    const handleContinue = () => {
+        if (!firstName.trim() || !lastName.trim() || !email.trim() || !password.trim()) {
+            alert("Please fill in all required fields.");
             return;
         }
 
-        try {
-            // Create a JSON object with the data
-            const userData = {
-                first_name,
-                last_name,
-                email,
-                password,
-                preferred_location: preferredLocation,
-                preferred_longitude: preferredLongitude,
-                preferred_latitude: preferredLatitude,
-                preferences: selectedPreferences,
-            };
-
-            // Send the request
-            const response = await fetch(`${API_BASE_URL}/auth/register`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(userData),
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                await AsyncStorage.setItem("userId", JSON.stringify(data.user.id));
-                await AsyncStorage.setItem("token", data.token);
-                router.push("/(tabs)/home");
-            } else {
-                alert(data.message || "Sign up failed");
-            }
-        } catch (error) {
-            console.error(error);
-            alert("An error occurred. Please try again.");
+        if (password !== confirmPassword) {
+            alert("Passwords do not match.");
+            return;
         }
+
+        router.replace("/preferencesSport"); // go to next screen
     };
 
-
     return (
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <KeyboardAvoidingView
-                behavior={Platform.OS === "ios" ? "padding" : "height"}
-                style={{ flex: 1 }}
-            >
-                <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
-                    <View style={styles.container}>
-                        <TouchableOpacity onPress={pickImage} style={styles.profileImageContainer}>
-                            {profileImage ? (
-                                <Image source={{ uri: profileImage }} style={styles.profileImage} />
-                            ) : (
-                                <View style={styles.profilePlaceholder}>
-                                    <Ionicons name="camera-outline" size={30} color="#888" />
-                                </View>
-                            )}
-                        </TouchableOpacity>
+        <KeyboardAvoidingView
+            style={{ flex: 1 }}
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+        >
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+                    <KeyboardAwareScrollView
+                        contentContainerStyle={{ flexGrow: 1 }}
+                        keyboardShouldPersistTaps="handled"
+                        enableOnAndroid
+                    >
+                        <View style={styles.container}>
+                            <TouchableOpacity onPress={pickImage} style={styles.profileImageContainer}>
+                                {profileImage ? (
+                                    <Image source={{ uri: profileImage }} style={styles.profileImage} />
+                                ) : (
+                                    <View style={styles.profilePlaceholder}>
+                                        <Ionicons name="camera-outline" size={30} color="#888" />
+                                    </View>
+                                )}
+                            </TouchableOpacity>
 
-                        <Text style={styles.text}>Create New Account</Text>
-                        <View>
+                            <Text style={styles.text}>Create New Account</Text>
+
                             <View style={styles.inputContainer}>
                                 <Ionicons name="person-outline" size={20} color="gray" style={styles.inputIcon} />
                                 <TextInput
                                     style={styles.input}
                                     placeholder="First Name"
                                     placeholderTextColor="#888"
-                                    value={first_name}
-                                    onChangeText={setFirstName}
+                                    value={firstName}
+                                    onChangeText={(text) => setField('firstName', text)}
                                     autoCapitalize="words"
                                 />
                             </View>
+
                             <View style={styles.inputContainer}>
                                 <Ionicons name="person-outline" size={20} color="gray" style={styles.inputIcon} />
                                 <TextInput
                                     style={styles.input}
                                     placeholder="Last Name"
                                     placeholderTextColor="#888"
-                                    value={last_name}
-                                    onChangeText={setLastName}
+                                    value={lastName}
+                                    onChangeText={(text) => setField('lastName', text)}
                                     autoCapitalize="words"
                                 />
                             </View>
+
+                            <View style={styles.inputContainer}>
+                                <Ionicons name="mail-outline" size={20} color="gray" style={styles.inputIcon} />
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Email"
+                                    placeholderTextColor="#888"
+                                    value={email}
+                                    onChangeText={(text) => setField('email', text)}
+                                    autoCapitalize="none"
+                                    keyboardType="email-address"
+                                    textContentType="emailAddress"
+                                    autoComplete="email"
+                                />
+                            </View>
+
+                            <View style={styles.inputContainer}>
+                                <Ionicons name="key-outline" size={20} color="gray" style={styles.inputIcon} />
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Password"
+                                    placeholderTextColor="#888"
+                                    value={password}
+                                    onChangeText={(text) => setField('password', text)}
+                                    secureTextEntry={!passwordVisible}
+                                    textContentType="newPassword"
+                                    autoComplete="password"
+                                />
+                                <TouchableOpacity onPress={() => setPasswordVisible(!passwordVisible)}>
+                                    <Ionicons name={passwordVisible ? "eye-off-outline" : "eye-outline"} size={20} color="gray" />
+                                </TouchableOpacity>
+                            </View>
+
+                            <View style={styles.inputContainer}>
+                                <Ionicons name="key-outline" size={20} color="gray" style={styles.inputIcon} />
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Confirm Password"
+                                    placeholderTextColor="#888"
+                                    value={confirmPassword}
+                                    onChangeText={setConfirmPassword}
+                                    secureTextEntry={!confirmPasswordVisible}
+                                    textContentType="newPassword"
+                                    autoComplete="password"
+                                />
+                                <TouchableOpacity onPress={() => setConfirmPasswordVisible(!confirmPasswordVisible)}>
+                                    <Ionicons name={confirmPasswordVisible ? "eye-off-outline" : "eye-outline"} size={20} color="gray" />
+                                </TouchableOpacity>
+                            </View>
+
+                            <StartButton title="Sign up" onPress={handleContinue} />
+
+                            <Text style={styles.signUpText}>
+                                I have an account, <Text style={styles.signUpLink} onPress={() => router.push("/login")}>sign in.</Text>
+                            </Text>
                         </View>
-
-                        <View style={styles.inputContainer}>
-                            <Ionicons name="mail-outline" size={20} color="gray" style={styles.inputIcon} />
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Email"
-                                placeholderTextColor="#888"
-                                value={email}
-                                onChangeText={setEmail}
-                                autoCapitalize="none"
-                                keyboardType="email-address"
-                            />
-                        </View>
-
-                        <View style={styles.inputContainer}>
-                            <Ionicons name="key-outline" size={20} color="gray" style={styles.inputIcon} />
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Password"
-                                placeholderTextColor="#888"
-                                value={password}
-                                onChangeText={setPassword}
-                                secureTextEntry={!passwordVisible}
-                            />
-                            <TouchableOpacity onPress={() => setPasswordVisible(!passwordVisible)}>
-                                <Ionicons name={passwordVisible ? "eye-off-outline" : "eye-outline"} size={20} color="gray" />
-                            </TouchableOpacity>
-                        </View>
-
-                        <View style={styles.inputContainer}>
-                            <Ionicons name="key-outline" size={20} color="gray" style={styles.inputIcon} />
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Confirm Password"
-                                placeholderTextColor="#888"
-                                value={confirmPassword}
-                                onChangeText={setConfirmPassword}
-                                secureTextEntry={!confirmPasswordVisible}
-                            />
-                            <TouchableOpacity onPress={() => setConfirmPasswordVisible(!confirmPasswordVisible)}>
-                                <Ionicons name={confirmPasswordVisible ? "eye-off-outline" : "eye-outline"} size={20} color="gray" />
-                            </TouchableOpacity>
-                        </View>
-
-                        <StartButton title="Sign up" onPress={handleSignUp} />
-
-                        <Text style={styles.signUpText}>
-                            I have an account, <Text style={styles.signUpLink} onPress={() => router.push("/login")}>sign in.</Text>
-                        </Text>
-                    </View>
-                </ScrollView>
-            </KeyboardAvoidingView>
-        </TouchableWithoutFeedback>
+                    </KeyboardAwareScrollView>
+                </SafeAreaView>
+            </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
     );
 }
 
@@ -197,9 +181,8 @@ const styles = StyleSheet.create({
     },
     container: {
         alignItems: "center",
-        justifyContent: "center",
-        flex: 1,
         backgroundColor: "#fff",
+        paddingBottom: 60,
     },
     input: {
         flex: 1,
