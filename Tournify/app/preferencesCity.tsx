@@ -7,8 +7,12 @@ import { Ionicons } from '@expo/vector-icons';
 import StartButton from '../components/startButton';
 import API_BASE_URL from "../config/config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { GOOGLE_MAPS_API_KEY } from '@env';
 import 'react-native-get-random-values';
+
+// API Key
+import Constants from 'expo-constants';
+const apiKey = Constants?.expoConfig?.extra?.GOOGLE_MAPS_API_KEY ?? 'DEFAULT_FALLBACK_KEY';
+
 
 // Zustand
 import { useSignUpStore } from "@/stores/signUpStore";
@@ -16,6 +20,7 @@ import { useSignUpStore } from "@/stores/signUpStore";
 export default function CityPreferencesScreen() {
     const router = useRouter();
     const [error, setError] = useState('');
+    
 
     const {
         firstName,
@@ -112,7 +117,7 @@ export default function CityPreferencesScreen() {
                             }}
                             fetchDetails={true}
                             query={{
-                                key: GOOGLE_MAPS_API_KEY,
+                                key: apiKey,
                                 language: 'en',
                                 types: '(cities)',
                             }}
