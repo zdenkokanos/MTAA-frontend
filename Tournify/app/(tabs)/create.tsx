@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Text, View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, SafeAreaView, TextInput, TouchableOpacity, Alert } from "react-native";
+import { Text, View, StyleSheet, KeyboardAvoidingView, Platform, SafeAreaView, TextInput, TouchableOpacity, Alert, FlatList } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { format } from 'date-fns';
 import API_BASE_URL from "@/config/config";
 
-import LottieView from 'lottie-react-native';
+import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 
@@ -16,10 +16,16 @@ import TimePickerInput from '@/components/create/timePicker';
 import StartButton from '@/components/startButton';
 import AnimationCreateTournament from '@/components/create/animationCreateTournament';
 
+// API Key
+import Constants from 'expo-constants';
+const apiKey = Constants?.expoConfig?.extra?.GOOGLE_MAPS_API_KEY ?? 'DEFAULT_FALLBACK_KEY';
+
 export default function CreateTournament() {
 
     const [tournamentName, setTournamentName] = useState('');
     const [tournamentPlace, setTournamentPlace] = useState('');
+    const [latitude, setLatitude] = useState(0);
+    const [longitude, setLongitude] = useState(0);
     const [level, setLevel] = useState('');
     const [sport, setSport] = useState('');
     const [sportId, setSportId] = useState(0);
@@ -98,8 +104,8 @@ export default function CreateTournament() {
                 tournament_name: tournamentName,
                 category_id: sportId,
                 location_name: tournamentPlace,
-                latitude: 0, //TODO: work !!!
-                longitude: 0, //TODO: work !!!
+                latitude: latitude, //TODO: work !!!
+                longitude: longitude, //TODO: work !!!
                 level: level,
                 max_team_size: Number(teamSize),
                 game_setting: gameSetting === 'other' ? customSetting : gameSetting,
@@ -144,7 +150,12 @@ export default function CreateTournament() {
                     <MaterialIcons style={styles.icon} name="edit" size={24} color="black" />
                     <Text style={styles.title}>Create Tournament</Text>
                 </View>
-                <ScrollView contentContainerStyle={styles.container}>
+                <FlatList 
+                    data={[{}]} // dummy 1-item list
+                    keyExtractor={() => 'form'}
+                    keyboardShouldPersistTaps="handled"
+                    renderItem={() => (
+                    <View style={styles.formContent}>
                     
                     {/* Tournament name */}
                     <View>
@@ -170,17 +181,51 @@ export default function CreateTournament() {
                         </View>
                     </View>
 
-                    {/* Tournament place */}
-                    <View>
+                     {/* Tournament place */}
+                     <View>
                         <Text style={styles.label}>Event place</Text>
-                        <View style={styles.inputWrapper}>
-                            <TextInput
-                                placeholder="Enter tournament place"
-                                style={styles.input}
-                                value={tournamentPlace}
-                                onChangeText={setTournamentPlace}
-                            />
-                            <FontAwesome6 name="location-dot" size={20} color="black" />
+                        <View>
+                        <GooglePlacesAutocomplete
+                            placeholder="Enter your city"
+                            onPress={(data, details) => {
+                                if (!details) return;
+                                const cityName = data.description;
+                                const { lat, lng } = details.geometry.location;
+                                setTournamentPlace(cityName);
+                                setLatitude(lat);
+                                setLongitude(lng);
+                            }}
+                            fetchDetails={true}
+                            query={{
+                                key: apiKey,
+                                language: 'en',
+                                types: '(cities)',
+                            }}
+                            styles={{
+                                container: {
+                                    flex: 0, 
+                                    zIndex: 10,
+                                    position: 'relative',
+                                },
+                                textInput: {
+                                    zIndex: 10000,
+                                    backgroundColor: '#f2f2f2',
+                                    borderRadius: 12,
+                                    paddingHorizontal: 16,
+                                    height: 48,
+                                    fontSize: 16,
+                                },
+                                listView: {
+                                    position: 'absolute',
+                                    top: 48, 
+                                    zIndex: 20,
+                                    backgroundColor: '#fff',
+                                    elevation: 5,
+                                    borderRadius: 10,
+                                    width: '100%',
+                                },
+                            }}
+                        />
                         </View>
                     </View>
 
@@ -317,8 +362,10 @@ export default function CreateTournament() {
                     <AnimationCreateTournament show={showSuccess} onHide={() => setShowSuccess(false)} />
 
 
-
-                </ScrollView>
+                    </View>
+                    )}
+                    contentContainerStyle={styles.container}
+                />
             </KeyboardAvoidingView>
         </SafeAreaView>
     );
@@ -473,6 +520,8 @@ const styles = StyleSheet.create({
         textAlignVertical: 'top', // needed for android
         minHeight: 100,
     },
-      
+    formContent: {
+        gap: 15,
+    },
       
 });

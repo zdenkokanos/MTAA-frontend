@@ -145,7 +145,6 @@ export default function CityPreferencesScreen() {
     );
 }
 
-
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,

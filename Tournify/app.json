@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Tournify",
-    "slug": "Tournify",
+    "name": "Tourinify",
+    "slug": "tournify",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
