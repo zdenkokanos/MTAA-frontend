@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { View, Text, Modal, TouchableOpacity, StyleSheet, Platform, ActivityIndicator } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import API_BASE_URL from "@/config/config";
-import { set } from 'date-fns';
+import { useTheme } from "@/themes/theme";
 
 type Sport = {
   id: string;
@@ -20,7 +20,6 @@ type CategoryPickerProps = {
   category: { id: number, category_name: string } | null;
   setCategory: (value: { id: number, category_name: string }) => void;
 };
-
 
 export default function SportPicker({ sport, setSport, categoryId, setCategoryId}: SportPickerProps) {
   const [modalVisible, setModalVisible] = useState(false);
@@ -57,6 +56,8 @@ export default function SportPicker({ sport, setSport, categoryId, setCategoryId
         fetchSports();
     }, []);
 
+    const theme = useTheme();
+    const styles = useMemo(() => getStyles(theme), [theme]);
   if (Platform.OS === 'android') {
     return (
       <View style={{ flex: 1, marginRight: 8 }}>
@@ -134,27 +135,31 @@ export default function SportPicker({ sport, setSport, categoryId, setCategoryId
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '500',
     marginBottom: 5,
     marginLeft: 15,
-    color: '#222',
+    color: theme.text,
     marginTop: 10,
   },
   selector: {
-    backgroundColor: '#eee',
+    backgroundColor: theme.createInputBackground,
     padding: 15,
     borderRadius: 12,
     marginRight: 5,
+    borderColor: theme.createInputBorder,
+    borderWidth: 1,
   },
   androidPickerWrapper: {
-    backgroundColor: '#eee',
+    backgroundColor: theme.createInputBackground,
     borderRadius: 10,
     paddingHorizontal: 12,
     height: 52,
     justifyContent: 'center',
+    borderColor: theme.createInputBorder,
+    borderWidth: 1,
   },
   modalContainer: {
     flex: 1,
