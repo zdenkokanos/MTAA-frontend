@@ -1,6 +1,8 @@
 import { View, Text, StyleSheet, Image, TouchableOpacity, ImageBackground, Dimensions } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from 'expo-router';
+import { useTheme } from "@/themes/theme";
+import { useMemo } from "react";
 
 interface TournamentCardProps {
     title: string;
@@ -13,6 +15,8 @@ interface TournamentCardProps {
 const screenWidth = Dimensions.get('window').width;
 
 const TournamentCard = ({ title, dateText, distanceText, imageUrl, tournamentId }: TournamentCardProps) => {
+    const theme = useTheme();
+    const styles = useMemo(() => getStyles(theme), [theme]);
     const router = useRouter();
     return (
         <View style={styles.card}>
@@ -53,7 +57,7 @@ const TournamentCard = ({ title, dateText, distanceText, imageUrl, tournamentId 
 
 export default TournamentCard;
 
-const styles = StyleSheet.create({
+const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     rowContainer: {
         flexDirection: "row",
         alignItems: "center",
@@ -71,7 +75,7 @@ const styles = StyleSheet.create({
         justifyContent: "flex-end",
     },
     overlay: {
-        backgroundColor: "rgba(205, 205, 205, 0.75)",
+        backgroundColor: theme.tournamentCard,
         padding: 18,
     },
     title: {

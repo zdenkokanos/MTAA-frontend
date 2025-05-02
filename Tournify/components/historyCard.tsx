@@ -1,5 +1,7 @@
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useTheme } from "@/themes/theme";
+import { useMemo } from "react";
 
 interface HistoryCardProps {
     title: string;
@@ -10,6 +12,8 @@ interface HistoryCardProps {
 }
 
 const HistoryCard = ({ title, date, position, imageUrl, onInfoPress }: HistoryCardProps) => {
+    const theme = useTheme();
+    const styles = useMemo(() => getStyles(theme), [theme]);
     return (
         <View style={styles.card}>
             <Image source={imageUrl} style={styles.image} />
@@ -23,17 +27,17 @@ const HistoryCard = ({ title, date, position, imageUrl, onInfoPress }: HistoryCa
                 )}
             </View>
             <TouchableOpacity style={styles.infoButton} onPress={onInfoPress}>
-                <Ionicons name="information-circle-outline" size={30} color="#000" />
+                <Ionicons name="information-circle-outline" size={30} style={styles.icons} />
             </TouchableOpacity>
         </View>
     );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     card: {
         flexDirection: "row",
         alignItems: "center",
-        backgroundColor: "#fff",
+        backgroundColor: theme.historyCard,
         padding: 12,
         borderRadius: 12,
         shadowColor: "#000",
@@ -56,6 +60,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 16,
         fontWeight: "bold",
+        color: theme.text,
     },
     date: {
         color: "#999",
@@ -76,6 +81,9 @@ const styles = StyleSheet.create({
     },
     infoButton: {
         marginLeft: 12,
+    },
+    icons: {
+        color: theme.text,
     },
 });
 

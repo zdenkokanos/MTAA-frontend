@@ -1,7 +1,7 @@
 import { Text, View, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Keyboard, Image, TouchableWithoutFeedback } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import StartButton from "@/components/startButton";
 import * as ImagePicker from "expo-image-picker";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
@@ -9,6 +9,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 // Zustand
 import { useSignUpStore } from "@/stores/signUpStore";
+import { useTheme } from "@/themes/theme";
 
 export default function SignUpScreen() {
     const router = useRouter();
@@ -59,13 +60,16 @@ export default function SignUpScreen() {
         router.replace("/preferencesSport"); // go to next screen
     };
 
+    const theme = useTheme();
+    const styles = useMemo(() => getStyles(theme), [theme]);
+
     return (
         <KeyboardAvoidingView
             style={{ flex: 1 }}
             behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+                <SafeAreaView style={styles.safeArea}>
                     <KeyboardAwareScrollView
                         contentContainerStyle={{ flexGrow: 1 }}
                         keyboardShouldPersistTaps="handled"
@@ -170,7 +174,11 @@ export default function SignUpScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
+    safeArea: {
+        flex: 1,
+        backgroundColor: theme.background,
+    },
     text: {
         fontFamily: "Inter",
         fontWeight: "bold",
@@ -178,27 +186,29 @@ const styles = StyleSheet.create({
         margin: 20,
         marginTop: 50,
         marginBottom: 40,
+        color: theme.text,
     },
     container: {
         alignItems: "center",
-        backgroundColor: "#fff",
+        backgroundColor: theme.background,
         paddingBottom: 60,
     },
     input: {
         flex: 1,
         height: 40,
         paddingHorizontal: 10,
+        color: theme.text,
     },
     inputContainer: {
         flexDirection: "row",
         alignItems: "center",
         borderWidth: 1,
-        borderColor: "#ccc",
+        borderColor: theme.inputBorder,
         borderRadius: 8,
         paddingHorizontal: 10,
         marginBottom: 20,
         width: "80%",
-        backgroundColor: "#fff",
+        backgroundColor: theme.inputBackground,
     },
     inputIcon: {
         marginRight: 10,
@@ -206,6 +216,7 @@ const styles = StyleSheet.create({
     signUpText: {
         marginTop: 20,
         fontSize: 14,
+        color: theme.text,
     },
     signUpLink: {
         color: "#2F80ED",
@@ -217,19 +228,20 @@ const styles = StyleSheet.create({
         height: 100,
         borderRadius: 50,
         borderWidth: 2,
-        borderColor: "#ccc",
+        borderColor: theme.inputBorder,
         justifyContent: "center",
         alignItems: "center",
         marginTop: 30,
         marginBottom: 20,
         overflow: "hidden",
+        backgroundColor: theme.inputBackground,
     },
     profilePlaceholder: {
         width: "100%",
         height: "100%",
         justifyContent: "center",
         alignItems: "center",
-        backgroundColor: "#f0f0f0",
+        backgroundColor: theme.inputBackground,
     },
     profileImage: {
         width: "100%",
