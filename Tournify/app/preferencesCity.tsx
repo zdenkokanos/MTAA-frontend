@@ -7,7 +7,7 @@ import { Ionicons } from '@expo/vector-icons';
 import StartButton from '../components/startButton';
 import API_BASE_URL from "../config/config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { GOOGLE_MAPS_API_KEY } from '@env';
+// import { GOOGLE_MAPS_API_KEY } from '@env';
 import 'react-native-get-random-values';
 
 // Zustand
@@ -112,7 +112,7 @@ export default function CityPreferencesScreen() {
                             }}
                             fetchDetails={true}
                             query={{
-                                key: GOOGLE_MAPS_API_KEY,
+                                // key: GOOGLE_MAPS_API_KEY,
                                 language: 'en',
                                 types: '(cities)',
                             }}
