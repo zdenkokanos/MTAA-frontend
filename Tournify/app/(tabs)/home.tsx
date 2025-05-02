@@ -150,7 +150,7 @@ export default function HomeScreen() {
                             source={
                                 userInfo && userInfo.image_path !== "null" && userInfo.image_path && token
                                     ? {
-                                        uri: `${API_BASE_URL}/uploads/${userInfo.image_path}`,
+                                        uri: `${API_BASE_URL}/category/images/${userInfo.image_path}`,
                                         headers: {
                                             Authorization: `Bearer ${token}`,
                                         },
@@ -187,7 +187,7 @@ export default function HomeScreen() {
                                     dateText={formatDateRelative(item.date)}
                                     distanceText={`${item.distance} km from you`}
                                     imageUrl={{
-                                        uri: `${API_BASE_URL}/uploads/${item.category_image}`,
+                                        uri: `${API_BASE_URL}/category/images/${item.category_image}`,
                                         headers: { Authorization: `Bearer ${token}` },
                                     }}
                                     tournamentId={item.id}
@@ -235,7 +235,7 @@ export default function HomeScreen() {
                                 ticketId={ticket.id}
                                 dateText={formatDateRelative(ticket.date)}
                                 imageUrl={{
-                                    uri: `${API_BASE_URL}/uploads/${ticket.category_image}`,
+                                    uri: `${API_BASE_URL}/category/images/${ticket.category_image}`,
                                     headers: {
                                         Authorization: `Bearer ${token}`,
                                     },
@@ -256,7 +256,7 @@ export default function HomeScreen() {
                             date={formatDate(item.date)}
                             position={item.position ? formatPosition(item.position) : null}
                             imageUrl={{
-                                uri: `${API_BASE_URL}/uploads/${item.category_image}`,
+                                uri: `${API_BASE_URL}/category/images/${item.category_image}`,
                                 headers: {
                                     Authorization: `Bearer ${token}`,
                                 },
