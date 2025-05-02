@@ -112,7 +112,7 @@ export default function CityPreferencesScreen() {
                             }}
                             fetchDetails={true}
                             query={{
-                                // key: GOOGLE_MAPS_API_KEY,
+                                key: process.env.GOOGLE_MAPS_API_KEY,
                                 language: 'en',
                                 types: '(cities)',
                             }}
