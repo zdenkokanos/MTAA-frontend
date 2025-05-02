@@ -124,7 +124,7 @@ export default function TicketDetailScreen() {
             <View style={styles.imageContainer}>
                 <Image
                     source={{
-                        uri: `${API_BASE_URL}/uploads/${tournament.category_image}`,
+                        uri: `${API_BASE_URL}/category/images/${tournament.category_image}`,
                         headers: token ? { Authorization: `Bearer ${token}` } : undefined,
                     }}
                     style={styles.image}

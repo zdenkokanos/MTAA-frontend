@@ -89,7 +89,7 @@ export default function PreferencesSportScreen() {
             <SportCard
               title={item.category_name}
               image={{
-                uri: `${API_BASE_URL}/uploads/${item.category_image}`,
+                uri: `${API_BASE_URL}/category/images/${item.category_image}`,
                 headers: { Authorization: `Bearer ${token}` },
               }}
               selected={selected.includes(item.id)}
