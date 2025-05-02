@@ -150,7 +150,7 @@ export default function HomeScreen() {
                             source={
                                 userInfo && userInfo.image_path !== "null" && userInfo.image_path && token
                                     ? {
-                                        uri: `${API_BASE_URL}/category/images/${userInfo.image_path}`,
+                                        uri: `${API_BASE_URL}/uploads/${userInfo.image_path}`,
                                         headers: {
                                             Authorization: `Bearer ${token}`,
                                         },
