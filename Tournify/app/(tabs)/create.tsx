@@ -33,7 +33,7 @@ export default function CreateTournament() {
     const [tournamentDate, setTournamentDate] = useState(new Date());
     const [tournamentTime, setTournamentTime] = useState(new Date());
 
-    const [teamSize, setTeamSize] =  useState('');
+    const [teamSize, setTeamSize] = useState('');
     const gameOptions = ['indoor', 'outdoor', 'other'] as const;
     const [gameSetting, setGameSetting] = useState('');
     const [customSetting, setCustomSetting] = useState('');
@@ -44,16 +44,16 @@ export default function CreateTournament() {
     const [showSuccess, setShowSuccess] = useState(false);
 
 
-    
+
     const levels = [
         { label: 'Beginner', value: 'beginner' },
         { label: 'Intermediate', value: 'intermediate' },
         { label: 'Advanced', value: 'advanced' },
         { label: 'Pro', value: 'pro' },
         { label: 'Open', value: 'open' },
-      ];
+    ];
 
-      const handleSubmit = async () => {
+    const handleSubmit = async () => {
         const token = await AsyncStorage.getItem('token');
 
         if (!tournamentName || tournamentName.trim().length < 3) {
@@ -99,7 +99,7 @@ export default function CreateTournament() {
 
         try {
             const dateCombined = format(combinedDateTime, 'yyyy-MM-dd HH:mm:ss');
-            
+
             const body = {
                 tournament_name: tournamentName,
                 category_id: sportId,
@@ -115,33 +115,33 @@ export default function CreateTournament() {
                 additional_info: additionalInfo,
                 status: 'Upcoming', // Default
                 date: dateCombined,
-              };
+            };
 
-              const response = await fetch(`${API_BASE_URL}/tournaments`, {
+            const response = await fetch(`${API_BASE_URL}/tournaments`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json', 
+                    'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify(body),
-              });
+            });
 
-              const result = await response.json();
+            const result = await response.json();
 
-              if (!response.ok) {
+            if (!response.ok) {
                 throw new Error(result.message || 'Failed to create tournament');
-              }
+            }
 
-              setShowSuccess(true);
-              console.log('Tournament created successfully:', result);
+            setShowSuccess(true);
+            console.log('Tournament created successfully:', result);
 
         } catch (error) {
             console.error('Error creating tournament:', error);
         }
     };
-      
-    
-    
+
+
+
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -150,219 +150,253 @@ export default function CreateTournament() {
                     <MaterialIcons style={styles.icon} name="edit" size={24} color="black" />
                     <Text style={styles.title}>Create Tournament</Text>
                 </View>
-                <FlatList 
+                <FlatList
                     data={[{}]} // dummy 1-item list
                     keyExtractor={() => 'form'}
                     keyboardShouldPersistTaps="handled"
                     renderItem={() => (
-                    <View style={styles.formContent}>
-                    
-                    {/* Tournament name */}
-                    <View>
-                        <Text style={styles.label}>Tournament Name</Text>
-                        <View style={styles.inputWrapper}>
-                            <TextInput
-                                placeholder="Enter tournament name"
-                                style={styles.input}
-                                value={tournamentName}
-                                onChangeText={setTournamentName}
-                            />
-                            <FontAwesome6 name="keyboard" size={20} color="black" style={styles.inputIcon} />
-                        </View>
-                    </View>
+                        <View style={styles.formContent}>
 
-                    {/* Tournament category and level */}
-                    <View style={styles.inputRow}>
-                        <View style={{ width: Platform.OS === 'ios' ? "60%" : '50%'}}>
-                            <CategoryPicker sport={sport} setSport={setSport} categoryId={sportId} setCategoryId={setSportId}/>
-                        </View>
-                        <View style={{ width: Platform.OS === 'ios' ? "40%" : '50%'}}>
-                            <LevelPicker level={level} setLevel={setLevel} />
-                        </View>
-                    </View>
-
-                     {/* Tournament place */}
-                     <View>
-                        <Text style={styles.label}>Event place</Text>
-                        <View>
-                        <GooglePlacesAutocomplete
-                            placeholder="Enter your city"
-                            onPress={(data, details) => {
-                                if (!details) return;
-                                const cityName = data.description;
-                                const { lat, lng } = details.geometry.location;
-                                setTournamentPlace(cityName);
-                                setLatitude(lat);
-                                setLongitude(lng);
-                            }}
-                            fetchDetails={true}
-                            query={{
-                                key: apiKey,
-                                language: 'en',
-                                types: '(cities)',
-                            }}
-                            styles={{
-                                container: {
-                                    flex: 0, 
-                                    zIndex: 10,
-                                    position: 'relative',
-                                },
-                                textInput: {
-                                    zIndex: 10000,
-                                    backgroundColor: '#f2f2f2',
-                                    borderRadius: 12,
-                                    paddingHorizontal: 16,
-                                    height: 48,
-                                    fontSize: 16,
-                                },
-                                listView: {
-                                    position: 'absolute',
-                                    top: 48, 
-                                    zIndex: 20,
-                                    backgroundColor: '#fff',
-                                    elevation: 5,
-                                    borderRadius: 10,
-                                    width: '100%',
-                                },
-                            }}
-                        />
-                        </View>
-                    </View>
-
-                    {/* Tournament date and time */}
-                    <View style={styles.inputRow}>
-                        <View style={{ width: '50%' }}>
-                            <DateTimePickerInput date={tournamentDate} setDate={setTournamentDate} />
-                        </View>
-                        <View style={{ width: '50%' }}>
-                            <TimePickerInput time={tournamentTime} setTime={setTournamentTime} />
-                        </View>
-                    </View>
-
-
-                    {/* Team size and entry fee */}
-                    <View style={styles.inputRow}>
-                        <View style={{ width: '50%', paddingRight: 5}}>
-                        <Text style={styles.label}>Entry fee</Text>
-                            <View style={styles.inputWrapper}>
-                                <TextInput
-                                    placeholder="5.00"
-                                    value={entryFee}
-                                    onChangeText={setEntryFee}
-                                    style={styles.input}
-                                    keyboardType="numeric"
-                                    placeholderTextColor="#888"
-                                />
-                                <View style={styles.euroCircle}>
-                                    <Text style={styles.euroText}>€</Text>
+                            {/* Tournament name */}
+                            <View>
+                                <Text style={styles.label}>Tournament Name</Text>
+                                <View style={styles.inputWrapper}>
+                                    <TextInput
+                                        placeholder="Enter tournament name"
+                                        style={styles.input}
+                                        value={tournamentName}
+                                        onChangeText={setTournamentName}
+                                    />
+                                    <FontAwesome6 name="keyboard" size={20} color="black" style={styles.inputIcon} />
                                 </View>
                             </View>
-                        </View>
-                        <View style={{ width: '50%', paddingLeft: 5}}>
-                            <Text style={styles.label}>Team Size</Text>
-                            <View style={styles.inputWrapper}>
-                                <TextInput
-                                    placeholder="2"
-                                    value={teamSize}
-                                    onChangeText={setTeamSize}
-                                    style={styles.numInput}
-                                    keyboardType="numeric" 
-                                />
-                                <FontAwesome6 name="keyboard" size={20} color="black" style={styles.inputIcon} />
+
+                            {/* Tournament category and level */}
+                            <View style={styles.inputRow}>
+                                <View style={{ width: Platform.OS === 'ios' ? "60%" : '50%' }}>
+                                    <CategoryPicker sport={sport} setSport={setSport} categoryId={sportId} setCategoryId={setSportId} />
+                                </View>
+                                <View style={{ width: Platform.OS === 'ios' ? "40%" : '50%' }}>
+                                    <LevelPicker level={level} setLevel={setLevel} />
+                                </View>
                             </View>
-                        </View>
-                    </View>
 
-                    {/* Game setting */}
-                    <View>
-                        <Text style={styles.label}>Game Setting</Text>
-                        <View style={styles.gameSettingRow}>
-                            {gameOptions.map(option => {
-                            const isActive = gameSetting === option;
+                            {/* Tournament place */}
+                            <View>
+                                <Text style={styles.label}>Event place</Text>
+                                <View>
+                                    <GooglePlacesAutocomplete
+                                        placeholder="Enter your city"
+                                        onPress={(data, details) => {
+                                            if (!details) return;
+                                            const cityName = data.description;
+                                            const { lat, lng } = details.geometry.location;
+                                            setTournamentPlace(cityName);
+                                            setLatitude(lat);
+                                            setLongitude(lng);
+                                        }}
+                                        predefinedPlaces={[]}
+                                        textInputProps={{}}
+                                        fetchDetails={true}
+                                        query={{
+                                            key: apiKey,
+                                            language: 'en',
+                                            types: '(cities)',
+                                        }}
+                                        styles={{
+                                            container: {
+                                                flex: 0,
+                                                zIndex: 10,
+                                                position: 'relative',
+                                            },
+                                            textInput: {
+                                                zIndex: 10000,
+                                                backgroundColor: '#f2f2f2',
+                                                borderRadius: 12,
+                                                paddingHorizontal: 16,
+                                                height: 48,
+                                                fontSize: 16,
+                                            },
+                                            listView: {
+                                                position: 'absolute',
+                                                top: 48,
+                                                zIndex: 20,
+                                                backgroundColor: '#fff',
+                                                elevation: 5,
+                                                borderRadius: 10,
+                                                width: '100%',
+                                            },
+                                        }}
+                                        // All other default props explicitly defined
+                                        autoFillOnNotFound={false}
+                                        currentLocation={false}
+                                        currentLocationLabel="Current location"
+                                        debounce={0}
+                                        disableScroll={false}
+                                        enableHighAccuracyLocation={true}
+                                        enablePoweredByContainer={true}
+                                        filterReverseGeocodingByTypes={[]}
+                                        GooglePlacesDetailsQuery={{}}
+                                        GooglePlacesSearchQuery={{
+                                            rankby: 'distance',
+                                            type: 'restaurant',
+                                        }}
+                                        GoogleReverseGeocodingQuery={{}}
+                                        isRowScrollable={true}
+                                        keyboardShouldPersistTaps="always"
+                                        listUnderlayColor="#c8c7cc"
+                                        listViewDisplayed="auto"
+                                        keepResultsAfterBlur={false}
+                                        minLength={1}
+                                        nearbyPlacesAPI="GooglePlacesSearch"
+                                        numberOfLines={1}
+                                        onFail={() => { }}
+                                        onNotFound={() => { }}
+                                        onTimeout={() =>
+                                            console.warn('google places autocomplete: request timeout')
+                                        }
+                                        predefinedPlacesAlwaysVisible={false}
+                                        suppressDefaultStyles={false}
+                                        textInputHide={false}
+                                        timeout={20000}
+                                    />
+                                </View>
+                            </View>
 
-                            return (
-                                <TouchableOpacity
-                                key={option}
-                                onPress={() => setGameSetting(option)}
-                                style={{ flex: 1 }}
-                                >
-                                {isActive ? (
-                                    <LinearGradient
-                                    colors={["#64CA76", "#2E8B57"]}
-                                    start={{ x: 0, y: 0 }}
-                                    end={{ x: 1, y: 1 }}
-                                    style={styles.optionButton}
-                                    >
-                                    <Text style={[styles.optionText, styles.optionTextActive]}>
-                                        {option}
-                                    </Text>
-                                    </LinearGradient>
-                                ) : (
-                                    <View style={styles.optionButton}>
-                                    <Text style={styles.optionText}>{option}</Text>
+                            {/* Tournament date and time */}
+                            <View style={styles.inputRow}>
+                                <View style={{ width: '50%' }}>
+                                    <DateTimePickerInput date={tournamentDate} setDate={setTournamentDate} />
+                                </View>
+                                <View style={{ width: '50%' }}>
+                                    <TimePickerInput time={tournamentTime} setTime={setTournamentTime} />
+                                </View>
+                            </View>
+
+
+                            {/* Team size and entry fee */}
+                            <View style={styles.inputRow}>
+                                <View style={{ width: '50%', paddingRight: 5 }}>
+                                    <Text style={styles.label}>Entry fee</Text>
+                                    <View style={styles.inputWrapper}>
+                                        <TextInput
+                                            placeholder="5.00"
+                                            value={entryFee}
+                                            onChangeText={setEntryFee}
+                                            style={styles.input}
+                                            keyboardType="numeric"
+                                            placeholderTextColor="#888"
+                                        />
+                                        <View style={styles.euroCircle}>
+                                            <Text style={styles.euroText}>€</Text>
+                                        </View>
+                                    </View>
+                                </View>
+                                <View style={{ width: '50%', paddingLeft: 5 }}>
+                                    <Text style={styles.label}>Team Size</Text>
+                                    <View style={styles.inputWrapper}>
+                                        <TextInput
+                                            placeholder="2"
+                                            value={teamSize}
+                                            onChangeText={setTeamSize}
+                                            style={styles.numInput}
+                                            keyboardType="numeric"
+                                        />
+                                        <FontAwesome6 name="keyboard" size={20} color="black" style={styles.inputIcon} />
+                                    </View>
+                                </View>
+                            </View>
+
+                            {/* Game setting */}
+                            <View>
+                                <Text style={styles.label}>Game Setting</Text>
+                                <View style={styles.gameSettingRow}>
+                                    {gameOptions.map(option => {
+                                        const isActive = gameSetting === option;
+
+                                        return (
+                                            <TouchableOpacity
+                                                key={option}
+                                                onPress={() => setGameSetting(option)}
+                                                style={{ flex: 1 }}
+                                            >
+                                                {isActive ? (
+                                                    <LinearGradient
+                                                        colors={["#64CA76", "#2E8B57"]}
+                                                        start={{ x: 0, y: 0 }}
+                                                        end={{ x: 1, y: 1 }}
+                                                        style={styles.optionButton}
+                                                    >
+                                                        <Text style={[styles.optionText, styles.optionTextActive]}>
+                                                            {option}
+                                                        </Text>
+                                                    </LinearGradient>
+                                                ) : (
+                                                    <View style={styles.optionButton}>
+                                                        <Text style={styles.optionText}>{option}</Text>
+                                                    </View>
+                                                )}
+                                            </TouchableOpacity>
+                                        );
+                                    })}
+                                </View>
+
+                                {gameSetting === 'other' && (
+                                    <View style={[styles.inputWrapper, { marginTop: 10 }]}>
+                                        <TextInput
+                                            placeholder="Enter custom setting"
+                                            value={customSetting}
+                                            onChangeText={setCustomSetting}
+                                            style={styles.input}
+                                            placeholderTextColor="#888"
+                                        />
                                     </View>
                                 )}
-                                </TouchableOpacity>
-                            );
-                            })}
-                        </View>
-
-                        {gameSetting === 'other' && (
-                            <View style={[styles.inputWrapper, { marginTop: 10 }]}>
-                            <TextInput
-                                placeholder="Enter custom setting"
-                                value={customSetting}
-                                onChangeText={setCustomSetting}
-                                style={styles.input}
-                                placeholderTextColor="#888"
-                            />
                             </View>
-                        )}
-                    </View>
 
-                    {/* Prize description */}
-                    <View style={styles.inputRow}>
-                        <View style={{ width: '100%' }}>
-                            <Text style={styles.label}>Prize Description</Text>
-                            <View style={styles.inputWrapper}>
-                            <TextInput
-                                placeholder="T-shirt merch"
-                                value={prizeDescription}
-                                onChangeText={setPrizeDescription}
-                                style={styles.input}
-                                placeholderTextColor="#888"
-                            />
-                            <FontAwesome6 name="keyboard" size={20} color="black" style={styles.inputIcon} />
+                            {/* Prize description */}
+                            <View style={styles.inputRow}>
+                                <View style={{ width: '100%' }}>
+                                    <Text style={styles.label}>Prize Description</Text>
+                                    <View style={styles.inputWrapper}>
+                                        <TextInput
+                                            placeholder="T-shirt merch"
+                                            value={prizeDescription}
+                                            onChangeText={setPrizeDescription}
+                                            style={styles.input}
+                                            placeholderTextColor="#888"
+                                        />
+                                        <FontAwesome6 name="keyboard" size={20} color="black" style={styles.inputIcon} />
+                                    </View>
+                                </View>
                             </View>
+
+                            {/* Additional info */}
+                            <View>
+                                <Text style={styles.label}>Additional info</Text>
+                                <View style={styles.textAreaWrapper}>
+                                    <TextInput
+                                        placeholder="Enter additional information..."
+                                        value={additionalInfo}
+                                        onChangeText={setAdditionalInfo}
+                                        style={styles.textArea}
+                                        multiline
+                                        numberOfLines={6}
+                                        placeholderTextColor="#888"
+                                    />
+                                    <FontAwesome6 name="keyboard" size={20} color="black" style={styles.inputIcon} />
+                                </View>
+                            </View>
+
+                            {/*  submit  */}
+                            <View style={styles.buttonWrapper}>
+                                <StartButton title="Submit" onPress={handleSubmit} />
+                            </View>
+
+                            <AnimationCreateTournament show={showSuccess} onHide={() => setShowSuccess(false)} />
+
+
                         </View>
-                    </View>
-
-                    {/* Additional info */}
-                    <View>
-                        <Text style={styles.label}>Additional info</Text>
-                        <View style={styles.textAreaWrapper}>
-                            <TextInput
-                            placeholder="Enter additional information..."
-                            value={additionalInfo}
-                            onChangeText={setAdditionalInfo}
-                            style={styles.textArea}
-                            multiline
-                            numberOfLines={6}
-                            placeholderTextColor="#888"
-                            />
-                            <FontAwesome6 name="keyboard" size={20} color="black" style={styles.inputIcon} />
-                        </View>
-                    </View>
-
-                    {/*  submit  */}
-                    <View style={styles.buttonWrapper}>
-                        <StartButton title="Submit" onPress={handleSubmit} />
-                    </View>
-
-                    <AnimationCreateTournament show={showSuccess} onHide={() => setShowSuccess(false)} />
-
-
-                    </View>
                     )}
                     contentContainerStyle={styles.container}
                 />
@@ -380,7 +414,7 @@ const styles = StyleSheet.create({
     wrapper: {
         flex: 1,
         backgroundColor: '#fff',
-      },
+    },
     container: {
         padding: 24,
     },
@@ -440,7 +474,7 @@ const styles = StyleSheet.create({
     },
     inputRow: {
         flexDirection: 'row',
-        justifyContent: 'space-between', 
+        justifyContent: 'space-between',
         alignItems: 'baseline',
     },
     numInput: {
@@ -465,7 +499,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#eee',
         borderRadius: 25,
         width: '100%',
-        justifyContent: 'center', 
+        justifyContent: 'center',
         alignItems: 'center'
     },
     optionButtonActive: {
@@ -523,5 +557,5 @@ const styles = StyleSheet.create({
     formContent: {
         gap: 15,
     },
-      
+
 });

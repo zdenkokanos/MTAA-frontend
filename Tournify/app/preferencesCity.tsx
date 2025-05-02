@@ -20,7 +20,6 @@ import { useSignUpStore } from "@/stores/signUpStore";
 export default function CityPreferencesScreen() {
     const router = useRouter();
     const [error, setError] = useState('');
-    
 
     const {
         firstName,
@@ -116,6 +115,9 @@ export default function CityPreferencesScreen() {
                                 setError("");
                             }}
                             fetchDetails={true}
+                            predefinedPlaces={[]}
+                            textInputProps={{}}
+
                             query={{
                                 key: apiKey,
                                 language: 'en',
@@ -131,6 +133,38 @@ export default function CityPreferencesScreen() {
                                 },
                                 container: { marginBottom: 16 },
                             }}
+                            // All other default props explicitly defined
+                            autoFillOnNotFound={false}
+                            currentLocation={false}
+                            currentLocationLabel="Current location"
+                            debounce={0}
+                            disableScroll={false}
+                            enableHighAccuracyLocation={true}
+                            enablePoweredByContainer={true}
+                            filterReverseGeocodingByTypes={[]}
+                            GooglePlacesDetailsQuery={{}}
+                            GooglePlacesSearchQuery={{
+                                rankby: 'distance',
+                                type: 'restaurant',
+                            }}
+                            GoogleReverseGeocodingQuery={{}}
+                            isRowScrollable={true}
+                            keyboardShouldPersistTaps="always"
+                            listUnderlayColor="#c8c7cc"
+                            listViewDisplayed="auto"
+                            keepResultsAfterBlur={false}
+                            minLength={1}
+                            nearbyPlacesAPI="GooglePlacesSearch"
+                            numberOfLines={1}
+                            onFail={() => { }}
+                            onNotFound={() => { }}
+                            onTimeout={() =>
+                                console.warn('google places autocomplete: request timeout')
+                            }
+                            predefinedPlacesAlwaysVisible={false}
+                            suppressDefaultStyles={false}
+                            textInputHide={false}
+                            timeout={20000}
                         />
 
                         {error ? <Text style={styles.error}>{error}</Text> : null}
