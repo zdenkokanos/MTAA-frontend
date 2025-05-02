@@ -32,7 +32,7 @@ export default function DateTimePickerInput({
         <FontAwesome6 name="calendar-minus" size={20} color="black" />
       </TouchableOpacity>
 
-      {showModal && (
+      {Platform.OS === 'ios' && showModal? (
         <Modal transparent animationType="slide">
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
@@ -50,7 +50,6 @@ export default function DateTimePickerInput({
                 <Text style={styles.dayLabel}>
                   {format(tempDate, 'EEEE, d MMMM yyyy')}
                 </Text>
-
                 <DateTimePicker
                   value={tempDate}
                   mode="date"
@@ -63,7 +62,20 @@ export default function DateTimePickerInput({
             </View>
           </View>
         </Modal>
+      ) : (
+        showModal && (
+          <DateTimePicker
+            value={date}
+            mode="date"
+            display="default"
+            onChange={(event, selectedDate) => {
+              setShowModal(false);
+              if (selectedDate) setDate(selectedDate);
+            }}
+          />
+        )
       )}
+
     </View>
   );
 }

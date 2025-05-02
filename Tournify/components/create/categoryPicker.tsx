@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Modal, TouchableOpacity, StyleSheet, Platform, ActivityIndicator } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import API_BASE_URL from "@/config/config";
+import { set } from 'date-fns';
 
 type Sport = {
   id: string;
@@ -9,13 +10,22 @@ type Sport = {
 };
 
 type SportPickerProps = {
-  sport: string;
+  sport: string;//Sport | null;
+  categoryId: number;
   setSport: (value: string) => void;
+  setCategoryId: (value: number) => void;
 };
 
-export default function SportPicker({ sport, setSport }: SportPickerProps) {
+type CategoryPickerProps = {
+  category: { id: number, category_name: string } | null;
+  setCategory: (value: { id: number, category_name: string }) => void;
+};
+
+
+export default function SportPicker({ sport, setSport, categoryId, setCategoryId}: SportPickerProps) {
   const [modalVisible, setModalVisible] = useState(false);
   const [sports, setSports] = useState<any[]>([]);
+  const [categoryIds, setCategoryIds] = useState("");
   const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -36,11 +46,14 @@ export default function SportPicker({ sport, setSport }: SportPickerProps) {
                 }
 
                 setSports(data); 
+                setCategoryIds(data[0].id);
                 setLoading(false);
+                
             } catch (error) {
                 console.error('❌ Error loading categories:', error);
             }
         };
+        
         fetchSports();
     }, []);
 
@@ -54,6 +67,10 @@ export default function SportPicker({ sport, setSport }: SportPickerProps) {
             onValueChange={(itemValue) => {
               setSport(itemValue);
               setModalVisible(false);
+              const selected = sports.find(s => s.category_name === itemValue);
+              if (selected) {
+                setCategoryId(selected.id);
+              }
             }}
             style={{ flex: 1, textAlignVertical: 'center' }}
             itemStyle={{ fontSize: 16, lineHeight: 22 }}
@@ -98,6 +115,10 @@ export default function SportPicker({ sport, setSport }: SportPickerProps) {
                 onValueChange={(itemValue) => {
                   setSport(itemValue);
                   setModalVisible(true); 
+                  const selected = sports.find(s => s.category_name === itemValue);
+                  if (selected) {
+                    setCategoryId(selected.id);
+                  }
                 }}
               >
                 <Picker.Item label="Choose category" value={null} />

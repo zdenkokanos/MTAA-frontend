@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Text, View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, SafeAreaView, TextInput, TouchableOpacity } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
+import { format } from 'date-fns';
+import API_BASE_URL from "@/config/config";
 
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
@@ -18,10 +20,10 @@ export default function CreateTournament() {
     const [tournamentPlace, setTournamentPlace] = useState('');
     const [level, setLevel] = useState('');
     const [sport, setSport] = useState('');
+    const [sportId, setSportId] = useState(0);
+
     const [tournamentDate, setTournamentDate] = useState(new Date());
     const [tournamentTime, setTournamentTime] = useState(new Date());
-    const [additionalInfo, setAdditionalInfo] = useState('');
-
 
     const [teamSize, setTeamSize] =  useState('');
     const gameOptions = ['indoor', 'outdoor', 'other'] as const;
@@ -29,6 +31,9 @@ export default function CreateTournament() {
     const [customSetting, setCustomSetting] = useState('');
     const [entryFee, setEntryFee] = useState('');
     const [prizeDescription, setPrizeDescription] = useState('');
+    const [additionalInfo, setAdditionalInfo] = useState('');
+
+    
 
 
     
@@ -40,9 +45,56 @@ export default function CreateTournament() {
         { label: 'Open', value: 'open' },
       ];
 
-    const handleContinue = () => {
-        console.log("React native!")
+      const handleSubmit = async () => {
+        const token = await AsyncStorage.getItem('token');
+
+        try {
+            const dateCombined = format(new Date(
+                tournamentDate.getFullYear(),
+                tournamentDate.getMonth(),
+                tournamentDate.getDate(),
+                tournamentTime.getHours(),
+                tournamentTime.getMinutes()
+            ), 'yyyy-MM-dd HH:mm:ss');
+
+            const body = {
+                tournament_name: tournamentName,
+                category_id: sportId,
+                location_name: tournamentPlace,
+                latitude: 0, //TODO: work !!!
+                longitude: 0, //TODO: work !!!
+                level: level,
+                max_team_size: Number(teamSize),
+                game_setting: gameSetting === 'other' ? customSetting : gameSetting,
+                entry_fee: parseFloat(entryFee),
+                prize_description: prizeDescription,
+                is_public: true, // default, future improvement
+                additional_info: additionalInfo,
+                status: 'Upcoming', // Default
+                date: dateCombined,
+              };
+
+              const response = await fetch(`${API_BASE_URL}/tournaments`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json', 
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify(body),
+              });
+
+              const result = await response.json();
+
+              if (!response.ok) {
+                throw new Error(result.message || 'Failed to create tournament');
+              }
+              console.log('Tournament created successfully:', result);
+
+        } catch (error) {
+            console.error('Error creating tournament:', error);
+        }
     };
+    
     
 
     return (
@@ -71,7 +123,7 @@ export default function CreateTournament() {
                     {/* Tournament category and level */}
                     <View style={styles.inputRow}>
                         <View style={{ width: Platform.OS === 'ios' ? "60%" : '50%'}}>
-                            <CategoryPicker sport={sport} setSport={setSport} />
+                            <CategoryPicker sport={sport} setSport={setSport} categoryId={sportId} setCategoryId={setSportId}/>
                         </View>
                         <View style={{ width: Platform.OS === 'ios' ? "40%" : '50%'}}>
                             <LevelPicker level={level} setLevel={setLevel} />
@@ -94,10 +146,10 @@ export default function CreateTournament() {
 
                     {/* Tournament date and time */}
                     <View style={styles.inputRow}>
-                        <View style={{ width: '50%'}}>
+                        <View style={{ width: '50%' }}>
                             <DateTimePickerInput date={tournamentDate} setDate={setTournamentDate} />
                         </View>
-                        <View style={{ width: '50%', paddingLeft: 5}}>
+                        <View style={{ width: '50%' }}>
                             <TimePickerInput time={tournamentTime} setTime={setTournamentTime} />
                         </View>
                     </View>
@@ -131,7 +183,7 @@ export default function CreateTournament() {
                                     style={styles.numInput}
                                     keyboardType="numeric" 
                                 />
-                                <FontAwesome6 name="people-group" size={20} color="black" />
+                                <FontAwesome6 name="keyboard" size={20} color="black" style={styles.inputIcon} />
                             </View>
                         </View>
                     </View>
@@ -217,12 +269,10 @@ export default function CreateTournament() {
                         </View>
                     </View>
 
-
-                    {/* submit  */}
+                    {/*  submit  */}
                     <View style={styles.buttonWrapper}>
-                        <StartButton title="Submit" onPress={handleContinue} />
+                        <StartButton title="Submit" onPress={handleSubmit} />
                     </View>
-
 
 
 
@@ -338,8 +388,8 @@ const styles = StyleSheet.create({
         color: '#666',
     },
     optionTextActive: {
-        fontWeight: '600',
-        color: '#000',
+        fontWeight: '900',
+        color: '#eee',
     },
     euroCircle: {
         width: 24,
@@ -374,22 +424,14 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'flex-start',
         position: 'relative',
-      },
-      
-      textArea: {
+    },
+    textArea: {
         flex: 1,
         fontSize: 16,
         color: '#000',
         textAlignVertical: 'top', // needed for android
         minHeight: 100,
-      },
-      
-      textAreaUnderline: {
-        height: 2,
-        backgroundColor: '#444',
-        marginTop: 4,
-        width: '100%',
-      },    
+    },
       
       
 });

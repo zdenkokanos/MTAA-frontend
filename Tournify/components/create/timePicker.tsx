@@ -21,6 +21,13 @@ export default function TimePickerInput({
   const [showModal, setShowModal] = useState(false);
   const [tempTime, setTempTime] = useState(time);
 
+  const handleAndroidChange = (event: any, selectedTime?: Date) => {
+    setShowModal(false);
+    if (selectedTime) {
+      setTime(selectedTime);
+    }
+  };
+
   return (
     <View>
       <Text style={styles.label}>Time</Text>
@@ -37,31 +44,44 @@ export default function TimePickerInput({
         />
       </TouchableOpacity>
 
-      {showModal && (
+      {/* iOS modal */}
+      {Platform.OS === 'ios' && showModal && (
         <Modal transparent animationType="slide">
           <View style={styles.modalContainer}>
             <View style={styles.modalContent}>
-                <View style={styles.modalHeader}>
-                    <TouchableOpacity onPress={() => {
+              <View style={styles.modalHeader}>
+                <TouchableOpacity
+                  onPress={() => {
                     setShowModal(false);
                     setTime(tempTime);
-                    }}>
-                    <Text style={styles.doneText}>Done</Text>
-                    </TouchableOpacity>
-                </View>
-                <View style={styles.pickerWrapper}>
+                  }}
+                >
+                  <Text style={styles.doneText}>Done</Text>
+                </TouchableOpacity>
+              </View>
+              <View style={styles.pickerWrapper}>
                 <DateTimePicker
-                    value={tempTime}
-                    mode="time"
-                    display="spinner"
-                    onChange={(event, selectedTime) => {
+                  value={tempTime}
+                  mode="time"
+                  display="spinner"
+                  onChange={(event, selectedTime) => {
                     if (selectedTime) setTempTime(selectedTime);
-                    }}
+                  }}
                 />
-                </View>
+              </View>
             </View>
           </View>
         </Modal>
+      )}
+
+      {/* Android picker */}
+      {Platform.OS === 'android' && showModal && (
+        <DateTimePicker
+          value={time}
+          mode="time"
+          display="default"
+          onChange={handleAndroidChange}
+        />
       )}
     </View>
   );
@@ -123,5 +143,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 10,
-  }
+  },
 });
