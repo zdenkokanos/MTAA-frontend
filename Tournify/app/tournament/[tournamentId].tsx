@@ -7,6 +7,9 @@ import API_BASE_URL from '@/config/config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '@/themes/theme';
 import iconSet from '@expo/vector-icons/build/Fontisto';
+import TournamentStats from '@/components/tournamentDetail/tournamentStats';
+import TournamentDescription from '@/components/tournamentDetail/tournamentDescription';
+import MapPreview from '@/components/tournamentDetail/mapPreview';
 
 export default function TournamentDetailScreen() {
     const { tournamentId } = useLocalSearchParams();
@@ -173,43 +176,18 @@ export default function TournamentDetailScreen() {
                     <Text style={styles.dateUnderTitle}>{formattedDate}</Text>
 
                     {/* Stats */}
-                    <View style={styles.statsRow}>
-                        <View style={styles.stat}>
-                            <Text style={styles.statNumber}>{teamsCount ?? "0"}</Text>
-                            <Text style={styles.statLabel}>joined</Text>
-                        </View>
-                        <View style={styles.stat}>
-                            <Text style={styles.statNumber}>{tournament.max_team_size}</Text>
-                            <Text style={styles.statLabel}>team size</Text>
-                        </View>
-                        <View style={styles.stat}>
-                            <Text style={styles.statNumber}>{daysUntil}</Text>
-                            <Text style={styles.statLabel}>days until</Text>
-                        </View>
-                    </View>
+                    <TournamentStats
+                        teamsCount={teamsCount ?? 0}
+                        teamSize={tournament.max_team_size}
+                        daysUntil={daysUntil}
+                    />
 
                     {/* Description */}
-                    <Text style={styles.description}>
-                        {tournament.additional_info
-                            ? isExpanded || !shouldShowReadMore
-                                ? tournament.additional_info
-                                : shortDescription + '...'
-                            : 'No description available.'}
-                        {shouldShowReadMore && (
-                            <>
-                                {'   '}
-                                <Text
-                                    style={[
-                                        styles.readMoreInline,
-                                        isExpanded ? styles.readMoreLess : styles.readMoreMore,
-                                    ]}
-                                    onPress={() => setIsExpanded(prev => !prev)}
-                                >
-                                    {isExpanded ? 'Show less' : 'Read more'}
-                                </Text>
-                            </>
-                        )}
-                    </Text>
+                    <TournamentDescription
+                        description={tournament.additional_info || 'No description available.'}
+                        isExpanded={isExpanded}
+                        onToggle={() => setIsExpanded(prev => !prev)}
+                    />
 
                     {/* Team Selection Buttons*/}
                     <View style={styles.teamButtons}>
@@ -264,6 +242,14 @@ export default function TournamentDetailScreen() {
                                 />
                             </View>
                         </View>
+                    )}
+
+                    {tournament.latitude && tournament.longitude && (
+                        <MapPreview
+                            latitude={tournament.latitude}
+                            longitude={tournament.longitude}
+                            tournamentName={tournament.tournament_name}
+                        />
                     )}
 
                     {/* Legal Text */}

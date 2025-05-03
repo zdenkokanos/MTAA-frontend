@@ -10,6 +10,9 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
 import { Linking } from 'react-native';
 import { useTheme } from '@/themes/theme';
+import TournamentStats from '@/components/tournamentDetail/tournamentStats';
+import TournamentDescription from '@/components/tournamentDetail/tournamentDescription';
+import MapPreview from '@/components/tournamentDetail/mapPreview';
 
 export default function TicketDetailScreen() {
     const { ticketId } = useLocalSearchParams();
@@ -185,71 +188,25 @@ export default function TicketDetailScreen() {
                 <Text style={styles.dateUnderTitle}>{formattedDate}</Text>
 
                 {/* Stats */}
-                <View style={styles.statsRow}>
-                    <View style={styles.stat}>
-                        <Text style={styles.statNumber}>{teamsCount ?? "0"}</Text>
-                        <Text style={styles.statLabel}>joined</Text>
-                    </View>
-                    <View style={styles.stat}>
-                        <Text style={styles.statNumber}>{tournament.max_team_size}</Text>
-                        <Text style={styles.statLabel}>team size</Text>
-                    </View>
-                    <View style={styles.stat}>
-                        <Text style={styles.statNumber}>{daysUntil}</Text>
-                        <Text style={styles.statLabel}>days until</Text>
-                    </View>
-                </View>
+                <TournamentStats
+                    teamsCount={teamsCount ?? 0}
+                    teamSize={tournament.max_team_size}
+                    daysUntil={daysUntil}
+                />
 
                 {/* Description */}
-                <Text style={styles.description}>
-                    {tournament.additional_info
-                        ? isExpanded || !shouldShowReadMore
-                            ? tournament.additional_info
-                            : shortDescription + '...'
-                        : 'No description available.'}
-                    {shouldShowReadMore && (
-                        <>
-                            {'   '}
-                            <Text
-                                style={[
-                                    styles.readMoreInline,
-                                    isExpanded ? styles.readMoreLess : styles.readMoreMore,
-                                ]}
-                                onPress={() => setIsExpanded(prev => !prev)}
-                            >
-                                {isExpanded ? 'Show less' : 'Read more'}
-                            </Text>
-                        </>
-                    )}
-                </Text>
+                <TournamentDescription
+                    description={tournament.additional_info || 'No description available.'}
+                    isExpanded={isExpanded}
+                    onToggle={() => setIsExpanded(prev => !prev)}
+                />
 
                 {tournament.latitude && tournament.longitude && (
-                    <TouchableOpacity
-                        activeOpacity={0.9}
-                        onPress={() => openInMaps(tournament.latitude, tournament.longitude, tournament.tournament_name)}
-                    >
-                        <MapView
-                            style={styles.map}
-                            initialRegion={{
-                                latitude: tournament.latitude,
-                                longitude: tournament.longitude,
-                                latitudeDelta: 0.01,
-                                longitudeDelta: 0.01,
-                            }}
-                            scrollEnabled={false}
-                            zoomEnabled={false}
-                            pitchEnabled={false}
-                            rotateEnabled={false}
-                        >
-                            <Marker
-                                coordinate={{
-                                    latitude: tournament.latitude,
-                                    longitude: tournament.longitude,
-                                }}
-                                title={tournament.tournament_name}
-                            />
-                        </MapView>
-                    </TouchableOpacity>
+                    <MapPreview
+                        latitude={tournament.latitude}
+                        longitude={tournament.longitude}
+                        tournamentName={tournament.tournament_name}
+                    />
                 )}
 
                 <Text style={styles.enrolledTitle}>Enrolled Teams</Text>
@@ -283,19 +240,6 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     joinedText: {
         color: '#007AFF',
         fontSize: 13,
-    },
-    description: {
-        fontSize: 14,
-        color: theme.text,
-        marginBottom: 16,
-        lineHeight: 20,
-    },
-    map: {
-        width: '100%',
-        height: 180,
-        borderRadius: 12,
-        marginBottom: 24,
-        backgroundColor: '#eee',
     },
     enrolledTitle: {
         fontSize: 18,
@@ -375,43 +319,6 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
         fontWeight: 'bold',
         color: theme.text,
         flexShrink: 1,
-    },
-    statsRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginVertical: 24,
-    },
-    stat: {
-        alignItems: 'center',
-        flex: 1,
-    },
-    statNumber: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: theme.text,
-    },
-    statLabel: {
-        fontSize: 13,
-        color: '#666',
-        marginTop: 4,
-    },
-    readMoreInline: {
-        fontWeight: 'bold',
-        marginLeft: 4,
-        textDecorationLine: 'underline',
-    },
-    readMoreMore: {
-        color: '#007AFF', // blue
-    },
-    readMoreLess: {
-        color: '#999', // gray
-    },
-    legalText: {
-        fontSize: 12,
-        color: '#999',
-        marginBottom: 20,
-        textAlign: 'justify',
-        lineHeight: 18,
     },
     safeAreaBack: {
         position: 'absolute',

@@ -53,6 +53,6 @@ export const useTheme = () => {
     const scheme = useColorScheme();
     // console.log('Appearance.getColorScheme():', Appearance.getColorScheme());
     // console.log("Android detected scheme:", scheme);
-    // return scheme === 'dark' ? darkTheme : lightTheme;
-    return darkTheme;
+    return scheme === 'dark' ? darkTheme : lightTheme;
+    // return darkTheme;
 };
