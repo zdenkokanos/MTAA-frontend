@@ -109,6 +109,7 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
         fontWeight: 'bold',
         marginLeft: 25,
         color: theme.text,
+        paddingBottom: 10,
     },
 
     container: {

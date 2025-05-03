@@ -11,13 +11,15 @@ export default function CategoryTournamentsScreen() {
     const { category } = useLocalSearchParams<{ category: string }>();
     const [tournaments, setTournaments] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [receivedTournaments, setReceivedTournaments] = useState(false);
 
     const categoryParts = category?.split('-');
     const categoryId = categoryParts?.[0];
     const categoryName = categoryParts?.slice(1).join(' '); 
 
     const userId = 11; // !!!!!
+
+    // TODO:
+    // font, idcko, GPSko, search
 
 
     useEffect(() => {
