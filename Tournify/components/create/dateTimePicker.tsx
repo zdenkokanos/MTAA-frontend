@@ -51,6 +51,7 @@ export default function DateTimePickerInput({
                   value={tempDate}
                   mode="date"
                   display="spinner"
+                  textColor={theme.text}
                   onChange={(event, selectedDate) => {
                     if (selectedDate) setTempDate(selectedDate);
                   }}

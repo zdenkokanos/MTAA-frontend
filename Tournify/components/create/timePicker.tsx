@@ -59,6 +59,7 @@ export default function TimePickerInput({
                   onChange={(event, selectedTime) => {
                     if (selectedTime) setTempTime(selectedTime);
                   }}
+                  textColor={theme.text}
                 />
               </View>
             </View>

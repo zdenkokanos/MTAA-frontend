@@ -37,6 +37,6 @@ export const darkTheme = {
 
 export const useTheme = () => {
     const scheme = useColorScheme();
-    // return scheme === 'dark' ? darkTheme : lightTheme;
-    return darkTheme;
+    return scheme === 'dark' ? darkTheme : lightTheme;
+    // return darkTheme;
 };
