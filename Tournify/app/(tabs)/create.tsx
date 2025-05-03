@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Text, View, StyleSheet, KeyboardAvoidingView, Platform, SafeAreaView, TextInput, TouchableOpacity, Alert, FlatList } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
 import { format } from 'date-fns';
 import API_BASE_URL from "@/config/config";
+import { useTheme } from "@/themes/theme";
 
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
@@ -43,15 +44,6 @@ export default function CreateTournament() {
 
     const [showSuccess, setShowSuccess] = useState(false);
 
-
-
-    const levels = [
-        { label: 'Beginner', value: 'beginner' },
-        { label: 'Intermediate', value: 'intermediate' },
-        { label: 'Advanced', value: 'advanced' },
-        { label: 'Pro', value: 'pro' },
-        { label: 'Open', value: 'open' },
-    ];
 
     const handleSubmit = async () => {
         const token = await AsyncStorage.getItem('token');
@@ -141,6 +133,9 @@ export default function CreateTournament() {
     };
 
 
+    const theme = useTheme();
+    const styles = useMemo(() => getStyles(theme), [theme]);
+
 
 
     return (
@@ -163,11 +158,12 @@ export default function CreateTournament() {
                                 <View style={styles.inputWrapper}>
                                     <TextInput
                                         placeholder="Enter tournament name"
+                                        placeholderTextColor={theme.placeholderText}
                                         style={styles.input}
                                         value={tournamentName}
                                         onChangeText={setTournamentName}
                                     />
-                                    <FontAwesome6 name="keyboard" size={20} color="black" style={styles.inputIcon} />
+                                    <FontAwesome6 name="keyboard" size={20} color={theme.text} style={styles.inputIcon} />
                                 </View>
                             </View>
 
@@ -196,35 +192,50 @@ export default function CreateTournament() {
                                             setLongitude(lng);
                                         }}
                                         predefinedPlaces={[]}
-                                        textInputProps={{}}
                                         fetchDetails={true}
                                         query={{
                                             key: apiKey,
                                             language: 'en',
-                                            types: '(cities)',
+                                            types: 'address',
+                                        }}
+                                        textInputProps={{
+                                            placeholderTextColor: theme.mutedText,
                                         }}
                                         styles={{
                                             container: {
                                                 flex: 0,
                                                 zIndex: 10,
                                                 position: 'relative',
+
                                             },
+                                            textInputContainer: { zIndex: 11 },
                                             textInput: {
-                                                zIndex: 10000,
-                                                backgroundColor: '#f2f2f2',
+                                                zIndex: 12,
+                                                backgroundColor: theme.createInputBackground,
+                                                borderColor: theme.createInputBorder,
+                                                color: theme.text,
+                                                borderWidth: 1,
                                                 borderRadius: 12,
                                                 paddingHorizontal: 16,
                                                 height: 48,
                                                 fontSize: 16,
                                             },
+                                            row: {
+                                                backgroundColor: theme.createInputBackground,
+                                            },
+                                            description: {
+                                                color: theme.text,
+                                            },
                                             listView: {
                                                 position: 'absolute',
                                                 top: 48,
-                                                zIndex: 20,
-                                                backgroundColor: '#fff',
+                                                zIndex: 50,
                                                 elevation: 5,
                                                 borderRadius: 10,
                                                 width: '100%',
+                                            },
+                                            poweredContainer: {
+                                                display: 'none',
                                             },
                                         }}
                                         // All other default props explicitly defined
@@ -297,12 +308,13 @@ export default function CreateTournament() {
                                     <View style={styles.inputWrapper}>
                                         <TextInput
                                             placeholder="2"
+                                            placeholderTextColor={theme.placeholderText}
                                             value={teamSize}
                                             onChangeText={setTeamSize}
                                             style={styles.numInput}
                                             keyboardType="numeric"
                                         />
-                                        <FontAwesome6 name="keyboard" size={20} color="black" style={styles.inputIcon} />
+                                        <FontAwesome6 name="keyboard" size={20} color={theme.text} style={styles.inputIcon} />
                                     </View>
                                 </View>
                             </View>
@@ -366,7 +378,7 @@ export default function CreateTournament() {
                                             style={styles.input}
                                             placeholderTextColor="#888"
                                         />
-                                        <FontAwesome6 name="keyboard" size={20} color="black" style={styles.inputIcon} />
+                                        <FontAwesome6 name="keyboard" size={20} color={theme.text} style={styles.inputIcon} />
                                     </View>
                                 </View>
                             </View>
@@ -384,7 +396,7 @@ export default function CreateTournament() {
                                         numberOfLines={6}
                                         placeholderTextColor="#888"
                                     />
-                                    <FontAwesome6 name="keyboard" size={20} color="black" style={styles.inputIcon} />
+                                    <FontAwesome6 name="keyboard" size={20} color={theme.text} style={styles.inputIcon} />
                                 </View>
                             </View>
 
@@ -406,14 +418,15 @@ export default function CreateTournament() {
 }
 
 
-const styles = StyleSheet.create({
+const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     safeArea: {
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: theme.background,
+        paddingTop: Platform.OS === 'ios' ? 0 : 40,
     },
     wrapper: {
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: theme.background,
     },
     container: {
         padding: 24,
@@ -428,10 +441,12 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: 'bold',
         marginBottom: 25,
+        color: theme.text,
     },
     icon: {
         marginTop: 4,
         marginRight: 10,
+        color: theme.text,
     },
     row: {
         flexDirection: 'row',
@@ -443,13 +458,15 @@ const styles = StyleSheet.create({
         marginBottom: 5,
         marginTop: 10,
         marginLeft: 15,
-        color: '#222',
+        color: theme.text,
     },
     inputWrapper: {
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-between',
-        backgroundColor: '#eee',
+        backgroundColor: theme.createInputBackground,
+        borderColor: theme.createInputBorder,
+        borderWidth: 1,
         borderRadius: 10,
         paddingHorizontal: 12,
         paddingVertical: 10,
@@ -458,8 +475,8 @@ const styles = StyleSheet.create({
     input: {
         flex: 1,
         fontSize: 16,
-        color: '#000',
         paddingVertical: 0,
+        color: theme.text,
     },
     inputIcon: {
         marginRight: 7,
@@ -467,24 +484,24 @@ const styles = StyleSheet.create({
     pickerWrapper: {
         marginVertical: 10,
     },
-    pickerContainer: {
-        backgroundColor: '#f2f2f2',
-        borderRadius: 10,
-        paddingHorizontal: 10,
-    },
     inputRow: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'baseline',
     },
     numInput: {
-        backgroundColor: '#eee',
-        borderRadius: 10,
+        backgroundColor: theme.createInputBackground,
+
+        borderColor: theme.createInputBorder,
+        borderWidth: 1,
+        borderLeftWidth: 0,
+        borderRightWidth: 0,
+
         paddingHorizontal: 20,
         paddingVertical: 10,
         height: 50,
         fontSize: 16,
-        color: '#000',
+        color: theme.text,
         textAlign: 'left',
         marginLeft: 5,
     },
@@ -496,7 +513,10 @@ const styles = StyleSheet.create({
     },
     optionButton: {
         paddingVertical: 12,
-        backgroundColor: '#eee',
+        backgroundColor: theme.createInputBackground,
+        borderColor: theme.createInputBorder,
+        borderWidth: 1,
+
         borderRadius: 25,
         width: '100%',
         justifyContent: 'center',
@@ -518,7 +538,7 @@ const styles = StyleSheet.create({
         height: 24,
         borderRadius: 12,
         borderWidth: 2,
-        borderColor: '#000',
+        borderColor: theme.text,
         alignItems: 'center',
         justifyContent: 'center',
         marginLeft: 8,
@@ -526,7 +546,7 @@ const styles = StyleSheet.create({
     euroText: {
         fontSize: 14,
         fontWeight: 'bold',
-        color: '#000',
+        color: theme.text,
     },
     buttonWrapper: {
         width: '100%',
@@ -539,7 +559,9 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     textAreaWrapper: {
-        backgroundColor: '#eee',
+        backgroundColor: theme.createInputBackground,
+        borderColor: theme.createInputBorder,
+        borderWidth: 1,
         borderRadius: 15,
         paddingHorizontal: 12,
         paddingVertical: 10,
@@ -550,7 +572,7 @@ const styles = StyleSheet.create({
     textArea: {
         flex: 1,
         fontSize: 16,
-        color: '#000',
+        color: theme.text,
         textAlignVertical: 'top', // needed for android
         minHeight: 100,
     },

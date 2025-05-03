@@ -255,7 +255,7 @@ export default function TournamentDetailScreen() {
                                     placeholderTextColor="#888"
                                     value={teamInput}
                                     onChangeText={setTeamInput}
-                                    style={{ flex: 1 }}
+                                    style={styles.inputText}
                                 />
                                 <Ionicons
                                     name={selectedOption === "new" ? "person-add-outline" : "key-outline"}
@@ -459,6 +459,10 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
         color: theme.text,
     },
     teamsButtonText: {
+        color: theme.text,
+    },
+    inputText: {
+        flex: 1,
         color: theme.text,
     },
 });

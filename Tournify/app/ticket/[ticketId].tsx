@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, SafeAreaView, ScrollView, ActivityIndicator, Image, TouchableOpacity, Platform } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import Toast from 'react-native-toast-message';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import QRCode from 'react-native-qrcode-svg';
 import API_BASE_URL from '@/config/config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -9,6 +9,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
 import { Linking } from 'react-native';
+import { useTheme } from '@/themes/theme';
 
 export default function TicketDetailScreen() {
     const { ticketId } = useLocalSearchParams();
@@ -97,6 +98,8 @@ export default function TicketDetailScreen() {
         fetchData();
     }, [ticketId]);
 
+    const theme = useTheme();
+    const styles = useMemo(() => getStyles(theme), [theme]);
 
     if (loading) {
         return <View style={styles.centered}><ActivityIndicator size="large" /></View>;
@@ -144,17 +147,17 @@ export default function TicketDetailScreen() {
 
             <ScrollView style={styles.sheet}
                 keyboardShouldPersistTaps="handled"
-                contentContainerStyle={{ backgroundColor: '#fff', paddingBottom: 50 }}
+                contentContainerStyle={styles.scrollViewContent}
                 showsVerticalScrollIndicator={false}
             >
                 {/* White Sheet */}
 
                 <View style={styles.swipeBar} />
                 <View style={styles.qrWrapper}>
-                    <QRCode value={ticket.ticket} size={180} />
+                    <QRCode value={ticket.ticket} size={180} backgroundColor={theme.background} color={theme.qrCode} />
                 </View>
 
-                <Text style={{ textAlign: "center", marginTop: 5 }}>Code for other members:</Text>
+                <Text style={styles.qrTitle}>Code for other members:</Text>
                 <TouchableOpacity
                     onPress={async () => {
                         try {
@@ -267,7 +270,11 @@ export default function TicketDetailScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
+    scrollViewContent: {
+        backgroundColor: theme.background,
+        paddingBottom: 50,
+    },
     centered: {
         flex: 1,
         justifyContent: 'center',
@@ -279,7 +286,7 @@ const styles = StyleSheet.create({
     },
     description: {
         fontSize: 14,
-        color: '#444',
+        color: theme.text,
         marginBottom: 16,
         lineHeight: 20,
     },
@@ -294,27 +301,29 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
         marginBottom: 10,
+        color: theme.text,
     },
     table: {
         borderWidth: 1,
-        borderColor: '#ddd',
+        borderColor: theme.tableBorder,
         borderRadius: 8,
         overflow: 'hidden',
     },
     tableRow: {
         flexDirection: 'row',
-        backgroundColor: '#fff',
+        backgroundColor: theme.tableRow,
     },
     tableCell: {
         flex: 1,
         padding: 10,
         fontSize: 14,
         borderWidth: 1,
-        borderColor: '#ddd',
+        borderColor: theme.tableBorder,
+        color: theme.text,
     },
     headerCell: {
         fontWeight: 'bold',
-        backgroundColor: '#f5f5f5',
+        backgroundColor: theme.headerTable,
     },
 
     //this is from other file
@@ -337,14 +346,14 @@ const styles = StyleSheet.create({
         borderRadius: 25,
     },
     sheet: {
-        backgroundColor: '#fff',
+        backgroundColor: theme.background,
         borderTopLeftRadius: 32,
         borderTopRightRadius: 32,
         marginTop: -24,
         paddingHorizontal: 25,
         paddingTop: 20,
         paddingBottom: 40,
-        position: 'relative',   // 👈 required to respect zIndex
+        position: 'relative',
         zIndex: 2,
     },
     swipeBar: {
@@ -364,7 +373,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 22,
         fontWeight: 'bold',
-        color: '#000',
+        color: theme.text,
         flexShrink: 1,
     },
     statsRow: {
@@ -379,7 +388,7 @@ const styles = StyleSheet.create({
     statNumber: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: '#000',
+        color: theme.text,
     },
     statLabel: {
         fontSize: 13,
@@ -397,38 +406,12 @@ const styles = StyleSheet.create({
     readMoreLess: {
         color: '#999', // gray
     },
-    teamButtons: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 24,
-    },
-    teamButton: {
-        flex: 0.48,
-        backgroundColor: '#f0f0f0',
-        paddingVertical: 12,
-        borderRadius: 12,
-        alignItems: 'center',
-    },
     legalText: {
         fontSize: 12,
         color: '#999',
         marginBottom: 20,
         textAlign: 'justify',
         lineHeight: 18,
-    },
-    continueButton: {
-        backgroundColor: '#38b381',
-        paddingVertical: 16,
-        borderRadius: 12,
-        alignItems: 'center',
-    },
-    continueButtonDisabled: {
-        backgroundColor: 'rgba(56, 179, 129, 0.4)'
-    },
-    continueText: {
-        color: '#fff',
-        fontWeight: 'bold',
-        fontSize: 16,
     },
     safeAreaBack: {
         position: 'absolute',
@@ -445,35 +428,16 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginVertical: 20,
     },
+    qrTitle: {
+        textAlign: "center",
+        marginTop: 5,
+        color: theme.text,
+    },
     teamCodeCopy: {
         fontSize: 20,
         fontWeight: '600',
         color: '#007AFF',
         textAlign: 'center',
         marginVertical: 10,
-    },
-    // Input styles
-    inputSection: {
-        marginBottom: 24,
-    },
-    inputLabel: {
-        fontSize: 14,
-        color: "#444",
-        marginBottom: 6,
-    },
-    inputBox: {
-        backgroundColor: "#f0f0f0",
-        borderRadius: 12,
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        flexDirection: "row",
-        alignItems: "center",
-    },
-    teamButtonSelected: {
-        backgroundColor: "#38b381",
-    },
-    teamButtonTextSelected: {
-        color: "#fff",
-        fontWeight: "bold",
     },
 });

@@ -43,7 +43,7 @@ dist/
 web-build/
 
 # Config
-config/
+Tournify/config/
 
 # Environment
 .env

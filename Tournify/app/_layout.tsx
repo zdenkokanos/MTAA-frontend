@@ -1,8 +1,14 @@
 import { Stack } from "expo-router";
 import { View } from "react-native";
 import Toast from "react-native-toast-message";
+import { useFonts } from 'expo-font';
 
 export default function RootLayout() {
+  
+  const [fontsLoaded] = useFonts({
+    Koulen: require('../assets/fonts/Koulen-Regular.ttf'),
+  });
+
   return (
     <>
       <View style={{ zIndex: 9999 }}>
