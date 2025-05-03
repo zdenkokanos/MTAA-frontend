@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/themes/theme";
 import { useMemo } from "react";
+import Badge from "./tournamentDetail/badge";
 
 interface HistoryCardProps {
     title: string;
@@ -21,9 +22,7 @@ const HistoryCard = ({ title, date, position, imageUrl, onInfoPress }: HistoryCa
                 <Text style={styles.title}>{title}</Text>
                 <Text style={styles.date}>{date}</Text>
                 {position && (
-                    <View style={styles.badge}>
-                        <Text style={styles.badgeText}>{position}</Text>
-                    </View>
+                    <Badge position={String(position)} />
                 )}
             </View>
             <TouchableOpacity style={styles.infoButton} onPress={onInfoPress}>
@@ -65,19 +64,6 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     date: {
         color: "#999",
         marginTop: 2,
-    },
-    badge: {
-        marginTop: 8,
-        backgroundColor: "#F5C344",
-        paddingVertical: 4,
-        paddingHorizontal: 12,
-        borderRadius: 8,
-        alignSelf: "flex-start",
-    },
-    badgeText: {
-        fontSize: 13,
-        fontWeight: "600",
-        color: "#000",
     },
     infoButton: {
         marginLeft: 12,

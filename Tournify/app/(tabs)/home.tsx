@@ -9,6 +9,7 @@ import TicketCard from "@/components/ticketCard";
 import HistoryCard from "@/components/historyCard";
 import { useIsFocused } from '@react-navigation/native';
 import { useTheme } from "@/themes/theme";
+import { router } from "expo-router";
 
 
 
@@ -267,7 +268,10 @@ export default function HomeScreen() {
                                     Authorization: `Bearer ${token}`,
                                 },
                             }}
-                            onInfoPress={() => console.log("Details for", item.id)}
+                            onInfoPress={() => router.push({
+                                pathname: `/history/${item.id}`,
+                                params: { position: item.position ? formatPosition(item.position) : null },
+                            })}
                         />
                     ))
                 ) : (

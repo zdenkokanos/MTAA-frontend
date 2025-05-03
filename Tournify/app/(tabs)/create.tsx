@@ -135,7 +135,7 @@ export default function CreateTournament() {
 
     const theme = useTheme();
     const styles = useMemo(() => getStyles(theme), [theme]);
-    
+
 
 
     return (
@@ -196,10 +196,10 @@ export default function CreateTournament() {
                                         query={{
                                             key: apiKey,
                                             language: 'en',
-                                            types: '(cities)',
+                                            types: 'address',
                                         }}
                                         textInputProps={{
-                                            placeholderTextColor: theme.mutedText, 
+                                            placeholderTextColor: theme.mutedText,
                                         }}
                                         styles={{
                                             container: {
@@ -491,7 +491,7 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     },
     numInput: {
         backgroundColor: theme.createInputBackground,
-        
+
         borderColor: theme.createInputBorder,
         borderWidth: 1,
         borderLeftWidth: 0,

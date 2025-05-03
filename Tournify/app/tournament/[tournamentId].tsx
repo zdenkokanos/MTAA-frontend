@@ -2,9 +2,14 @@ import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, SafeAreaVi
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import API_BASE_URL from '@/config/config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useTheme } from '@/themes/theme';
+import iconSet from '@expo/vector-icons/build/Fontisto';
+import TournamentStats from '@/components/tournamentDetail/tournamentStats';
+import TournamentDescription from '@/components/tournamentDetail/tournamentDescription';
+import MapPreview from '@/components/tournamentDetail/mapPreview';
 
 export default function TournamentDetailScreen() {
     const { tournamentId } = useLocalSearchParams();
@@ -99,6 +104,9 @@ export default function TournamentDetailScreen() {
         fetchTournament();
     }, [tournamentId]);
 
+    const theme = useTheme();
+    const styles = useMemo(() => getStyles(theme), [theme]);
+
     if (loading) {
         return (
             <View style={styles.centered}>
@@ -130,16 +138,16 @@ export default function TournamentDetailScreen() {
 
     return (
         <KeyboardAwareScrollView
-            style={{ flex: 1, backgroundColor: '#fff' }}
+            style={styles.container}
             contentContainerStyle={{ flexGrow: 1 }}
             keyboardShouldPersistTaps="handled"
             enableOnAndroid
             extraScrollHeight={40} // Pushes the input above the keyboard
         >
             {/* Image and Back Button */}
-            <ScrollView style={{ flex: 1, backgroundColor: '#fff' }}
+            <ScrollView style={styles.container}
                 keyboardShouldPersistTaps="handled"
-                contentContainerStyle={{ backgroundColor: '#fff', flexGrow: 1 }}
+                contentContainerStyle={styles.container}
             >
                 <View style={styles.imageContainer}>
                     <Image
@@ -162,49 +170,24 @@ export default function TournamentDetailScreen() {
 
                     <View style={styles.headerRow}>
                         <Text style={styles.title}>{tournament.tournament_name}</Text>
-                        <Ionicons name="share-outline" size={24} color="#000" />
+                        <Ionicons name="share-outline" size={24} style={styles.icons} />
                     </View>
 
                     <Text style={styles.dateUnderTitle}>{formattedDate}</Text>
 
                     {/* Stats */}
-                    <View style={styles.statsRow}>
-                        <View style={styles.stat}>
-                            <Text style={styles.statNumber}>{teamsCount ?? "0"}</Text>
-                            <Text style={styles.statLabel}>joined</Text>
-                        </View>
-                        <View style={styles.stat}>
-                            <Text style={styles.statNumber}>{tournament.max_team_size}</Text>
-                            <Text style={styles.statLabel}>team size</Text>
-                        </View>
-                        <View style={styles.stat}>
-                            <Text style={styles.statNumber}>{daysUntil}</Text>
-                            <Text style={styles.statLabel}>days until</Text>
-                        </View>
-                    </View>
+                    <TournamentStats
+                        teamsCount={teamsCount ?? 0}
+                        teamSize={tournament.max_team_size}
+                        daysUntil={daysUntil}
+                    />
 
                     {/* Description */}
-                    <Text style={styles.description}>
-                        {tournament.additional_info
-                            ? isExpanded || !shouldShowReadMore
-                                ? tournament.additional_info
-                                : shortDescription + '...'
-                            : 'No description available.'}
-                        {shouldShowReadMore && (
-                            <>
-                                {'   '}
-                                <Text
-                                    style={[
-                                        styles.readMoreInline,
-                                        isExpanded ? styles.readMoreLess : styles.readMoreMore,
-                                    ]}
-                                    onPress={() => setIsExpanded(prev => !prev)}
-                                >
-                                    {isExpanded ? 'Show less' : 'Read more'}
-                                </Text>
-                            </>
-                        )}
-                    </Text>
+                    <TournamentDescription
+                        description={tournament.additional_info || 'No description available.'}
+                        isExpanded={isExpanded}
+                        onToggle={() => setIsExpanded(prev => !prev)}
+                    />
 
                     {/* Team Selection Buttons*/}
                     <View style={styles.teamButtons}>
@@ -216,7 +199,7 @@ export default function TournamentDetailScreen() {
                             onPress={() => setSelectedOption("new")}
                         >
                             <Text
-                                style={selectedOption === "new" ? styles.teamButtonTextSelected : undefined}
+                                style={selectedOption === "new" ? styles.teamButtonTextSelected : styles.teamsButtonText}
                             >
                                 New Team
                             </Text>
@@ -228,7 +211,7 @@ export default function TournamentDetailScreen() {
                             ]}
                             onPress={() => setSelectedOption("existing")}
                         >
-                            <Text style={selectedOption === "existing" ? styles.teamButtonTextSelected : undefined}>
+                            <Text style={selectedOption === "existing" ? styles.teamButtonTextSelected : styles.teamsButtonText}>
                                 Existing Team
                             </Text>
                         </TouchableOpacity>
@@ -250,7 +233,7 @@ export default function TournamentDetailScreen() {
                                     placeholderTextColor="#888"
                                     value={teamInput}
                                     onChangeText={setTeamInput}
-                                    style={{ flex: 1 }}
+                                    style={styles.inputText}
                                 />
                                 <Ionicons
                                     name={selectedOption === "new" ? "person-add-outline" : "key-outline"}
@@ -259,6 +242,14 @@ export default function TournamentDetailScreen() {
                                 />
                             </View>
                         </View>
+                    )}
+
+                    {tournament.latitude && tournament.longitude && (
+                        <MapPreview
+                            latitude={tournament.latitude}
+                            longitude={tournament.longitude}
+                            tournamentName={tournament.tournament_name}
+                        />
                     )}
 
                     {/* Legal Text */}
@@ -284,7 +275,11 @@ export default function TournamentDetailScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: theme.background,
+    },
     imageContainer: {
         position: 'relative',
         height: 280,
@@ -303,7 +298,7 @@ const styles = StyleSheet.create({
         borderRadius: 25,
     },
     sheet: {
-        backgroundColor: '#fff',
+        backgroundColor: theme.background,
         borderTopLeftRadius: 32,
         borderTopRightRadius: 32,
         marginTop: -24,
@@ -328,7 +323,7 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 22,
         fontWeight: 'bold',
-        color: '#000',
+        color: theme.text,
         flexShrink: 1,
     },
     statsRow: {
@@ -343,7 +338,7 @@ const styles = StyleSheet.create({
     statNumber: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: '#000',
+        color: theme.text,
     },
     statLabel: {
         fontSize: 13,
@@ -352,7 +347,7 @@ const styles = StyleSheet.create({
     },
     description: {
         fontSize: 14,
-        color: '#444',
+        color: theme.descriptionText,
         marginBottom: 30,
         textAlign: 'justify',
         lineHeight: 20,
@@ -373,10 +368,11 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginBottom: 24,
+        color: theme.text,
     },
     teamButton: {
         flex: 0.48,
-        backgroundColor: '#f0f0f0',
+        backgroundColor: theme.teamButton,
         paddingVertical: 12,
         borderRadius: 12,
         alignItems: 'center',
@@ -406,7 +402,6 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#fff',
     },
     safeAreaBack: {
         position: 'absolute',
@@ -430,7 +425,9 @@ const styles = StyleSheet.create({
         marginBottom: 6,
     },
     inputBox: {
-        backgroundColor: "#f0f0f0",
+        backgroundColor: theme.inputBackground,
+        borderWidth: 1,
+        borderColor: theme.inputBorder,
         borderRadius: 12,
         paddingHorizontal: 16,
         paddingVertical: 12,
@@ -443,6 +440,16 @@ const styles = StyleSheet.create({
     teamButtonTextSelected: {
         color: "#fff",
         fontWeight: "bold",
+    },
+    icons: {
+        color: theme.text,
+    },
+    teamsButtonText: {
+        color: theme.text,
+    },
+    inputText: {
+        flex: 1,
+        color: theme.text,
     },
 });
 

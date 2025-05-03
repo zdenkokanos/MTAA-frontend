@@ -14,7 +14,7 @@ interface TournamentCardProps {
 
 const screenWidth = Dimensions.get('window').width;
 
-const TourenamentView = ({ title, dateText, distanceText, imageUrl, tournamentId }: TournamentCardProps) => {
+const TournamentView = ({ title, dateText, distanceText, imageUrl, tournamentId }: TournamentCardProps) => {
     const theme = useTheme();
     const styles = useMemo(() => getStyles(theme), [theme]);
     const router = useRouter();
@@ -55,7 +55,7 @@ const TourenamentView = ({ title, dateText, distanceText, imageUrl, tournamentId
 };
 
 
-export default TourenamentView;
+export default TournamentView;
 
 const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     rowContainer: {

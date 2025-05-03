@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, FlatList } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -10,6 +10,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Zustand
 import { useSignUpStore } from "@/stores/signUpStore";
+import { useTheme } from '@/themes/theme';
 
 export default function PreferencesSportScreen() {
   const [sportsData, setSportsData] = useState<any[]>([]);
@@ -72,6 +73,9 @@ export default function PreferencesSportScreen() {
     router.replace("/preferencesCity");
   };
 
+  const theme = useTheme();
+  const styles = useMemo(() => getStyles(theme), [theme]);
+
   return (
     <SafeAreaView
       style={styles.container}
@@ -98,7 +102,7 @@ export default function PreferencesSportScreen() {
           )}
           keyExtractor={item => item.id.toString()}
           numColumns={2}
-          contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}
+          contentContainerStyle={styles.flatList}
           showsVerticalScrollIndicator={false}
         />
 
@@ -110,15 +114,16 @@ export default function PreferencesSportScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#fff',
+    backgroundColor: theme.background,
   },
   heading: {
     fontSize: 24,
     marginBottom: 20,
+    color: theme.text,
   },
   bold: {
     fontWeight: 'bold',
@@ -127,4 +132,8 @@ const styles = StyleSheet.create({
   buttonContainer: {
     marginTop: 10,
   },
+  flatList: {
+    flexGrow: 1,
+    paddingBottom: 20,
+  }
 });
