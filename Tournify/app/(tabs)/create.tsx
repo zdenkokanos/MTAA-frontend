@@ -45,15 +45,6 @@ export default function CreateTournament() {
     const [showSuccess, setShowSuccess] = useState(false);
 
 
-
-    const levels = [
-        { label: 'Beginner', value: 'beginner' },
-        { label: 'Intermediate', value: 'intermediate' },
-        { label: 'Advanced', value: 'advanced' },
-        { label: 'Pro', value: 'pro' },
-        { label: 'Open', value: 'open' },
-    ];
-
     const handleSubmit = async () => {
         const token = await AsyncStorage.getItem('token');
 
@@ -167,11 +158,12 @@ export default function CreateTournament() {
                                 <View style={styles.inputWrapper}>
                                     <TextInput
                                         placeholder="Enter tournament name"
+                                        placeholderTextColor={theme.placeholderText}
                                         style={styles.input}
                                         value={tournamentName}
                                         onChangeText={setTournamentName}
                                     />
-                                    <FontAwesome6 name="keyboard" size={20} color="black" style={styles.inputIcon} />
+                                    <FontAwesome6 name="keyboard" size={20} color={theme.text} style={styles.inputIcon} />
                                 </View>
                             </View>
 
@@ -200,18 +192,21 @@ export default function CreateTournament() {
                                             setLongitude(lng);
                                         }}
                                         predefinedPlaces={[]}
-                                        textInputProps={{}}
                                         fetchDetails={true}
                                         query={{
                                             key: apiKey,
                                             language: 'en',
                                             types: '(cities)',
                                         }}
+                                        textInputProps={{
+                                            placeholderTextColor: theme.mutedText, 
+                                        }}
                                         styles={{
                                             container: {
                                                 flex: 0,
                                                 zIndex: 10,
                                                 position: 'relative',
+
                                             },
                                             textInputContainer: { zIndex: 11 },
                                             textInput: {
@@ -313,12 +308,13 @@ export default function CreateTournament() {
                                     <View style={styles.inputWrapper}>
                                         <TextInput
                                             placeholder="2"
+                                            placeholderTextColor={theme.placeholderText}
                                             value={teamSize}
                                             onChangeText={setTeamSize}
                                             style={styles.numInput}
                                             keyboardType="numeric"
                                         />
-                                        <FontAwesome6 name="keyboard" size={20} color="black" style={styles.inputIcon} />
+                                        <FontAwesome6 name="keyboard" size={20} color={theme.text} style={styles.inputIcon} />
                                     </View>
                                 </View>
                             </View>
@@ -382,7 +378,7 @@ export default function CreateTournament() {
                                             style={styles.input}
                                             placeholderTextColor="#888"
                                         />
-                                        <FontAwesome6 name="keyboard" size={20} color="black" style={styles.inputIcon} />
+                                        <FontAwesome6 name="keyboard" size={20} color={theme.text} style={styles.inputIcon} />
                                     </View>
                                 </View>
                             </View>
@@ -400,7 +396,7 @@ export default function CreateTournament() {
                                         numberOfLines={6}
                                         placeholderTextColor="#888"
                                     />
-                                    <FontAwesome6 name="keyboard" size={20} color="black" style={styles.inputIcon} />
+                                    <FontAwesome6 name="keyboard" size={20} color={theme.text} style={styles.inputIcon} />
                                 </View>
                             </View>
 
@@ -426,6 +422,7 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     safeArea: {
         flex: 1,
         backgroundColor: theme.background,
+        paddingTop: Platform.OS === 'ios' ? 0 : 40,
     },
     wrapper: {
         flex: 1,
@@ -494,10 +491,11 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     },
     numInput: {
         backgroundColor: theme.createInputBackground,
+        
         borderColor: theme.createInputBorder,
         borderWidth: 1,
-        borderRightColor: 'transparent',
-        borderLeftColor: 'transparent',
+        borderLeftWidth: 0,
+        borderRightWidth: 0,
 
         paddingHorizontal: 20,
         paddingVertical: 10,

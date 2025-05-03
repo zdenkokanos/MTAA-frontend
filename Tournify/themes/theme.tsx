@@ -14,6 +14,7 @@ export const lightTheme = {
     inputBorder: '#cccccc',
     createInputBackground: '#eee',
     createInputBorder: '#ddd',
+    placeholderText: "#888"
 };
 
 export const darkTheme = {
@@ -31,9 +32,11 @@ export const darkTheme = {
     focusedBorder: '#66D9EF',
     createInputBackground: '#333',
     createInputBorder: '#555',
+    placeholderText: "#aaa"
 };
 
 export const useTheme = () => {
     const scheme = useColorScheme();
-    return scheme === 'dark' ? darkTheme : lightTheme;
+    // return scheme === 'dark' ? darkTheme : lightTheme;
+    return darkTheme;
 };

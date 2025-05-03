@@ -1,15 +1,9 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Platform,
-  StyleSheet,
-  Modal,
-} from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { View, Text, TouchableOpacity, Platform, StyleSheet, Modal, } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 import { format } from 'date-fns';
+import { useTheme } from "@/themes/theme";
 
 export default function TimePickerInput({
   time,
@@ -28,6 +22,9 @@ export default function TimePickerInput({
     }
   };
 
+  const theme = useTheme();
+  const styles = useMemo(() => getStyles(theme), [theme]);
+
   return (
     <View>
       <Text style={styles.label}>Time</Text>
@@ -36,12 +33,7 @@ export default function TimePickerInput({
         style={styles.inputWrapper}
       >
         <Text style={styles.inputText}>{format(time, 'HH:mm')}</Text>
-        <FontAwesome6
-          name="clock"
-          size={20}
-          color="black"
-          style={styles.inputIcon}
-        />
+        <FontAwesome6 name="clock" size={20} color="black" style={styles.inputIcon} />
       </TouchableOpacity>
 
       {/* iOS modal */}
@@ -79,7 +71,7 @@ export default function TimePickerInput({
         <DateTimePicker
           value={time}
           mode="time"
-          display="default"
+          display="spinner"
           onChange={handleAndroidChange}
         />
       )}
@@ -87,19 +79,22 @@ export default function TimePickerInput({
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '500',
     marginBottom: 5,
     marginLeft: 15,
     marginTop: 10,
-    color: '#222',
+    color: theme.text,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#eee',
+    backgroundColor: theme.createInputBackground,
+    borderColor: theme.createInputBorder,
+    borderWidth: 1,
+
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 10,
@@ -109,10 +104,11 @@ const styles = StyleSheet.create({
   inputText: {
     flex: 1,
     fontSize: 16,
-    color: '#000',
+    color: theme.text,
   },
   inputIcon: {
     marginLeft: 8,
+    color: theme.text,
   },
   modalContainer: {
     flex: 1,
@@ -120,7 +116,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.3)',
   },
   modalContent: {
-    backgroundColor: '#fff',
+    backgroundColor: theme.createInputBackground,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     paddingBottom: Platform.OS === 'ios' ? 40 : 10,
@@ -130,7 +126,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     padding: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    borderBottomColor: theme.createInputBorder,
   },
   doneText: {
     fontSize: 16,

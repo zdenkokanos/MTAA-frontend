@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { View, Text, Modal, TouchableOpacity, StyleSheet, Platform } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import { useTheme } from "@/themes/theme";
 
 type LevelPickerProps = {
     level: string;
@@ -19,6 +20,8 @@ type LevelPickerProps = {
     { label: 'All levels', value: 'all' },
   ];
 
+  const theme = useTheme();
+  const styles = useMemo(() => getStyles(theme), [theme]);
   if (Platform.OS === 'android') {
     return (
       <View style={{ marginTop: 10 }}>
@@ -28,10 +31,11 @@ type LevelPickerProps = {
             selectedValue={level}
             onValueChange={(itemValue) => setLevel(itemValue)}
             mode="dropdown"
+            style={{color: theme.text}}
           >
-            <Picker.Item label="Choose level" value={null}/>
+            <Picker.Item label="Choose level" value={null} style={{color: theme.text, backgroundColor: theme.createInputBackground}}/>
             {levels.map((l) => (
-              <Picker.Item key={l.value} label={l.label} value={l.value} />
+              <Picker.Item key={l.value} label={l.label} value={l.value} style={{color: theme.text, backgroundColor: theme.createInputBackground}}/>
             ))}
           </Picker>
         </View>
@@ -45,7 +49,7 @@ type LevelPickerProps = {
         onPress={() => setModalVisible(true)}
         style={styles.selector}
       >
-        <Text style={{ color: level ? '#000' : '#aaa' }}>
+        <Text style={{ color: level ? theme.text : '#aaa' }}>
           {level ? levels.find((l) => l.value === level)?.label : 'Choose level'}
         </Text>
       </TouchableOpacity>
@@ -59,7 +63,7 @@ type LevelPickerProps = {
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
                 <TouchableOpacity onPress={() => setModalVisible(false)}>
-                <Text style={styles.doneText}>Done</Text>
+                  <Text style={styles.doneText}>Done</Text>
                 </TouchableOpacity>
             </View>
 
@@ -82,26 +86,31 @@ type LevelPickerProps = {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '500',
     marginBottom: 5,
     marginLeft: 15,
-    color: '#222',
+    color: theme.text,
   },
   selector: {
-    backgroundColor: '#eee',
+    backgroundColor: theme.createInputBackground,
     padding: 15,
     borderRadius: 12,
     marginLeft: 5,
+    borderColor: theme.createInputBorder,
+    borderWidth: 1,
   },
   androidPickerWrapper: {
-    backgroundColor: '#f2f2f2',
+    backgroundColor: theme.createInputBackground,
     borderRadius: 10,
     paddingHorizontal: 10,
     marginHorizontal: 10,
     height: 52,
+    borderColor: theme.createInputBorder,
+    borderWidth: 1,
+    color: theme.text,
   },
   modalContainer: {
     flex: 1,
@@ -109,7 +118,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.3)',
   },
   modalContent: {
-    backgroundColor: '#fff',
+    backgroundColor: theme.createInputBackground,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     paddingBottom: Platform.OS === 'ios' ? 40 : 10,
@@ -119,7 +128,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     padding: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    borderBottomColor: theme.createInputBorder,
   },
   doneText: {
     fontSize: 16,
