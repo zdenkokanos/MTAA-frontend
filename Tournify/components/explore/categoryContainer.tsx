@@ -67,10 +67,11 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
         backgroundColor: 'rgba(0, 0, 0, 0.2)',
     },
     sportText: {
+        fontFamily: 'Koulen',
+        fontSize: 28,
         color: '#fff',
         zIndex: 10,
         fontWeight: 'bold',
-        fontSize: 24,
         textTransform: 'uppercase',
     },
 });

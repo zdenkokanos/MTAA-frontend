@@ -6,6 +6,7 @@ import API_BASE_URL from '@/config/config';
 import TourenamentView from '@/components/explore/tournamentView'
 import { useTheme } from "@/themes/theme";
 import LottieView from 'lottie-react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function CategoryTournamentsScreen() {
     const { category } = useLocalSearchParams<{ category: string }>();
@@ -16,14 +17,17 @@ export default function CategoryTournamentsScreen() {
     const categoryId = categoryParts?.[0];
     const categoryName = categoryParts?.slice(1).join(' '); 
 
-    const userId = 11; // !!!!!
+    
 
     // TODO:
-    // font, idcko, GPSko, search
+    // GPSko, search
 
 
     useEffect(() => {
         const fetchTournaments = async () => {
+
+        const userId = await AsyncStorage.getItem("userId");
+
           try {
             const response = await fetch(`${API_BASE_URL}/tournaments?category_id=${categoryId}&user_id=${userId}`);
             const data = await response.json();
