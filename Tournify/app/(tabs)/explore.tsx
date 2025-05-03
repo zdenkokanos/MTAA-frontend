@@ -59,6 +59,7 @@ export default function ExploreScreen() {
                 <FlatList
                     data={categories}
                     keyExtractor={(item) => item.id.toString()}
+                    showsVerticalScrollIndicator={false}
                     renderItem={({item}) => (
                         <CategoryContainer
                             categoryName={item.category_name}

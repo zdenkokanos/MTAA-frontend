@@ -51,7 +51,7 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
         overflow: 'hidden',
     },
     image: {
-        height: 120,
+        height: 150,
         width: '100%',
         justifyContent: 'center',
         alignItems: 'center',
