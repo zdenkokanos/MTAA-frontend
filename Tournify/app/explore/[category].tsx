@@ -2,6 +2,8 @@ import { useLocalSearchParams } from 'expo-router';
 import { View, Text, StyleSheet, FlatList, SafeAreaView, Platform } from 'react-native';
 import { useEffect, useMemo, useState } from 'react';
 import API_BASE_URL from '@/config/config';
+import useLocation from '@/hooks/useLocation';
+import { getDistance } from 'geolib';
 
 import TourenamentView from '@/components/explore/tournamentView'
 import { useTheme } from "@/themes/theme";
@@ -9,8 +11,12 @@ import LottieView from 'lottie-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function CategoryTournamentsScreen() {
+    const { latitude, longitude, error, getUserLocation } = useLocation();
     const { category } = useLocalSearchParams<{ category: string }>();
+    const [rawTournaments, setRawTournaments] = useState<any[]>([]);
     const [tournaments, setTournaments] = useState<any[]>([]);
+    const [usingActualGPS, setUsingActualGPS] = useState(false);
+
     const [loading, setLoading] = useState(true);
 
     const categoryParts = category?.split('-');
@@ -32,30 +38,62 @@ export default function CategoryTournamentsScreen() {
             const response = await fetch(`${API_BASE_URL}/tournaments?category_id=${categoryId}&user_id=${userId}`);
             const data = await response.json();
 
-            setTournaments(Array.isArray(data) ? data : []);
-
-          } catch (error) {
+            setRawTournaments(Array.isArray(data) ? data : []);
+            
+        } catch (error) {
             console.error('Error loading tournaments:', error);
-            setTournaments([]); // fallback 
-          } finally {
+            setRawTournaments([]); // fallback 
+        } finally {
             setLoading(false);
-          }
-        };
-    
-        if (categoryId) {
-          fetchTournaments();
         }
+    };
+    
+    if (categoryId) {
+        fetchTournaments();
+    }
     }, [categoryId]);
+    
+    useEffect(() => {
+        getUserLocation();
+    }, []);    
+    
+    // console.log(rawTournaments); // keep to show it actually does something
+
+    useEffect(() => {
+        if (!rawTournaments.length) return;
+        
+        if (latitude !== 0 && longitude !== 0) { // if user allowed gps
+            const updated = rawTournaments.map((tt) => {
+                if (tt.latitude && tt.longitude){
+                    const distanceInMeters = getDistance(
+                        {latitude, longitude},
+                        { latitude: tt.latitude, longitude: tt.longitude}
+                    );
+                    const distanceInKm = Math.round((distanceInMeters / 1000) * 10) / 10;
+                    return {...tt, distance: distanceInKm };
+                }
+                return tt; // if doesnt have lat/long, keep as is
+            });
+
+            setTournaments(updated);
+            setUsingActualGPS(true);
+        } else { // GPS unavailable, use data from backend
+            setTournaments(rawTournaments);
+        }
+
+    }, [rawTournaments, latitude, longitude ]);
 
     const theme = useTheme();
     const styles = useMemo(() => getStyles(theme), [theme]);
+
+    // console.log(tournaments); // keep to show it actually does something
 
     return(
         <SafeAreaView
             style={styles.safeArea}
         >
             <View style={styles.container}>
-            <Text style={styles.title}>Tournaments for {categoryName}</Text>
+            <Text style={styles.title}>Tournaments for <Text style={styles.titleSport}>{categoryName}</Text> </Text>
             {loading ? (
                 <Text>Loading...</Text>
             ) : tournaments.length === 0 ? (
@@ -69,11 +107,19 @@ export default function CategoryTournamentsScreen() {
                     <Text style={styles.emptyText}>Sorry, no tournaments found.</Text>
                 </View>
             ) : (
+                <>
+                <View style={styles.GPSinfo}>
+                    {usingActualGPS ? (
+                        <Text style={styles.GPSinfoText}>(Tournify is using your current location)</Text>
+                    ) : (
+                        <Text style={styles.GPSinfoText}>(Tournify is using your prefered location from profile)</Text>
+                    )}
+                </View>
                 <FlatList
-                data={tournaments}
-                keyExtractor={(item) => item.id.toString()}
-                showsVerticalScrollIndicator={false}
-                renderItem={({ item }) => (
+                    data={tournaments}
+                    keyExtractor={(item) => item.id.toString()}
+                    showsVerticalScrollIndicator={false}
+                    renderItem={({ item }) => (
                     <View>
                         <TourenamentView
                             title={item.tournament_name}
@@ -85,7 +131,8 @@ export default function CategoryTournamentsScreen() {
                     </View>
                     )}
                     contentContainerStyle={{ paddingBottom: 20 }}
-                    />
+                />
+                </>
                 )}
             </View>
         </SafeAreaView>
@@ -119,9 +166,13 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     container: { flex: 1, padding: 20 },
     title: { 
         fontSize: 24, 
-        fontWeight: 'bold', 
+        fontWeight: 700, 
         marginBottom: 20, 
-        color: theme.text 
+        color: theme.text ,
+    },
+    titleSport: {
+        textTransform: 'capitalize',
+        fontWeight: 900
     },
     card: { 
         padding: 16, 
@@ -150,6 +201,13 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     animation: {
         width: '90%',
         height: 200,
+    },
+    GPSinfo: {
+        alignItems: 'center',
+        marginBottom: 15,
+    },
+    GPSinfoText: {
+        color: '#999'
     },
       
 });
