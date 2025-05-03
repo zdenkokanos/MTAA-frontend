@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
@@ -16,6 +16,7 @@ const apiKey = Constants?.expoConfig?.extra?.GOOGLE_MAPS_API_KEY ?? 'DEFAULT_FAL
 
 // Zustand
 import { useSignUpStore } from "@/stores/signUpStore";
+import { useTheme } from '@/themes/theme';
 
 export default function CityPreferencesScreen() {
     const router = useRouter();
@@ -89,6 +90,9 @@ export default function CityPreferencesScreen() {
         }
     };
 
+    const theme = useTheme();
+    const styles = useMemo(() => getStyles(theme), [theme]);
+
     return (
         <SafeAreaView style={styles.safeArea}>
             <Text style={styles.heading}>
@@ -124,14 +128,47 @@ export default function CityPreferencesScreen() {
                                 types: '(cities)',
                             }}
                             styles={{
+                                // textInput: {
+                                //     backgroundColor: '#f2f2f2',
+                                //     borderRadius: 12,
+                                //     paddingHorizontal: 16,
+                                //     height: 48,
+                                //     fontSize: 16,
+                                // },
+                                container: {
+                                    flex: 0,
+                                    zIndex: 10,
+                                    position: 'relative',
+                                },
+                                textInputContainer: { zIndex: 11 },
                                 textInput: {
-                                    backgroundColor: '#f2f2f2',
+                                    zIndex: 12,
+                                    backgroundColor: theme.createInputBackground,
+                                    borderColor: theme.createInputBorder,
+                                    color: theme.text,
+                                    borderWidth: 1,
                                     borderRadius: 12,
                                     paddingHorizontal: 16,
                                     height: 48,
                                     fontSize: 16,
                                 },
-                                container: { marginBottom: 16 },
+                                row: {
+                                    backgroundColor: theme.createInputBackground,
+                                },
+                                description: {
+                                    color: theme.text,
+                                },
+                                listView: {
+                                    position: 'absolute',
+                                    top: 48,
+                                    zIndex: 50,
+                                    elevation: 5,
+                                    borderRadius: 10,
+                                    width: '100%',
+                                },
+                                poweredContainer: {
+                                    display: 'none',
+                                },
                             }}
                             // All other default props explicitly defined
                             autoFillOnNotFound={false}
@@ -179,10 +216,10 @@ export default function CityPreferencesScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     safeArea: {
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: theme.background,
     },
     flex: {
         flex: 1,
@@ -191,6 +228,7 @@ const styles = StyleSheet.create({
         fontSize: 24,
         marginLeft: 20,
         marginTop: 20,
+        color: theme.text,
     },
     bold: {
         fontSize: 32,
@@ -203,7 +241,7 @@ const styles = StyleSheet.create({
     },
     label: {
         marginBottom: 6,
-        color: '#333',
+        color: theme.text,
         fontSize: 14,
     },
     buttonWrapper: {

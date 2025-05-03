@@ -12,10 +12,14 @@ export const lightTheme = {
     tournamentCard: "rgba(205, 205, 205, 0.75)",
     inputBackground: '#ffffff',
     inputBorder: '#cccccc',
+    teamButton: '#f0f0f0',
+    descriptionText: '#444444',
+    createInputBackground: '#eee',
+    createInputBorder: '#ddd',
 };
 
 export const darkTheme = {
-    background: '#1E1E1E',
+    background: '#222222',
     text: '#ffffff',
     mutedText: '#aaaaaa',
     card: '#222222',
@@ -27,6 +31,10 @@ export const darkTheme = {
     inputBackground: '#333333',
     inputBorder: '#555555',
     focusedBorder: '#66D9EF',
+    teamButton: '#555555',
+    descriptionText: '#eeeeee',
+    createInputBackground: '#333',
+    createInputBorder: '#555',
 };
 
 export const useTheme = () => {
