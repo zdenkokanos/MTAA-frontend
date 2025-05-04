@@ -1,5 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import API_BASE_URL from '@/config/config';
+import { getCachedImageUri } from '@/utils/cacheImage';
 
 type CachedTicket = {
     id: string;
@@ -93,6 +94,10 @@ export const cacheAllTickets = async () => {
                     ? await teamCountRes.json()
                     : [];
                 const enrolled = enrolledRes.ok ? await enrolledRes.json() : [];
+
+                const categoryImageUrl = `${API_BASE_URL}/category/images/${tournament.category_image}`;
+                const localImageUri = await getCachedImageUri(categoryImageUrl, token); // pass token if required
+                tournament.localCategoryImage = localImageUri;
 
                 const cachedTicket: CachedTicket = {
                     id: ticket.id,
