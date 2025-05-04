@@ -93,12 +93,31 @@ export default function TicketDetailScreen() {
                     console.error("Failed to fetch enrolled teams:", enrolledData.message);
                 }
             } catch (err) {
-                console.error("Error loading data:", err);
+                console.warn("Falling back to cached data:", err);
+
+                try {
+                    const cached = await AsyncStorage.getItem("cachedTickets");
+                    console.log(cached)
+                    if (!cached) return;
+
+                    const parsed = JSON.parse(cached);
+                    const cachedTicket = parsed.find((t: any) => String(t.id) === String(ticketId));
+
+                    if (cachedTicket) {
+                        setTicket(cachedTicket.ticket);
+                        setTournament(cachedTicket.tournament);
+                        setTeamsCount(cachedTicket.teamsCount);
+                        setEnrolledTeams(cachedTicket.enrolledTeams);
+                    } else {
+                        console.error("Ticket not found in cache:", ticketId, cached);
+                    }
+                } catch (cacheErr) {
+                    console.error("Failed to load from cache:", cacheErr);
+                }
             } finally {
                 setLoading(false);
             }
         };
-
         fetchData();
     }, [ticketId]);
 

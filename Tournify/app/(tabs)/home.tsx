@@ -11,6 +11,7 @@ import { useTheme } from "@/themes/theme";
 import { router } from "expo-router";
 import OfflineBanner from "@/components/offlineBanner";
 import TournamentView from "@/components/explore/tournamentView";
+import { cacheAllTickets } from "@/utils/cacheTickets";
 
 export default function HomeScreen() {
 
@@ -111,6 +112,9 @@ export default function HomeScreen() {
             } else {
                 console.error("History error:", historyData.message);
             }
+
+            // Cache Tickets for Offline use
+            await cacheAllTickets();
 
         } catch (err) {
             console.error("Failed to load home screen data:", err);
