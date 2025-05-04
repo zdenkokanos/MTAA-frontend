@@ -17,6 +17,8 @@ const apiKey = Constants?.expoConfig?.extra?.GOOGLE_MAPS_API_KEY ?? 'DEFAULT_FAL
 // Zustand
 import { useSignUpStore } from "@/stores/signUpStore";
 import { useTheme } from '@/themes/theme';
+import OfflineBanner from '@/components/safeOfflineBanner';
+import SafeOfflineBanner from '@/components/safeOfflineBanner';
 
 export default function CityPreferencesScreen() {
     const router = useRouter();
@@ -94,125 +96,128 @@ export default function CityPreferencesScreen() {
     const styles = useMemo(() => getStyles(theme), [theme]);
 
     return (
-        <SafeAreaView style={styles.safeArea}>
-            <Text style={styles.heading}>
-                Choose your,{'\n'}
-                <Text style={styles.bold}>City</Text>
-            </Text>
-            <KeyboardAvoidingView
-                behavior={Platform.OS === "ios" ? "padding" : "height"}
-                style={styles.flex}
-            >
-                <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                    <View style={styles.container}>
-                        <Text style={styles.label}>Your City</Text>
+        <>
+            <SafeOfflineBanner />
+            <SafeAreaView style={styles.safeArea}>
+                <Text style={styles.heading}>
+                    Choose your,{'\n'}
+                    <Text style={styles.bold}>City</Text>
+                </Text>
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === "ios" ? "padding" : "height"}
+                    style={styles.flex}
+                >
+                    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                        <View style={styles.container}>
+                            <Text style={styles.label}>Your City</Text>
 
-                        <GooglePlacesAutocomplete
-                            placeholder="Enter your city"
-                            onPress={(data, details) => {
-                                if (!details) return;
-                                const cityName = data.description;
-                                const { lat, lng } = details.geometry.location;
-                                setField("preferredLocation", cityName);
-                                setField("preferredLatitude", lat);
-                                setField("preferredLongitude", lng);
-                                setError("");
-                            }}
-                            fetchDetails={true}
-                            predefinedPlaces={[]}
-                            textInputProps={{}}
+                            <GooglePlacesAutocomplete
+                                placeholder="Enter your city"
+                                onPress={(data, details) => {
+                                    if (!details) return;
+                                    const cityName = data.description;
+                                    const { lat, lng } = details.geometry.location;
+                                    setField("preferredLocation", cityName);
+                                    setField("preferredLatitude", lat);
+                                    setField("preferredLongitude", lng);
+                                    setError("");
+                                }}
+                                fetchDetails={true}
+                                predefinedPlaces={[]}
+                                textInputProps={{}}
 
-                            query={{
-                                key: apiKey,
-                                language: 'en',
-                                types: '(cities)',
-                            }}
-                            styles={{
-                                // textInput: {
-                                //     backgroundColor: '#f2f2f2',
-                                //     borderRadius: 12,
-                                //     paddingHorizontal: 16,
-                                //     height: 48,
-                                //     fontSize: 16,
-                                // },
-                                container: {
-                                    flex: 0,
-                                    zIndex: 10,
-                                    position: 'relative',
-                                },
-                                textInputContainer: { zIndex: 11 },
-                                textInput: {
-                                    zIndex: 12,
-                                    backgroundColor: theme.createInputBackground,
-                                    borderColor: theme.createInputBorder,
-                                    color: theme.text,
-                                    borderWidth: 1,
-                                    borderRadius: 12,
-                                    paddingHorizontal: 16,
-                                    height: 48,
-                                    fontSize: 16,
-                                },
-                                row: {
-                                    backgroundColor: theme.createInputBackground,
-                                },
-                                description: {
-                                    color: theme.text,
-                                },
-                                listView: {
-                                    position: 'absolute',
-                                    top: 48,
-                                    zIndex: 50,
-                                    elevation: 5,
-                                    borderRadius: 10,
-                                    width: '100%',
-                                },
-                                poweredContainer: {
-                                    display: 'none',
-                                },
-                            }}
-                            // All other default props explicitly defined
-                            autoFillOnNotFound={false}
-                            currentLocation={false}
-                            currentLocationLabel="Current location"
-                            debounce={0}
-                            disableScroll={false}
-                            enableHighAccuracyLocation={true}
-                            enablePoweredByContainer={true}
-                            filterReverseGeocodingByTypes={[]}
-                            GooglePlacesDetailsQuery={{}}
-                            GooglePlacesSearchQuery={{
-                                rankby: 'distance',
-                                type: 'restaurant',
-                            }}
-                            GoogleReverseGeocodingQuery={{}}
-                            isRowScrollable={true}
-                            keyboardShouldPersistTaps="always"
-                            listUnderlayColor="#c8c7cc"
-                            listViewDisplayed="auto"
-                            keepResultsAfterBlur={false}
-                            minLength={1}
-                            nearbyPlacesAPI="GooglePlacesSearch"
-                            numberOfLines={1}
-                            onFail={() => { }}
-                            onNotFound={() => { }}
-                            onTimeout={() =>
-                                console.warn('google places autocomplete: request timeout')
-                            }
-                            predefinedPlacesAlwaysVisible={false}
-                            suppressDefaultStyles={false}
-                            textInputHide={false}
-                            timeout={20000}
-                        />
+                                query={{
+                                    key: apiKey,
+                                    language: 'en',
+                                    types: '(cities)',
+                                }}
+                                styles={{
+                                    // textInput: {
+                                    //     backgroundColor: '#f2f2f2',
+                                    //     borderRadius: 12,
+                                    //     paddingHorizontal: 16,
+                                    //     height: 48,
+                                    //     fontSize: 16,
+                                    // },
+                                    container: {
+                                        flex: 0,
+                                        zIndex: 10,
+                                        position: 'relative',
+                                    },
+                                    textInputContainer: { zIndex: 11 },
+                                    textInput: {
+                                        zIndex: 12,
+                                        backgroundColor: theme.createInputBackground,
+                                        borderColor: theme.createInputBorder,
+                                        color: theme.text,
+                                        borderWidth: 1,
+                                        borderRadius: 12,
+                                        paddingHorizontal: 16,
+                                        height: 48,
+                                        fontSize: 16,
+                                    },
+                                    row: {
+                                        backgroundColor: theme.createInputBackground,
+                                    },
+                                    description: {
+                                        color: theme.text,
+                                    },
+                                    listView: {
+                                        position: 'absolute',
+                                        top: 48,
+                                        zIndex: 50,
+                                        elevation: 5,
+                                        borderRadius: 10,
+                                        width: '100%',
+                                    },
+                                    poweredContainer: {
+                                        display: 'none',
+                                    },
+                                }}
+                                // All other default props explicitly defined
+                                autoFillOnNotFound={false}
+                                currentLocation={false}
+                                currentLocationLabel="Current location"
+                                debounce={0}
+                                disableScroll={false}
+                                enableHighAccuracyLocation={true}
+                                enablePoweredByContainer={true}
+                                filterReverseGeocodingByTypes={[]}
+                                GooglePlacesDetailsQuery={{}}
+                                GooglePlacesSearchQuery={{
+                                    rankby: 'distance',
+                                    type: 'restaurant',
+                                }}
+                                GoogleReverseGeocodingQuery={{}}
+                                isRowScrollable={true}
+                                keyboardShouldPersistTaps="always"
+                                listUnderlayColor="#c8c7cc"
+                                listViewDisplayed="auto"
+                                keepResultsAfterBlur={false}
+                                minLength={1}
+                                nearbyPlacesAPI="GooglePlacesSearch"
+                                numberOfLines={1}
+                                onFail={() => { }}
+                                onNotFound={() => { }}
+                                onTimeout={() =>
+                                    console.warn('google places autocomplete: request timeout')
+                                }
+                                predefinedPlacesAlwaysVisible={false}
+                                suppressDefaultStyles={false}
+                                textInputHide={false}
+                                timeout={20000}
+                            />
 
-                        {error ? <Text style={styles.error}>{error}</Text> : null}
+                            {error ? <Text style={styles.error}>{error}</Text> : null}
 
-                        <View style={styles.buttonWrapper}>
-                            <StartButton title="Continue" onPress={handleSignUp} />
+                            <View style={styles.buttonWrapper}>
+                                <StartButton title="Continue" onPress={handleSignUp} />
+                            </View>
                         </View>
-                    </View>
-                </TouchableWithoutFeedback>
-            </KeyboardAvoidingView>
-        </SafeAreaView>
+                    </TouchableWithoutFeedback>
+                </KeyboardAvoidingView>
+            </SafeAreaView>
+        </>
     );
 }
 

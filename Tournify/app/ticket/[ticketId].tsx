@@ -13,6 +13,7 @@ import { useTheme } from '@/themes/theme';
 import TournamentStats from '@/components/tournamentDetail/tournamentStats';
 import TournamentDescription from '@/components/tournamentDetail/tournamentDescription';
 import MapPreview from '@/components/tournamentDetail/mapPreview';
+import SafeOfflineBanner from '@/components/safeOfflineBanner';
 
 export default function TicketDetailScreen() {
     const { ticketId } = useLocalSearchParams();
@@ -126,104 +127,107 @@ export default function TicketDetailScreen() {
     });
 
     return (
-        <View style={{ flex: 1 }}>
-            <View style={styles.imageContainer}>
-                <Image
-                    source={{
-                        uri: `${API_BASE_URL}/category/images/${tournament.category_image}`,
-                        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-                    }}
-                    style={styles.image}
-                />
-                <SafeAreaView style={styles.safeAreaBack}>
-                    <TouchableOpacity style={styles.backButton} onPress={() => {
-                        if (router.canGoBack()) {
-                            router.back();
-                        } else {
-                            router.replace("/(tabs)/home");
-                        }
-                    }}>
-                        <Ionicons name="arrow-back" size={24} color="white" />
-                    </TouchableOpacity>
-                </SafeAreaView>
-            </View>
-
-            <ScrollView style={styles.sheet}
-                keyboardShouldPersistTaps="handled"
-                contentContainerStyle={styles.scrollViewContent}
-                showsVerticalScrollIndicator={false}
-            >
-                {/* White Sheet */}
-
-                <View style={styles.swipeBar} />
-                <View style={styles.qrWrapper}>
-                    <QRCode value={ticket.ticket} size={180} backgroundColor={theme.background} color={theme.qrCode} />
-                </View>
-
-                <Text style={styles.qrTitle}>Code for other members:</Text>
-                <TouchableOpacity
-                    onPress={async () => {
-                        try {
-                            await Clipboard.setStringAsync(ticket.code);
-                            Toast.show({
-                                type: 'success',
-                                text1: 'Code copied!',
-                                position: 'top',
-                                visibilityTime: 1500,
-                            });
-                            console.log('Code copied to clipboard:', ticket.code);
-                        } catch (error) {
-                            console.error('Clipboard operation failed:', error);
-                        }
-                    }}
-                >
-                    <Text style={styles.teamCodeCopy}>{ticket.code}</Text>
-                </TouchableOpacity>
-
-                <View style={styles.headerRow}>
-                    <Text style={styles.title}>{tournament.tournament_name}</Text>
-                    <Text style={styles.joinedText}>{teamsCount ?? "0"} joined</Text>
-                </View>
-
-                <Text style={styles.dateUnderTitle}>{formattedDate}</Text>
-
-                {/* Stats */}
-                <TournamentStats
-                    teamsCount={teamsCount ?? 0}
-                    teamSize={tournament.max_team_size}
-                    daysUntil={daysUntil}
-                />
-
-                {/* Description */}
-                <TournamentDescription
-                    description={tournament.additional_info || 'No description available.'}
-                    isExpanded={isExpanded}
-                    onToggle={() => setIsExpanded(prev => !prev)}
-                />
-
-                {tournament.latitude && tournament.longitude && (
-                    <MapPreview
-                        latitude={tournament.latitude}
-                        longitude={tournament.longitude}
-                        tournamentName={tournament.tournament_name}
+        <>
+            <SafeOfflineBanner />
+            <View style={{ flex: 1 }}>
+                <View style={styles.imageContainer}>
+                    <Image
+                        source={{
+                            uri: `${API_BASE_URL}/category/images/${tournament.category_image}`,
+                            headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+                        }}
+                        style={styles.image}
                     />
-                )}
-
-                <Text style={styles.enrolledTitle}>Enrolled Teams</Text>
-                <View style={styles.table}>
-                    <View style={styles.tableRow}>
-                        <Text style={[styles.tableCell, styles.headerCell]}>Team name</Text>
-                        <Text style={[styles.tableCell, styles.headerCell]}>Members</Text>
-                    </View>
-                    {enrolledTeams.map((team: any, index: number) => (
-                        <View key={index} style={styles.tableRow}>
-                            <Text style={styles.tableCell}>{team.team_name}</Text>
-                            <Text style={styles.tableCell}>{team.number_of_members}</Text>
-                        </View>
-                    ))}
+                    <SafeAreaView style={styles.safeAreaBack}>
+                        <TouchableOpacity style={styles.backButton} onPress={() => {
+                            if (router.canGoBack()) {
+                                router.back();
+                            } else {
+                                router.replace("/(tabs)/home");
+                            }
+                        }}>
+                            <Ionicons name="arrow-back" size={24} color="white" />
+                        </TouchableOpacity>
+                    </SafeAreaView>
                 </View>
-            </ScrollView >
-        </View >
+
+                <ScrollView style={styles.sheet}
+                    keyboardShouldPersistTaps="handled"
+                    contentContainerStyle={styles.scrollViewContent}
+                    showsVerticalScrollIndicator={false}
+                >
+                    {/* White Sheet */}
+
+                    <View style={styles.swipeBar} />
+                    <View style={styles.qrWrapper}>
+                        <QRCode value={ticket.ticket} size={180} backgroundColor={theme.background} color={theme.qrCode} />
+                    </View>
+
+                    <Text style={styles.qrTitle}>Code for other members:</Text>
+                    <TouchableOpacity
+                        onPress={async () => {
+                            try {
+                                await Clipboard.setStringAsync(ticket.code);
+                                Toast.show({
+                                    type: 'success',
+                                    text1: 'Code copied!',
+                                    position: 'top',
+                                    visibilityTime: 1500,
+                                });
+                                console.log('Code copied to clipboard:', ticket.code);
+                            } catch (error) {
+                                console.error('Clipboard operation failed:', error);
+                            }
+                        }}
+                    >
+                        <Text style={styles.teamCodeCopy}>{ticket.code}</Text>
+                    </TouchableOpacity>
+
+                    <View style={styles.headerRow}>
+                        <Text style={styles.title}>{tournament.tournament_name}</Text>
+                        <Text style={styles.joinedText}>{teamsCount ?? "0"} joined</Text>
+                    </View>
+
+                    <Text style={styles.dateUnderTitle}>{formattedDate}</Text>
+
+                    {/* Stats */}
+                    <TournamentStats
+                        teamsCount={teamsCount ?? 0}
+                        teamSize={tournament.max_team_size}
+                        daysUntil={daysUntil}
+                    />
+
+                    {/* Description */}
+                    <TournamentDescription
+                        description={tournament.additional_info || 'No description available.'}
+                        isExpanded={isExpanded}
+                        onToggle={() => setIsExpanded(prev => !prev)}
+                    />
+
+                    {tournament.latitude && tournament.longitude && (
+                        <MapPreview
+                            latitude={tournament.latitude}
+                            longitude={tournament.longitude}
+                            tournamentName={tournament.tournament_name}
+                        />
+                    )}
+
+                    <Text style={styles.enrolledTitle}>Enrolled Teams</Text>
+                    <View style={styles.table}>
+                        <View style={styles.tableRow}>
+                            <Text style={[styles.tableCell, styles.headerCell]}>Team name</Text>
+                            <Text style={[styles.tableCell, styles.headerCell]}>Members</Text>
+                        </View>
+                        {enrolledTeams.map((team: any, index: number) => (
+                            <View key={index} style={styles.tableRow}>
+                                <Text style={styles.tableCell}>{team.team_name}</Text>
+                                <Text style={styles.tableCell}>{team.number_of_members}</Text>
+                            </View>
+                        ))}
+                    </View>
+                </ScrollView >
+            </View >
+        </>
     );
 }
 

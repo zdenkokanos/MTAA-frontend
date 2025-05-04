@@ -10,6 +10,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 // Zustand
 import { useSignUpStore } from "@/stores/signUpStore";
 import { useTheme } from "@/themes/theme";
+import SafeOfflineBanner, { OfflineBanner } from "@/components/safeOfflineBanner";
 
 export default function SignUpScreen() {
     const router = useRouter();
@@ -68,6 +69,7 @@ export default function SignUpScreen() {
             style={{ flex: 1 }}
             behavior={Platform.OS === "ios" ? "padding" : "height"}
         >
+            <SafeOfflineBanner />
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <SafeAreaView style={styles.safeArea}>
                     <KeyboardAwareScrollView

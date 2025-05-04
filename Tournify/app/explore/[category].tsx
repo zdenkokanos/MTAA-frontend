@@ -9,6 +9,7 @@ import TourenamentView from '@/components/explore/tournamentView'
 import { useTheme } from "@/themes/theme";
 import LottieView from 'lottie-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import OfflineBanner from '@/components/offlineBanner';
 
 export default function CategoryTournamentsScreen() {
     const { latitude, longitude, error, getUserLocation } = useLocation();
@@ -21,9 +22,9 @@ export default function CategoryTournamentsScreen() {
 
     const categoryParts = category?.split('-');
     const categoryId = categoryParts?.[0];
-    const categoryName = categoryParts?.slice(1).join(' '); 
+    const categoryName = categoryParts?.slice(1).join(' ');
 
-    
+
 
     // TODO:
     // GPSko, search
@@ -32,45 +33,45 @@ export default function CategoryTournamentsScreen() {
     useEffect(() => {
         const fetchTournaments = async () => {
 
-        const userId = await AsyncStorage.getItem("userId");
+            const userId = await AsyncStorage.getItem("userId");
 
-          try {
-            const response = await fetch(`${API_BASE_URL}/tournaments?category_id=${categoryId}&user_id=${userId}`);
-            const data = await response.json();
+            try {
+                const response = await fetch(`${API_BASE_URL}/tournaments?category_id=${categoryId}&user_id=${userId}`);
+                const data = await response.json();
 
-            setRawTournaments(Array.isArray(data) ? data : []);
-            
-        } catch (error) {
-            console.error('Error loading tournaments:', error);
-            setRawTournaments([]); // fallback 
-        } finally {
-            setLoading(false);
+                setRawTournaments(Array.isArray(data) ? data : []);
+
+            } catch (error) {
+                console.error('Error loading tournaments:', error);
+                setRawTournaments([]); // fallback 
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        if (categoryId) {
+            fetchTournaments();
         }
-    };
-    
-    if (categoryId) {
-        fetchTournaments();
-    }
     }, [categoryId]);
-    
+
     useEffect(() => {
         getUserLocation();
-    }, []);    
-    
+    }, []);
+
     // console.log(rawTournaments); // keep to show it actually does something
 
     useEffect(() => {
         if (!rawTournaments.length) return;
-        
+
         if (latitude !== 0 && longitude !== 0) { // if user allowed gps
             const updated = rawTournaments.map((tt) => {
-                if (tt.latitude && tt.longitude){
+                if (tt.latitude && tt.longitude) {
                     const distanceInMeters = getDistance(
-                        {latitude, longitude},
-                        { latitude: tt.latitude, longitude: tt.longitude}
+                        { latitude, longitude },
+                        { latitude: tt.latitude, longitude: tt.longitude }
                     );
                     const distanceInKm = Math.round((distanceInMeters / 1000) * 10) / 10;
-                    return {...tt, distance: distanceInKm };
+                    return { ...tt, distance: distanceInKm };
                 }
                 return tt; // if doesnt have lat/long, keep as is
             });
@@ -81,58 +82,59 @@ export default function CategoryTournamentsScreen() {
             setTournaments(rawTournaments);
         }
 
-    }, [rawTournaments, latitude, longitude ]);
+    }, [rawTournaments, latitude, longitude]);
 
     const theme = useTheme();
     const styles = useMemo(() => getStyles(theme), [theme]);
 
     // console.log(tournaments); // keep to show it actually does something
 
-    return(
+    return (
         <SafeAreaView
             style={styles.safeArea}
         >
+            <OfflineBanner />
             <View style={styles.container}>
-            <Text style={styles.title}>Tournaments for <Text style={styles.titleSport}>{categoryName}</Text> </Text>
-            {loading ? (
-                <Text>Loading...</Text>
-            ) : tournaments.length === 0 ? (
-                <View style={styles.animationContainer}>
-                    <LottieView
-                        source={require('@/assets/animations/notFound.json')}
-                        autoPlay
-                        loop={true}
-                        style={styles.animation}
+                <Text style={styles.title}>Tournaments for <Text style={styles.titleSport}>{categoryName}</Text> </Text>
+                {loading ? (
+                    <Text>Loading...</Text>
+                ) : tournaments.length === 0 ? (
+                    <View style={styles.animationContainer}>
+                        <LottieView
+                            source={require('@/assets/animations/notFound.json')}
+                            autoPlay
+                            loop={true}
+                            style={styles.animation}
                         />
-                    <Text style={styles.emptyText}>Sorry, no tournaments found.</Text>
-                </View>
-            ) : (
-                <>
-                <View style={styles.GPSinfo}>
-                    {usingActualGPS ? (
-                        <Text style={styles.GPSinfoText}>(Tournify is using your current location)</Text>
-                    ) : (
-                        <Text style={styles.GPSinfoText}>(Tournify is using your prefered location from profile)</Text>
-                    )}
-                </View>
-                <FlatList
-                    data={tournaments}
-                    keyExtractor={(item) => item.id.toString()}
-                    showsVerticalScrollIndicator={false}
-                    renderItem={({ item }) => (
-                    <View>
-                        <TourenamentView
-                            title={item.tournament_name}
-                            dateText={formatDateRelative(item.date)}
-                            distanceText={`${item.distance} km from you`}
-                            imageUrl={{ uri: `${API_BASE_URL}/category/images/${item.category_image}` }}
-                            tournamentId={item.id}
-                        />
+                        <Text style={styles.emptyText}>Sorry, no tournaments found.</Text>
                     </View>
-                    )}
-                    contentContainerStyle={{ paddingBottom: 20 }}
-                />
-                </>
+                ) : (
+                    <>
+                        <View style={styles.GPSinfo}>
+                            {usingActualGPS ? (
+                                <Text style={styles.GPSinfoText}>(Tournify is using your current location)</Text>
+                            ) : (
+                                <Text style={styles.GPSinfoText}>(Tournify is using your prefered location from profile)</Text>
+                            )}
+                        </View>
+                        <FlatList
+                            data={tournaments}
+                            keyExtractor={(item) => item.id.toString()}
+                            showsVerticalScrollIndicator={false}
+                            renderItem={({ item }) => (
+                                <View>
+                                    <TourenamentView
+                                        title={item.tournament_name}
+                                        dateText={formatDateRelative(item.date)}
+                                        distanceText={`${item.distance} km from you`}
+                                        imageUrl={{ uri: `${API_BASE_URL}/category/images/${item.category_image}` }}
+                                        tournamentId={item.id}
+                                    />
+                                </View>
+                            )}
+                            contentContainerStyle={{ paddingBottom: 20 }}
+                        />
+                    </>
                 )}
             </View>
         </SafeAreaView>
@@ -163,30 +165,30 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
         backgroundColor: theme.background,
         paddingTop: Platform.OS === 'ios' ? 0 : 40,
     },
-    container: { flex: 1, padding: 20 },
-    title: { 
-        fontSize: 24, 
-        fontWeight: 700, 
-        marginBottom: 20, 
-        color: theme.text ,
+    container: { flex: 1, padding: 10 },
+    title: {
+        fontSize: 24,
+        fontWeight: 700,
+        marginBottom: 20,
+        color: theme.text,
     },
     titleSport: {
         textTransform: 'capitalize',
         fontWeight: 900
     },
-    card: { 
-        padding: 16, 
-        backgroundColor: '#eee', 
-        marginBottom: 10, 
-        borderRadius: 8 
+    card: {
+        padding: 16,
+        backgroundColor: '#eee',
+        marginBottom: 10,
+        borderRadius: 8
     },
-    cardTitle: { 
-        fontSize: 18, 
-        fontWeight: '600' 
+    cardTitle: {
+        fontSize: 18,
+        fontWeight: '600'
     },
-    cardInfo: { 
-        fontSize: 14, 
-        color: '#555' 
+    cardInfo: {
+        fontSize: 14,
+        color: '#555'
     },
     emptyText: {
         textAlign: 'center',
@@ -209,5 +211,5 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     GPSinfoText: {
         color: '#999'
     },
-      
+
 });

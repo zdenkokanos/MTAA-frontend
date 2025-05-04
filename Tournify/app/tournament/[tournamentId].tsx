@@ -10,6 +10,7 @@ import iconSet from '@expo/vector-icons/build/Fontisto';
 import TournamentStats from '@/components/tournamentDetail/tournamentStats';
 import TournamentDescription from '@/components/tournamentDetail/tournamentDescription';
 import MapPreview from '@/components/tournamentDetail/mapPreview';
+import SafeOfflineBanner from '@/components/safeOfflineBanner';
 
 export default function TournamentDetailScreen() {
     const { tournamentId } = useLocalSearchParams();
@@ -137,141 +138,144 @@ export default function TournamentDetailScreen() {
     });
 
     return (
-        <KeyboardAwareScrollView
-            style={styles.container}
-            contentContainerStyle={{ flexGrow: 1 }}
-            keyboardShouldPersistTaps="handled"
-            enableOnAndroid
-            extraScrollHeight={40} // Pushes the input above the keyboard
-        >
-            {/* Image and Back Button */}
-            <ScrollView style={styles.container}
+        <>
+            <SafeOfflineBanner />
+            <KeyboardAwareScrollView
+                style={styles.container}
+                contentContainerStyle={{ flexGrow: 1 }}
                 keyboardShouldPersistTaps="handled"
-                contentContainerStyle={styles.container}
+                enableOnAndroid
+                extraScrollHeight={40} // Pushes the input above the keyboard
             >
-                <View style={styles.imageContainer}>
-                    <Image
-                        source={{
-                            uri: `${API_BASE_URL}/category/images/${tournament.category_image}`,
-                            headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-                        }}
-                        style={styles.image}
-                    />
-                    <SafeAreaView style={styles.safeAreaBack}>
-                        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-                            <Ionicons name="arrow-back" size={24} color="white" />
-                        </TouchableOpacity>
-                    </SafeAreaView>
-                </View>
-
-                {/* White Sheet */}
-                <View style={styles.sheet}>
-                    <View style={styles.swipeBar} />
-
-                    <View style={styles.headerRow}>
-                        <Text style={styles.title}>{tournament.tournament_name}</Text>
-                        <Ionicons name="share-outline" size={24} style={styles.icons} />
-                    </View>
-
-                    <Text style={styles.dateUnderTitle}>{formattedDate}</Text>
-
-                    {/* Stats */}
-                    <TournamentStats
-                        teamsCount={teamsCount ?? 0}
-                        teamSize={tournament.max_team_size}
-                        daysUntil={daysUntil}
-                    />
-
-                    {/* Description */}
-                    <TournamentDescription
-                        description={tournament.additional_info || 'No description available.'}
-                        isExpanded={isExpanded}
-                        onToggle={() => setIsExpanded(prev => !prev)}
-                    />
-
-                    {/* Team Selection Buttons*/}
-                    <View style={styles.teamButtons}>
-                        <TouchableOpacity
-                            style={[
-                                styles.teamButton,
-                                selectedOption === "new" && styles.teamButtonSelected,
-                            ]}
-                            onPress={() => setSelectedOption("new")}
-                        >
-                            <Text
-                                style={selectedOption === "new" ? styles.teamButtonTextSelected : styles.teamsButtonText}
-                            >
-                                New Team
-                            </Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={[
-                                styles.teamButton,
-                                selectedOption === "existing" && styles.teamButtonSelected,
-                            ]}
-                            onPress={() => setSelectedOption("existing")}
-                        >
-                            <Text style={selectedOption === "existing" ? styles.teamButtonTextSelected : styles.teamsButtonText}>
-                                Existing Team
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-
-                    {/* Input Field */}
-                    {selectedOption && (
-                        <View style={styles.inputSection}>
-                            <Text style={styles.inputLabel}>
-                                {selectedOption === "new" ? "Team name" : "Team code"}
-                            </Text>
-                            <View style={styles.inputBox}>
-                                <TextInput
-                                    placeholder={
-                                        selectedOption === "new"
-                                            ? "Enter your team name"
-                                            : "Enter your team code"
-                                    }
-                                    placeholderTextColor="#888"
-                                    value={teamInput}
-                                    onChangeText={setTeamInput}
-                                    style={styles.inputText}
-                                />
-                                <Ionicons
-                                    name={selectedOption === "new" ? "person-add-outline" : "key-outline"}
-                                    size={20}
-                                    color="#666"
-                                />
-                            </View>
-                        </View>
-                    )}
-
-                    {tournament.latitude && tournament.longitude && (
-                        <MapPreview
-                            latitude={tournament.latitude}
-                            longitude={tournament.longitude}
-                            tournamentName={tournament.tournament_name}
+                {/* Image and Back Button */}
+                <ScrollView style={styles.container}
+                    keyboardShouldPersistTaps="handled"
+                    contentContainerStyle={styles.container}
+                >
+                    <View style={styles.imageContainer}>
+                        <Image
+                            source={{
+                                uri: `${API_BASE_URL}/category/images/${tournament.category_image}`,
+                                headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+                            }}
+                            style={styles.image}
                         />
-                    )}
+                        <SafeAreaView style={styles.safeAreaBack}>
+                            <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+                                <Ionicons name="arrow-back" size={24} color="white" />
+                            </TouchableOpacity>
+                        </SafeAreaView>
+                    </View>
 
-                    {/* Legal Text */}
-                    <Text style={styles.legalText}>
-                        By clicking the Continue button, you agree to the collection and processing of your personal
-                        data for the purpose of tournament registration and management, in accordance with our Privacy Policy.
-                    </Text>
+                    {/* White Sheet */}
+                    <View style={styles.sheet}>
+                        <View style={styles.swipeBar} />
 
-                    {/* Continue Button */}
-                    <TouchableOpacity
-                        style={[
-                            styles.continueButton,
-                            !selectedOption && styles.continueButtonDisabled,
-                        ]}
-                        disabled={!selectedOption}
-                        onPress={handleContinue}
-                    >
-                        <Text style={styles.continueText}>Continue</Text>
-                    </TouchableOpacity>
-                </View>
-            </ScrollView>
-        </KeyboardAwareScrollView >
+                        <View style={styles.headerRow}>
+                            <Text style={styles.title}>{tournament.tournament_name}</Text>
+                            <Ionicons name="share-outline" size={24} style={styles.icons} />
+                        </View>
+
+                        <Text style={styles.dateUnderTitle}>{formattedDate}</Text>
+
+                        {/* Stats */}
+                        <TournamentStats
+                            teamsCount={teamsCount ?? 0}
+                            teamSize={tournament.max_team_size}
+                            daysUntil={daysUntil}
+                        />
+
+                        {/* Description */}
+                        <TournamentDescription
+                            description={tournament.additional_info || 'No description available.'}
+                            isExpanded={isExpanded}
+                            onToggle={() => setIsExpanded(prev => !prev)}
+                        />
+
+                        {/* Team Selection Buttons*/}
+                        <View style={styles.teamButtons}>
+                            <TouchableOpacity
+                                style={[
+                                    styles.teamButton,
+                                    selectedOption === "new" && styles.teamButtonSelected,
+                                ]}
+                                onPress={() => setSelectedOption("new")}
+                            >
+                                <Text
+                                    style={selectedOption === "new" ? styles.teamButtonTextSelected : styles.teamsButtonText}
+                                >
+                                    New Team
+                                </Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[
+                                    styles.teamButton,
+                                    selectedOption === "existing" && styles.teamButtonSelected,
+                                ]}
+                                onPress={() => setSelectedOption("existing")}
+                            >
+                                <Text style={selectedOption === "existing" ? styles.teamButtonTextSelected : styles.teamsButtonText}>
+                                    Existing Team
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+
+                        {/* Input Field */}
+                        {selectedOption && (
+                            <View style={styles.inputSection}>
+                                <Text style={styles.inputLabel}>
+                                    {selectedOption === "new" ? "Team name" : "Team code"}
+                                </Text>
+                                <View style={styles.inputBox}>
+                                    <TextInput
+                                        placeholder={
+                                            selectedOption === "new"
+                                                ? "Enter your team name"
+                                                : "Enter your team code"
+                                        }
+                                        placeholderTextColor="#888"
+                                        value={teamInput}
+                                        onChangeText={setTeamInput}
+                                        style={styles.inputText}
+                                    />
+                                    <Ionicons
+                                        name={selectedOption === "new" ? "person-add-outline" : "key-outline"}
+                                        size={20}
+                                        color="#666"
+                                    />
+                                </View>
+                            </View>
+                        )}
+
+                        {tournament.latitude && tournament.longitude && (
+                            <MapPreview
+                                latitude={tournament.latitude}
+                                longitude={tournament.longitude}
+                                tournamentName={tournament.tournament_name}
+                            />
+                        )}
+
+                        {/* Legal Text */}
+                        <Text style={styles.legalText}>
+                            By clicking the Continue button, you agree to the collection and processing of your personal
+                            data for the purpose of tournament registration and management, in accordance with our Privacy Policy.
+                        </Text>
+
+                        {/* Continue Button */}
+                        <TouchableOpacity
+                            style={[
+                                styles.continueButton,
+                                !selectedOption && styles.continueButtonDisabled,
+                            ]}
+                            disabled={!selectedOption}
+                            onPress={handleContinue}
+                        >
+                            <Text style={styles.continueText}>Continue</Text>
+                        </TouchableOpacity>
+                    </View>
+                </ScrollView>
+            </KeyboardAwareScrollView >
+        </>
     );
 }
 

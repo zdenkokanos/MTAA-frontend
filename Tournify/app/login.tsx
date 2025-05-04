@@ -9,6 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "@/config/config";
 import { useTheme } from "@/themes/theme";
+import SafeOfflineBanner from "@/components/safeOfflineBanner";
 
 export default function LoginScreen() {
     const router = useRouter();
@@ -54,51 +55,54 @@ export default function LoginScreen() {
     const styles = useMemo(() => getStyles(theme), [theme]);
 
     return (
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <KeyboardAvoidingView
-                behavior={Platform.OS === "ios" ? "padding" : "height"}
-                style={{ flex: 1 }}
-            >
-                <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
-                    <View style={styles.container}>
-                        <Text style={styles.text}>Welcome back!</Text>
-                        <View style={styles.inputContainer}>
-                            <Ionicons name="mail-outline" size={20} color="gray" style={styles.inputIcon} />
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Email"
-                                placeholderTextColor="#888"
-                                value={email}
-                                onChangeText={setEmail}
-                                autoCapitalize="none"
-                                keyboardType="email-address"
-                            />
-                        </View>
-                        <View style={styles.inputContainer}>
-                            <Ionicons name="key-outline" size={20} color="gray" style={styles.inputIcon} />
-                            <TextInput
-                                style={styles.input}
-                                placeholder="Password"
-                                placeholderTextColor="#888"
-                                value={password}
-                                onChangeText={setPassword}
-                                secureTextEntry={!passwordVisible}
-                            />
-                            <TouchableOpacity onPress={() => setPasswordVisible(!passwordVisible)}>
-                                <Ionicons name={passwordVisible ? "eye-off-outline" : "eye-outline"} size={20} color="gray" />
+        <>
+            <SafeOfflineBanner />
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                <KeyboardAvoidingView
+                    behavior={Platform.OS === "ios" ? "padding" : "height"}
+                    style={{ flex: 1 }}
+                >
+                    <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+                        <View style={styles.container}>
+                            <Text style={styles.text}>Welcome back!</Text>
+                            <View style={styles.inputContainer}>
+                                <Ionicons name="mail-outline" size={20} color="gray" style={styles.inputIcon} />
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Email"
+                                    placeholderTextColor="#888"
+                                    value={email}
+                                    onChangeText={setEmail}
+                                    autoCapitalize="none"
+                                    keyboardType="email-address"
+                                />
+                            </View>
+                            <View style={styles.inputContainer}>
+                                <Ionicons name="key-outline" size={20} color="gray" style={styles.inputIcon} />
+                                <TextInput
+                                    style={styles.input}
+                                    placeholder="Password"
+                                    placeholderTextColor="#888"
+                                    value={password}
+                                    onChangeText={setPassword}
+                                    secureTextEntry={!passwordVisible}
+                                />
+                                <TouchableOpacity onPress={() => setPasswordVisible(!passwordVisible)}>
+                                    <Ionicons name={passwordVisible ? "eye-off-outline" : "eye-outline"} size={20} color="gray" />
+                                </TouchableOpacity>
+                            </View>
+                            <TouchableOpacity onPress={() => alert("Forgot Password?")}>
+                                <Text style={styles.forgotPassword}>Forgot Password?</Text>
                             </TouchableOpacity>
+                            <StartButton title="Sign in" onPress={handleLogin} />
+                            <Text style={styles.signUpText}>
+                                Don't have an account? <Text style={styles.signUpLink} onPress={() => router.push("/register")}>Sign up.</Text>
+                            </Text>
                         </View>
-                        <TouchableOpacity onPress={() => alert("Forgot Password?")}>
-                            <Text style={styles.forgotPassword}>Forgot Password?</Text>
-                        </TouchableOpacity>
-                        <StartButton title="Sign in" onPress={handleLogin} />
-                        <Text style={styles.signUpText}>
-                            Don't have an account? <Text style={styles.signUpLink} onPress={() => router.push("/register")}>Sign up.</Text>
-                        </Text>
-                    </View>
-                </ScrollView>
-            </KeyboardAvoidingView>
-        </TouchableWithoutFeedback>
+                    </ScrollView>
+                </KeyboardAvoidingView>
+            </TouchableWithoutFeedback>
+        </>
     );
 }
 

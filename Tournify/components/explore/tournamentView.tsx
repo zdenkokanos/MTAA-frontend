@@ -67,12 +67,11 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
         alignSelf: 'center',
         borderRadius: 20,
         overflow: 'hidden',
-        elevation: 3,
         marginBottom: 20,
     },
     image: {
         width: "100%",
-        height: 190,
+        height: 210,
         justifyContent: "flex-end",
     },
     overlay: {
@@ -90,7 +89,7 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        width: 103,
+        width: 130,
     },
     infoGroup: {
         flexDirection: "row",
