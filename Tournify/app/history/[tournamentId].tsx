@@ -1,14 +1,4 @@
-import {
-    View,
-    Text,
-    StyleSheet,
-    Image,
-    TouchableOpacity,
-    ScrollView,
-    SafeAreaView,
-    ActivityIndicator,
-    RefreshControl,
-} from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, SafeAreaView, ActivityIndicator, RefreshControl } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -16,13 +6,11 @@ import { Ionicons } from '@expo/vector-icons';
 import API_BASE_URL from '@/config/config';
 import { useTheme } from '@/themes/theme';
 
-import TournamentStats from '@/components/tournamentDetail/tournamentStats';
 import TournamentDescription from '@/components/tournamentDetail/tournamentDescription';
-import Leaderboard from '@/components/leaderboard';
+import Leaderboard from '@/components/tournamentDetail/leaderboard';
 import MapPreview from '@/components/tournamentDetail/mapPreview';
 import Badge from '@/components/tournamentDetail/badge';
-import OfflineBanner from '@/components/offlineBanner';
-import SafeOfflineBanner from '@/components/safeOfflineBanner';
+import SafeOfflineBanner from '@/components/offline/safeOfflineBanner';
 
 export default function TournamentInfoScreen() {
     const { tournamentId, position } = useLocalSearchParams();
@@ -33,7 +21,6 @@ export default function TournamentInfoScreen() {
     const [tournament, setTournament] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [token, setToken] = useState<string | null>(null);
-    const [teamsCount, setTeamsCount] = useState<number>(0);
     const [isExpanded, setIsExpanded] = useState(false);
     const [leaderboard, setLeaderboard] = useState<{ position: number; name: string }[]>([]);
 
@@ -48,14 +35,8 @@ export default function TournamentInfoScreen() {
             }
             setToken(storedToken);
 
-            const [tournamentRes, teamCountRes, leaderboardRes] = await Promise.all([
+            const [tournamentRes, leaderboardRes] = await Promise.all([
                 fetch(`${API_BASE_URL}/tournaments/${tournamentId}/info`),
-                fetch(`${API_BASE_URL}/tournaments/${tournamentId}/teams/count`, {
-                    headers: {
-                        Authorization: `Bearer ${storedToken}`,
-                        'Content-Type': 'application/json',
-                    },
-                }),
                 fetch(`${API_BASE_URL}/tournaments/${tournamentId}/leaderboard`, {
                     headers: {
                         Authorization: `Bearer ${storedToken}`,
@@ -65,19 +46,12 @@ export default function TournamentInfoScreen() {
             ]);
 
             const tournamentData = await tournamentRes.json();
-            const teamCountData = teamCountRes.status !== 204 ? await teamCountRes.json() : {};
             const leaderboardData = await leaderboardRes.json();
 
             if (tournamentRes.ok) {
                 setTournament(tournamentData);
             } else {
                 console.error('Tournament fetch error:', tournamentData.message);
-            }
-
-            if (teamCountRes.ok) {
-                setTeamsCount(teamCountData[0]?.team_count ?? 0);
-            } else {
-                console.error('Team count fetch error:', teamCountData.message);
             }
 
             if (leaderboardRes.ok) {
@@ -110,7 +84,7 @@ export default function TournamentInfoScreen() {
                 <ActivityIndicator size="large" />
             </View>
         );
-    }
+    } // TODO: add to every screen
 
     if (!tournament) {
         return (
@@ -118,7 +92,7 @@ export default function TournamentInfoScreen() {
                 <Text style={styles.errorText}>Failed to load tournament data.</Text>
             </View>
         );
-    }
+    } //TODO: add error handling with animation and network error
 
     return (
         <>
@@ -156,6 +130,7 @@ export default function TournamentInfoScreen() {
                     <Text style={styles.subtitle}>
                         sport • level • date • time • game setting • tournament structure • entry fee • price structure
                     </Text>
+                    {/* TODO: add real data */}
 
                     <TournamentDescription
                         description={tournament.additional_info || ''}
@@ -164,7 +139,6 @@ export default function TournamentInfoScreen() {
                     />
 
                     <Leaderboard data={leaderboard} />
-
 
                     {tournament.latitude && tournament.longitude && (
                         <MapPreview

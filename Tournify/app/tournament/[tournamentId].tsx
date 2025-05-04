@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, SafeAreaView, ActivityIndicator, TextInput, KeyboardAvoidingView, Platform, Alert, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, SafeAreaView, ActivityIndicator, TextInput, Alert, RefreshControl } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -9,7 +9,8 @@ import { useTheme } from '@/themes/theme';
 import TournamentStats from '@/components/tournamentDetail/tournamentStats';
 import TournamentDescription from '@/components/tournamentDetail/tournamentDescription';
 import MapPreview from '@/components/tournamentDetail/mapPreview';
-import SafeOfflineBanner from '@/components/safeOfflineBanner';
+import SafeOfflineBanner from '@/components/offline/safeOfflineBanner';
+import { formatDate } from '@/utils/formatDate';
 
 export default function TournamentDetailScreen() {
     const { tournamentId } = useLocalSearchParams();
@@ -126,19 +127,6 @@ export default function TournamentDetailScreen() {
         );
     }
 
-    const daysUntil = Math.ceil((new Date(tournament.date).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-
-    const shortDescription = tournament.additional_info?.slice(0, 120) ?? '';
-    const shouldShowReadMore = tournament.additional_info && tournament.additional_info.length > 120;
-
-    const formattedDate = new Date(tournament.date).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-    });
-
     const onRefresh = async () => {
         setRefreshing(true);
         await fetchTournament();
@@ -187,13 +175,13 @@ export default function TournamentDetailScreen() {
                             <Ionicons name="share-outline" size={24} style={styles.icons} />
                         </View>
 
-                        <Text style={styles.dateUnderTitle}>{formattedDate}</Text>
+                        <Text style={styles.dateUnderTitle}>{formatDate(tournament.date)}</Text>
 
                         {/* Stats */}
                         <TournamentStats
                             teamsCount={teamsCount ?? 0}
                             teamSize={tournament.max_team_size}
-                            daysUntil={daysUntil}
+                            date={tournament.date}
                         />
 
                         {/* Description */}

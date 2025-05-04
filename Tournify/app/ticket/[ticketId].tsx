@@ -1,5 +1,4 @@
 import { View, Text, StyleSheet, SafeAreaView, ScrollView, ActivityIndicator, Image, TouchableOpacity, Platform, RefreshControl } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
 import Toast from 'react-native-toast-message';
 import React, { useEffect, useMemo, useState } from 'react';
 import QRCode from 'react-native-qrcode-svg';
@@ -8,12 +7,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
-import { Linking } from 'react-native';
 import { useTheme } from '@/themes/theme';
 import TournamentStats from '@/components/tournamentDetail/tournamentStats';
 import TournamentDescription from '@/components/tournamentDetail/tournamentDescription';
 import MapPreview from '@/components/tournamentDetail/mapPreview';
-import SafeOfflineBanner from '@/components/safeOfflineBanner';
+import SafeOfflineBanner from '@/components/offline/safeOfflineBanner';
+import { formatDate } from '@/utils/formatDate';
 
 export default function TicketDetailScreen() {
     const { ticketId } = useLocalSearchParams();
@@ -26,20 +25,6 @@ export default function TicketDetailScreen() {
     const [enrolledTeams, setEnrolledTeams] = useState([]);
     const [refreshing, setRefreshing] = useState(false);
 
-    const openInMaps = (lat: number, lng: number, label = 'Location') => {
-        const scheme = Platform.select({
-            ios: `http://maps.apple.com/?ll=${lat},${lng}&q=${encodeURIComponent(label)}`,
-            android: `geo:${lat},${lng}?q=${lat},${lng}(${encodeURIComponent(label)})`,
-        });
-
-        if (scheme) {
-            Linking.openURL(scheme).catch(err => {
-                console.error('Error opening map app:', err);
-            });
-        }
-    };
-
-
     const fetchData = async () => {
         try {
             const token = await AsyncStorage.getItem("token");
@@ -51,7 +36,6 @@ export default function TicketDetailScreen() {
             const ticketRes = await fetch(`${API_BASE_URL}/users/${userId}/tickets/${ticketId}/qr`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
-
 
             const ticketData = await ticketRes.json();
             const ticketInfo = ticketData[0];
@@ -87,12 +71,15 @@ export default function TicketDetailScreen() {
             const enrolledRes = await fetch(`${API_BASE_URL}/tournaments/${ticketInfo.tournament_id}/enrolled`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
+
             const enrolledData = await enrolledRes.json();
+
             if (enrolledRes.ok) {
                 setEnrolledTeams(enrolledData);
             } else {
                 console.error("Failed to fetch enrolled teams:", enrolledData.message);
             }
+
         } catch (err) {
             console.warn("Falling back to cached data:", err);
 
@@ -124,6 +111,7 @@ export default function TicketDetailScreen() {
         fetchData();
     }, [ticketId]);
 
+    // Variable to store the theme styles
     const theme = useTheme();
     const styles = useMemo(() => getStyles(theme), [theme]);
 
@@ -134,19 +122,6 @@ export default function TicketDetailScreen() {
     if (!ticket || !tournament) {
         return <View style={styles.centered}><Text>Failed to load data.</Text></View>;
     }
-
-    const shortDescription = tournament.additional_info?.slice(0, 120) ?? '';
-    const shouldShowReadMore = tournament.additional_info && tournament.additional_info.length > 120;
-
-    const daysUntil = Math.ceil((new Date(tournament.date).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-
-    const formattedDate = new Date(tournament.date).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-    });
 
     const onRefresh = async () => {
         setRefreshing(true);
@@ -223,13 +198,13 @@ export default function TicketDetailScreen() {
                         <Text style={styles.joinedText}>{teamsCount ?? "0"} joined</Text>
                     </View>
 
-                    <Text style={styles.dateUnderTitle}>{formattedDate}</Text>
+                    <Text style={styles.dateUnderTitle}>{formatDate(tournament.date)}</Text>
 
                     {/* Stats */}
                     <TournamentStats
                         teamsCount={teamsCount ?? 0}
                         teamSize={tournament.max_team_size}
-                        daysUntil={daysUntil}
+                        date={tournament.date}
                     />
 
                     {/* Description */}

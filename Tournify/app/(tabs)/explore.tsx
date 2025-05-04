@@ -7,7 +7,7 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 import CategoryContainer from "@/components/explore/categoryContainer";
 import { useRouter } from "expo-router";
-import OfflineBanner from "@/components/offlineBanner";
+import OfflineBanner from "@/components/offline/offlineBanner";
 import useOnShakeRefresh from "@/hooks/useOnShakeRefresh";
 
 export default function ExploreScreen() {
@@ -15,9 +15,11 @@ export default function ExploreScreen() {
     const [categories, setCategories] = useState<{ id: number; category_name: string; category_image: string; }[]>([]);
     const [loading, setLoading] = useState(false);
 
+    const router = useRouter();
+
+    // Variable to store the theme styles
     const theme = useTheme();
     const styles = useMemo(() => getStyles(theme), [theme]);
-    const router = useRouter();
 
     const fetchSports = async () => {
         setLoading(true);
@@ -47,6 +49,7 @@ export default function ExploreScreen() {
         fetchSports();
     }, []);
 
+    // Refresh control for the FlatList
     const [refreshing, setRefreshing] = useState(false);
 
     const onRefresh = async () => {

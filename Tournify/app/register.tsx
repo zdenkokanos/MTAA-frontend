@@ -1,4 +1,4 @@
-import { Text, View, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Keyboard, Image, TouchableWithoutFeedback } from "react-native";
+import { Text, View, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Keyboard, Image, TouchableWithoutFeedback, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { useMemo, useState } from "react";
@@ -6,11 +6,12 @@ import StartButton from "@/components/startButton";
 import * as ImagePicker from "expo-image-picker";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { SafeAreaView } from "react-native-safe-area-context";
+import SafeOfflineBanner from "@/components/offline/safeOfflineBanner";
 
 // Zustand
 import { useSignUpStore } from "@/stores/signUpStore";
 import { useTheme } from "@/themes/theme";
-import SafeOfflineBanner, { OfflineBanner } from "@/components/safeOfflineBanner";
+import API_BASE_URL from "@/config/config";
 
 export default function SignUpScreen() {
     const router = useRouter();
@@ -47,9 +48,34 @@ export default function SignUpScreen() {
         }
     };
 
-    const handleContinue = () => {
+    const handleContinue = async () => {
         if (!firstName.trim() || !lastName.trim() || !email.trim() || !password.trim()) {
             alert("Please fill in all required fields.");
+            return;
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            Alert.alert("Invalid email", "Please enter a valid email address.");
+            return;
+        }
+
+        if (password.length < 8) {
+            alert("Password must be at least 6 characters long.");
+            return;
+        }
+
+        if (!/[A-Z]/.test(password)) {
+            alert("Password must contain at least one uppercase letter.");
+            return;
+        }
+
+        if (!/[a-z]/.test(password)) {
+            alert("Password must contain at least one lowercase letter.");
+            return;
+        }
+        if (!/[0-9]/.test(password)) {
+            alert("Password must contain at least one number.");
             return;
         }
 
@@ -58,9 +84,36 @@ export default function SignUpScreen() {
             return;
         }
 
-        router.replace("/preferencesSport"); // go to next screen
+        try {
+            const res = await fetch(`${API_BASE_URL}/users/check-email`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ email }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.message || "Something went wrong while checking email.");
+            }
+
+            if (data.exists) {
+                alert("An account with this email already exists.");
+                return;
+            }
+
+            router.replace("/preferencesSport");
+
+        } catch (err: any) {
+            console.error("Email check failed:", err);
+            alert(err.message || "Unable to verify email.");
+        }
     };
 
+
+    // Variable to store the theme styles
     const theme = useTheme();
     const styles = useMemo(() => getStyles(theme), [theme]);
 

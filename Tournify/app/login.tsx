@@ -9,7 +9,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "@/config/config";
 import { useTheme } from "@/themes/theme";
-import SafeOfflineBanner from "@/components/safeOfflineBanner";
+import SafeOfflineBanner from "@/components/offline/safeOfflineBanner";
 
 export default function LoginScreen() {
     const router = useRouter();
@@ -19,6 +19,12 @@ export default function LoginScreen() {
     const [passwordVisible, setPasswordVisible] = useState(false);
 
     const handleLogin = async () => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            Alert.alert("Invalid email", "Please enter a valid email address.");
+            return;
+        }
+
         if (!email || !password) {
             Alert.alert("Missing fields", "Please enter both email and password.");
             return;

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Text, View, StyleSheet, KeyboardAvoidingView, Platform, SafeAreaView, TextInput, TouchableOpacity, Alert, FlatList } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -19,7 +19,7 @@ import AnimationCreateTournament from '@/components/create/animationCreateTourna
 
 // API Key
 import Constants from 'expo-constants';
-import OfflineBanner from '@/components/offlineBanner';
+import OfflineBanner from '@/components/offline/offlineBanner';
 const apiKey = Constants?.expoConfig?.extra?.GOOGLE_MAPS_API_KEY ?? 'DEFAULT_FALLBACK_KEY';
 
 export default function CreateTournament() {
@@ -133,11 +133,9 @@ export default function CreateTournament() {
         }
     };
 
-
+    // Variable to store the theme styles
     const theme = useTheme();
     const styles = useMemo(() => getStyles(theme), [theme]);
-
-
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -240,7 +238,7 @@ export default function CreateTournament() {
                                                 display: 'none',
                                             },
                                         }}
-                                        // All other default props explicitly defined
+                                        // All other default props explicitly defined // StackOverflow fix
                                         autoFillOnNotFound={false}
                                         currentLocation={false}
                                         currentLocationLabel="Current location"

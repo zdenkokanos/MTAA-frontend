@@ -1,19 +1,19 @@
 import { Text, View, StyleSheet, ImageBackground, TouchableOpacity } from "react-native";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useTheme } from "@/themes/theme";
 import API_BASE_URL from "@/config/config";
 
 
-interface Props{
+interface Props {
     categoryName: string;
     imageFilename: string;
     onPress: () => void;
 }
 
-export default function CategoryContainer({ categoryName, imageFilename, onPress}: Props) {
+export default function CategoryContainer({ categoryName, imageFilename, onPress }: Props) {
     const theme = useTheme();
     const styles = useMemo(() => getStyles(theme), [theme]);
-    
+
 
     return (
         <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
@@ -27,7 +27,7 @@ export default function CategoryContainer({ categoryName, imageFilename, onPress
                         onError={(error) => {
                             console.log("Image failed to load:", error.nativeEvent.error);
                         }}
-                        >
+                    >
                         <View style={styles.overlay}>
                             <Text style={styles.sportText}>{categoryName}</Text>
                         </View>

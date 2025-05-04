@@ -1,14 +1,15 @@
 import { View, Text, StyleSheet, ImageBackground, TouchableOpacity } from "react-native";
-import { Ionicons } from "@expo/vector-icons"; // For icon placeholder, or use a custom QR icon
+import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import useRelativeDate from "@/hooks/useRelativeDate";
 
 interface TicketCardProps {
-    ticketId: string;      // Unique ticket ID
-    dateText: string;       // e.g., "in 10 days"
-    imageUrl: any;          // require(...) or { uri: ... }
+    ticketId: string;
+    date: string;
+    imageUrl: any;
 }
 
-const TicketCard = ({ ticketId, dateText, imageUrl }: TicketCardProps) => {
+const TicketCard = ({ ticketId, date, imageUrl }: TicketCardProps) => {
     const router = useRouter();
 
     const handlePress = () => {
@@ -28,7 +29,7 @@ const TicketCard = ({ ticketId, dateText, imageUrl }: TicketCardProps) => {
                 <View style={styles.darkOverlay} />
                 <View style={styles.overlay}>
                     <Ionicons name="qr-code-outline" size={50} color="#fff" />
-                    <Text style={styles.text}>{dateText}</Text>
+                    <Text style={styles.text}>{useRelativeDate(date)}</Text>
                 </View>
             </ImageBackground>
         </TouchableOpacity>

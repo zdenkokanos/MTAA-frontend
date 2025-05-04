@@ -5,11 +5,11 @@ import API_BASE_URL from '@/config/config';
 import useLocation from '@/hooks/useLocation';
 import { getDistance } from 'geolib';
 
-import TourenamentView from '@/components/explore/tournamentView'
+import TournamentView from '@/components/explore/tournamentView'
 import { useTheme } from "@/themes/theme";
 import LottieView from 'lottie-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import OfflineBanner from '@/components/offlineBanner';
+import OfflineBanner from '@/components/offline/offlineBanner';
 import useOnShakeRefresh from '@/hooks/useOnShakeRefresh';
 
 export default function CategoryTournamentsScreen() {
@@ -24,8 +24,6 @@ export default function CategoryTournamentsScreen() {
     const categoryParts = category?.split('-');
     const categoryId = categoryParts?.[0];
     const categoryName = categoryParts?.slice(1).join(' ');
-
-
 
     // TODO:
     // GPSko, search
@@ -86,6 +84,7 @@ export default function CategoryTournamentsScreen() {
     const theme = useTheme();
     const styles = useMemo(() => getStyles(theme), [theme]);
 
+    // Refresh control for the FlatList
     const [refreshing, setRefreshing] = useState(false);
 
     const onRefresh = async () => {
@@ -137,9 +136,9 @@ export default function CategoryTournamentsScreen() {
                             }
                             renderItem={({ item }) => (
                                 <View>
-                                    <TourenamentView
+                                    <TournamentView
                                         title={item.tournament_name}
-                                        dateText={formatDateRelative(item.date)}
+                                        date={item.date}
                                         distanceText={`${item.distance} km from you`}
                                         imageUrl={{ uri: `${API_BASE_URL}/category/images/${item.category_image}` }}
                                         tournamentId={item.id}
@@ -155,23 +154,6 @@ export default function CategoryTournamentsScreen() {
     );
 
 };
-
-function formatDateRelative(dateString: string): string {
-    const today = new Date();
-    const target = new Date(dateString);
-
-    // Strip time from both dates to compare pure days
-    const utcToday = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
-    const utcTarget = Date.UTC(target.getFullYear(), target.getMonth(), target.getDate());
-
-    const diffDays = Math.ceil((utcTarget - utcToday) / (1000 * 60 * 60 * 24));
-
-    if (diffDays < 0) return "In the past";
-    if (diffDays === 0) return "Today";
-    if (diffDays === 1) return "Tomorrow";
-
-    return `in ${diffDays} days`;
-}
 
 const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     safeArea: {

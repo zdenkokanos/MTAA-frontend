@@ -4,10 +4,12 @@ import { useTheme } from "@/themes/theme";
 interface Props {
     teamsCount: number;
     teamSize: number;
-    daysUntil: number;
+    date: string;
 }
 
-export default function TournamentStats({ teamsCount, teamSize, daysUntil }: Props) {
+
+export default function TournamentStats({ teamsCount, teamSize, date }: Props) {
+    const daysUntil = Math.ceil((new Date(date).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
     const theme = useTheme();
 
     return (

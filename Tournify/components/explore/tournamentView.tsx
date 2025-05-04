@@ -1,20 +1,19 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity, ImageBackground, Dimensions } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, ImageBackground } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from 'expo-router';
 import { useTheme } from "@/themes/theme";
 import { useMemo } from "react";
+import useRelativeDate from "@/hooks/useRelativeDate";
 
 interface TournamentCardProps {
     title: string;
-    dateText: string;         // e.g., "in 10 days"
-    distanceText: string;     // e.g., "20 km from you"
-    imageUrl: any;         // e.g., image URL or require('...') local path
+    date: string;
+    distanceText: string;
+    imageUrl: any;
     tournamentId: string;
 }
 
-const screenWidth = Dimensions.get('window').width;
-
-const TournamentView = ({ title, dateText, distanceText, imageUrl, tournamentId }: TournamentCardProps) => {
+const TournamentView = ({ title, date, distanceText, imageUrl, tournamentId }: TournamentCardProps) => {
     const theme = useTheme();
     const styles = useMemo(() => getStyles(theme), [theme]);
     const router = useRouter();
@@ -31,7 +30,7 @@ const TournamentView = ({ title, dateText, distanceText, imageUrl, tournamentId 
 
                             <View style={styles.detailsRow}>
                                 <Ionicons name="calendar-outline" size={16} color="#000" />
-                                <Text style={styles.detailText}>{dateText}</Text>
+                                <Text style={styles.detailText}>{useRelativeDate(date)}</Text>
 
                                 <Ionicons name="location-outline" size={16} color="#000" style={{ marginLeft: 12 }} />
                                 <Text style={styles.detailText}>{distanceText}</Text>
