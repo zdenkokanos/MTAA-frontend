@@ -112,23 +112,20 @@ export default function SignUpScreen() {
         }
     };
 
-
     // Variable to store the theme styles
     const theme = useTheme();
     const styles = useMemo(() => getStyles(theme), [theme]);
 
     return (
-        <KeyboardAvoidingView
-            style={{ flex: 1 }}
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-        >
+        <>
             <SafeOfflineBanner />
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <SafeAreaView style={styles.safeArea}>
                     <KeyboardAwareScrollView
-                        contentContainerStyle={{ flexGrow: 1 }}
-                        keyboardShouldPersistTaps="handled"
                         enableOnAndroid
+                        keyboardShouldPersistTaps="handled"
+                        contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', paddingBottom: 60 }}
+                        extraScrollHeight={60} // pushes up when keyboard appears
                     >
                         <View style={styles.container}>
                             <TouchableOpacity onPress={pickImage} style={styles.profileImageContainer}>
@@ -225,7 +222,7 @@ export default function SignUpScreen() {
                     </KeyboardAwareScrollView>
                 </SafeAreaView>
             </TouchableWithoutFeedback>
-        </KeyboardAvoidingView>
+        </>
     );
 }
 

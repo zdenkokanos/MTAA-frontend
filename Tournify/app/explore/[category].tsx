@@ -28,7 +28,6 @@ export default function CategoryTournamentsScreen() {
     // TODO:
     // GPSko, search
 
-
     const fetchTournaments = async () => {
 
         const userId = await AsyncStorage.getItem("userId");
@@ -161,7 +160,7 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
         backgroundColor: theme.background,
         paddingTop: Platform.OS === 'ios' ? 0 : 40,
     },
-    container: { flex: 1, padding: 10 },
+    container: { flex: 1, padding: 15 },
     title: {
         fontSize: 24,
         fontWeight: 700,

@@ -131,6 +131,7 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   },
   buttonContainer: {
     marginTop: 10,
+    paddingHorizontal: 20,
   },
   flatList: {
     flexGrow: 1,

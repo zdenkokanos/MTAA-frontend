@@ -238,6 +238,9 @@ export default function CreateTournament() {
                                                 display: 'none',
                                             },
                                         }}
+                                        onFail={(error) => {
+                                            console.error("Google Places API error:", error);
+                                        }}
                                         // All other default props explicitly defined // StackOverflow fix
                                         autoFillOnNotFound={false}
                                         currentLocation={false}
@@ -261,7 +264,6 @@ export default function CreateTournament() {
                                         minLength={1}
                                         nearbyPlacesAPI="GooglePlacesSearch"
                                         numberOfLines={1}
-                                        onFail={() => { }}
                                         onNotFound={() => { }}
                                         onTimeout={() =>
                                             console.warn('google places autocomplete: request timeout')

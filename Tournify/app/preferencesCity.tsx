@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import { useRouter } from 'expo-router';
@@ -160,6 +160,9 @@ export default function CityPreferencesScreen() {
                                         display: 'none',
                                     },
                                 }}
+                                onFail={(error) => {
+                                    console.error("Google Places API error:", error);
+                                }}
                                 // All other default props explicitly defined // StackOverflow fix
                                 autoFillOnNotFound={false}
                                 currentLocation={false}
@@ -183,7 +186,6 @@ export default function CityPreferencesScreen() {
                                 minLength={1}
                                 nearbyPlacesAPI="GooglePlacesSearch"
                                 numberOfLines={1}
-                                onFail={() => { }}
                                 onNotFound={() => { }}
                                 onTimeout={() =>
                                     console.warn('google places autocomplete: request timeout')
