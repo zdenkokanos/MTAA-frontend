@@ -1,23 +1,21 @@
-
-import React, { useState, useEffect, useRef } from "react";
-import { Text, StyleSheet, ImageBackground, View, Animated, PanResponder, KeyboardAvoidingView, Platform } from "react-native";
+import { StyleSheet, ImageBackground, View, Animated, PanResponder, KeyboardAvoidingView, Platform } from "react-native";
 import { router } from "expo-router";
 import StartButton from "@/components/startButton";
-import WelcomeHeader from "@/components/welcome-header";
+import WelcomeHeader from "@/components/welcome/welcome-header";
 
 export default function WelcomeScreen() {
 
     return (
         <ImageBackground
-            source={require("../images/baseball-md.jpg")}
+            source={require("../images/welcome-background.jpg")}
             style={styles.container}
         >
             <View style={styles.headerContainer}>
                 <WelcomeHeader />
             </View>
             <View style={styles.buttonContainer}>
-                <StartButton title="Sign in" onPress={() => router.push("/login")} />
-                <StartButton title="Sign up" onPress={() => router.push("/register")} />
+                <StartButton title="Sign in" onPress={() => router.replace("/login")} />
+                <StartButton title="Sign up" onPress={() => router.replace("/register")} />
             </View>
 
         </ImageBackground>

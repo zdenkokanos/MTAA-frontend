@@ -1,15 +1,16 @@
 import { useLocalSearchParams } from 'expo-router';
-import { View, Text, StyleSheet, FlatList, SafeAreaView, Platform } from 'react-native';
+import { View, Text, StyleSheet, FlatList, SafeAreaView, Platform, RefreshControl, ActivityIndicator } from 'react-native';
 import { useEffect, useMemo, useState } from 'react';
 import API_BASE_URL from '@/config/config';
 import useLocation from '@/hooks/useLocation';
 import { getDistance } from 'geolib';
 
-import TourenamentView from '@/components/explore/tournamentView'
+import TournamentView from '@/components/explore/tournamentView'
 import { useTheme } from "@/themes/theme";
 import LottieView from 'lottie-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import OfflineBanner from '@/components/offlineBanner';
+import OfflineBanner from '@/components/offline/offlineBanner';
+import useOnShakeRefresh from '@/hooks/useOnShakeRefresh';
 
 export default function CategoryTournamentsScreen() {
     const { latitude, longitude, error, getUserLocation } = useLocation();
@@ -24,34 +25,29 @@ export default function CategoryTournamentsScreen() {
     const categoryId = categoryParts?.[0];
     const categoryName = categoryParts?.slice(1).join(' ');
 
-
-
     // TODO:
     // GPSko, search
 
+    const fetchTournaments = async () => {
+
+        const userId = await AsyncStorage.getItem("userId");
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/tournaments?category_id=${categoryId}&user_id=${userId}`);
+            const data = await response.json();
+
+            setRawTournaments(Array.isArray(data) ? data : []);
+
+        } catch (error) {
+            console.error('Error loading tournaments:', error);
+            setRawTournaments([]); // fallback 
+        } finally {
+            setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchTournaments = async () => {
-
-            const userId = await AsyncStorage.getItem("userId");
-
-            try {
-                const response = await fetch(`${API_BASE_URL}/tournaments?category_id=${categoryId}&user_id=${userId}`);
-                const data = await response.json();
-
-                setRawTournaments(Array.isArray(data) ? data : []);
-
-            } catch (error) {
-                console.error('Error loading tournaments:', error);
-                setRawTournaments([]); // fallback 
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        if (categoryId) {
-            fetchTournaments();
-        }
+        fetchTournaments();
     }, [categoryId]);
 
     useEffect(() => {
@@ -87,6 +83,17 @@ export default function CategoryTournamentsScreen() {
     const theme = useTheme();
     const styles = useMemo(() => getStyles(theme), [theme]);
 
+    // Refresh control for the FlatList
+    const [refreshing, setRefreshing] = useState(false);
+
+    const onRefresh = async () => {
+        setRefreshing(true);
+        await fetchTournaments();
+        setRefreshing(false);
+    };
+
+    useOnShakeRefresh(onRefresh);
+
     // console.log(tournaments); // keep to show it actually does something
 
     return (
@@ -97,7 +104,9 @@ export default function CategoryTournamentsScreen() {
             <View style={styles.container}>
                 <Text style={styles.title}>Tournaments for <Text style={styles.titleSport}>{categoryName}</Text> </Text>
                 {loading ? (
-                    <Text>Loading...</Text>
+                    <View style={styles.loadingContainer}>
+                        <ActivityIndicator size="large" color="gray" />
+                    </View>
                 ) : tournaments.length === 0 ? (
                     <View style={styles.animationContainer}>
                         <LottieView
@@ -121,11 +130,14 @@ export default function CategoryTournamentsScreen() {
                             data={tournaments}
                             keyExtractor={(item) => item.id.toString()}
                             showsVerticalScrollIndicator={false}
+                            refreshControl={
+                                <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                            }
                             renderItem={({ item }) => (
                                 <View>
-                                    <TourenamentView
+                                    <TournamentView
                                         title={item.tournament_name}
-                                        dateText={formatDateRelative(item.date)}
+                                        date={item.date}
                                         distanceText={`${item.distance} km from you`}
                                         imageUrl={{ uri: `${API_BASE_URL}/category/images/${item.category_image}` }}
                                         tournamentId={item.id}
@@ -142,30 +154,13 @@ export default function CategoryTournamentsScreen() {
 
 };
 
-function formatDateRelative(dateString: string): string {
-    const today = new Date();
-    const target = new Date(dateString);
-
-    // Strip time from both dates to compare pure days
-    const utcToday = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
-    const utcTarget = Date.UTC(target.getFullYear(), target.getMonth(), target.getDate());
-
-    const diffDays = Math.ceil((utcTarget - utcToday) / (1000 * 60 * 60 * 24));
-
-    if (diffDays < 0) return "In the past";
-    if (diffDays === 0) return "Today";
-    if (diffDays === 1) return "Tomorrow";
-
-    return `in ${diffDays} days`;
-}
-
 const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     safeArea: {
         flex: 1,
         backgroundColor: theme.background,
         paddingTop: Platform.OS === 'ios' ? 0 : 40,
     },
-    container: { flex: 1, padding: 10 },
+    container: { flex: 1, padding: 15 },
     title: {
         fontSize: 24,
         fontWeight: 700,
@@ -211,5 +206,10 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     GPSinfoText: {
         color: '#999'
     },
-
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 40,
+    },
 });

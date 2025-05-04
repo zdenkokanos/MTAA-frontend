@@ -6,9 +6,9 @@ import { useMemo } from "react";
 
 interface TournamentCardProps {
     title: string;
-    dateText: string;         // e.g., "in 10 days"
-    distanceText: string;     // e.g., "20 km from you"
-    imageUrl: any;         // e.g., image URL or require('...') local path
+    dateText: string;
+    distanceText: string;
+    imageUrl: any;
     tournamentId: string;
 }
 

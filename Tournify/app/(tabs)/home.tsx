@@ -1,17 +1,18 @@
 import API_BASE_URL from "@/config/config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Text, View, StyleSheet, ScrollView, Image, FlatList, NativeSyntheticEvent, NativeScrollEvent, Dimensions } from "react-native";
+import { Text, View, StyleSheet, ScrollView, Image, FlatList, NativeSyntheticEvent, NativeScrollEvent, Dimensions, RefreshControl } from "react-native";
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import TicketCard from "@/components/ticketCard";
-import HistoryCard from "@/components/historyCard";
+import TicketCard from "@/components/home/ticketCard";
+import HistoryCard from "@/components/home/historyCard";
 import { useIsFocused } from '@react-navigation/native';
 import { useTheme } from "@/themes/theme";
 import { router } from "expo-router";
-import OfflineBanner from "@/components/offlineBanner";
+import OfflineBanner from "@/components/offline/offlineBanner";
 import TournamentView from "@/components/explore/tournamentView";
 import { cacheAllTickets } from "@/utils/cacheTickets";
+import { useOnShakeRefresh } from '@/hooks/useOnShakeRefresh';
 
 export default function HomeScreen() {
 
@@ -46,7 +47,7 @@ export default function HomeScreen() {
     const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
     const [tickets, setTickets] = useState<Ticket[]>([]);
 
-    const isFocused = useIsFocused();
+    const isFocused = useIsFocused(); //automatically updates when the screen is focused
 
     const fetchData = async () => {
         try {
@@ -92,6 +93,7 @@ export default function HomeScreen() {
                     "Content-Type": "application/json",
                 },
             });
+
             const ticketsData = await ticketsResponse.json();
             if (ticketsResponse.ok) {
                 setTickets(ticketsData);
@@ -106,6 +108,7 @@ export default function HomeScreen() {
                     "Content-Type": "application/json",
                 },
             });
+
             const historyData = await historyResponse.json();
             if (historyResponse.ok) {
                 setHistory(historyData);
@@ -126,6 +129,18 @@ export default function HomeScreen() {
         fetchData();
     }, []);
 
+
+    // Refresh control for pull-to-refresh
+    const [refreshing, setRefreshing] = useState(false);
+
+    const onRefresh = async () => {
+        setRefreshing(true);
+        await fetchData();
+        setRefreshing(false);
+    };
+
+    useOnShakeRefresh(onRefresh);
+
     // Refetch when screen is focused
     useEffect(() => {
         if (isFocused) {
@@ -133,18 +148,18 @@ export default function HomeScreen() {
         }
     }, [isFocused]);
 
-
     const screenWidth = Dimensions.get('window').width;
     const CARD_WIDTH = screenWidth * 0.95;
     const CARD_GAP = 16;
-    const [activeIndex, setActiveIndex] = useState(0);
+    const [activeIndex, setActiveIndex] = useState(0); // State to track the active index of the FlatList
     const flatListRef = useRef<FlatList>(null);
 
     const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
         const index = Math.round(event.nativeEvent.contentOffset.x / screenWidth);
         setActiveIndex(index);
-    };
+    }; // Function to handle the scroll event and update the active index
 
+    // Variable to store the theme styles
     const theme = useTheme();
     const styles = useMemo(() => getStyles(theme), [theme]);
 
@@ -154,8 +169,12 @@ export default function HomeScreen() {
             edges={['top', 'left', 'right']}
         >
             <OfflineBanner />
-            <ScrollView showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingBottom: 40 }}>
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: 40 }}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                }>
                 <View style={styles.header}>
                     <View style={styles.profileRow}>
                         <Image
@@ -196,7 +215,7 @@ export default function HomeScreen() {
                             <View style={{ width: CARD_WIDTH, marginRight: CARD_GAP }}>
                                 <TournamentView
                                     title={item.tournament_name}
-                                    dateText={formatDateRelative(item.date)}
+                                    date={item.date}
                                     distanceText={`${item.distance} km from you`}
                                     imageUrl={{
                                         uri: `${API_BASE_URL}/category/images/${item.category_image}`,
@@ -245,7 +264,7 @@ export default function HomeScreen() {
                             <TicketCard
                                 key={ticket.id}
                                 ticketId={ticket.id}
-                                dateText={formatDateRelative(ticket.date)}
+                                date={ticket.date}
                                 imageUrl={{
                                     uri: `${API_BASE_URL}/category/images/${ticket.category_image}`,
                                     headers: {
@@ -265,7 +284,7 @@ export default function HomeScreen() {
                         <HistoryCard
                             key={item.id}
                             title={item.tournament_name}
-                            date={formatDate(item.date)}
+                            date={item.date}
                             position={item.position ? formatPosition(item.position) : null}
                             imageUrl={{
                                 uri: `${API_BASE_URL}/category/images/${item.category_image}`,
@@ -275,7 +294,7 @@ export default function HomeScreen() {
                             }}
                             onInfoPress={() => router.push({
                                 pathname: `/history/${item.id}`,
-                                params: { position: item.position ? formatPosition(item.position) : null },
+                                params: { position: item.position ? formatPosition(item.position) + `place` : null },
                             })}
                         />
                     ))
@@ -289,50 +308,12 @@ export default function HomeScreen() {
 
 }
 
-function formatDateRelative(dateString: string): string {
-    const today = new Date();
-    const target = new Date(dateString);
-
-    // Strip time from both dates to compare pure days
-    const utcToday = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
-    const utcTarget = Date.UTC(target.getFullYear(), target.getMonth(), target.getDate());
-
-    const diffDays = Math.ceil((utcTarget - utcToday) / (1000 * 60 * 60 * 24));
-
-    if (diffDays < 0) return "In the past";
-    if (diffDays === 0) return "Today";
-    if (diffDays === 1) return "Tomorrow";
-
-    return `in ${diffDays} days`;
-}
-
-function formatDate(dateString: string): string {
-    const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString(undefined, options);
-}
-
-function formatPosition(position: number | null): string | null {
-    if (position === null || position === undefined) return null;
-
-    const lastDigit = position % 10;
-    const lastTwoDigits = position % 100;
-
-    if (lastTwoDigits >= 11 && lastTwoDigits <= 13) {
-        return `${position}th place`;
-    }
-
-    switch (lastDigit) {
-        case 1:
-            return `${position}st place`;
-        case 2:
-            return `${position}nd place`;
-        case 3:
-            return `${position}rd place`;
-        default:
-            return `${position}th place`;
-    }
-}
-
+const formatPosition = (n: number) => { // Generated by OpenAI
+    const s = ['th', 'st', 'nd', 'rd'];
+    const v = n % 100;
+    const position = n + (s[(v - 20) % 10] || s[v] || s[0])
+    return `${position} place`;
+};
 
 const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     safeArea: {

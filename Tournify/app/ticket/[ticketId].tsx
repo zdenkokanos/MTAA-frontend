@@ -1,5 +1,4 @@
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, ActivityIndicator, Image, TouchableOpacity, Platform } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, ActivityIndicator, Image, TouchableOpacity, Platform, RefreshControl } from 'react-native';
 import Toast from 'react-native-toast-message';
 import React, { useEffect, useMemo, useState } from 'react';
 import QRCode from 'react-native-qrcode-svg';
@@ -8,12 +7,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { router, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as Clipboard from 'expo-clipboard';
-import { Linking } from 'react-native';
 import { useTheme } from '@/themes/theme';
 import TournamentStats from '@/components/tournamentDetail/tournamentStats';
 import TournamentDescription from '@/components/tournamentDetail/tournamentDescription';
 import MapPreview from '@/components/tournamentDetail/mapPreview';
-import SafeOfflineBanner from '@/components/safeOfflineBanner';
+import SafeOfflineBanner from '@/components/offline/safeOfflineBanner';
+import { formatDate } from '@/utils/formatDate';
 
 export default function TicketDetailScreen() {
     const { ticketId } = useLocalSearchParams();
@@ -24,103 +23,95 @@ export default function TicketDetailScreen() {
     const [isExpanded, setIsExpanded] = useState(false);
     const [teamsCount, setTeamsCount] = useState<number | null>(null);
     const [enrolledTeams, setEnrolledTeams] = useState([]);
+    const [refreshing, setRefreshing] = useState(false);
 
-    const openInMaps = (lat: number, lng: number, label = 'Location') => {
-        const scheme = Platform.select({
-            ios: `http://maps.apple.com/?ll=${lat},${lng}&q=${encodeURIComponent(label)}`,
-            android: `geo:${lat},${lng}?q=${lat},${lng}(${encodeURIComponent(label)})`,
-        });
+    const fetchData = async () => {
+        try {
+            const token = await AsyncStorage.getItem("token");
+            const userId = await AsyncStorage.getItem("userId");
 
-        if (scheme) {
-            Linking.openURL(scheme).catch(err => {
-                console.error('Error opening map app:', err);
+            setToken(token);
+
+            // Fetch the ticket info
+            const ticketRes = await fetch(`${API_BASE_URL}/users/${userId}/tickets/${ticketId}/qr`, {
+                headers: { Authorization: `Bearer ${token}` },
             });
+
+            const ticketData = await ticketRes.json();
+            const ticketInfo = ticketData[0];
+            setTicket(ticketInfo);
+
+            console.log("Fetched ticketData:", ticketData);
+            // If ticket is valid, fetch tournament + team count
+            if (ticketInfo?.tournament_id) {
+                const [tournamentRes, teamCountRes] = await Promise.all([
+                    fetch(`${API_BASE_URL}/tournaments/${ticketInfo.tournament_id}/info`),
+                    fetch(`${API_BASE_URL}/tournaments/${ticketInfo.tournament_id}/teams/count`, {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            "Content-Type": "application/json",
+                        },
+                    }),
+                ]);
+
+                const tournamentData = await tournamentRes.json();
+                const teamCountData = teamCountRes.status !== 204 ? await teamCountRes.json() : [];
+
+                if (tournamentRes.ok) {
+                    setTournament(tournamentData);
+                }
+
+                if (teamCountRes.ok) {
+                    setTeamsCount(teamCountData[0]?.team_count ?? 0);
+                } else {
+                    setTeamsCount(0); // fallback for 204
+                }
+            }
+
+            const enrolledRes = await fetch(`${API_BASE_URL}/tournaments/${ticketInfo.tournament_id}/enrolled`, {
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            const enrolledData = await enrolledRes.json();
+
+            if (enrolledRes.ok) {
+                setEnrolledTeams(enrolledData);
+            } else {
+                console.error("Failed to fetch enrolled teams:", enrolledData.message);
+            }
+
+        } catch (err) {
+            console.warn("Falling back to cached data:", err);
+
+            try {
+                const cached = await AsyncStorage.getItem("cachedTickets");
+                console.log(cached)
+                if (!cached) return;
+
+                const parsed = JSON.parse(cached);
+                const cachedTicket = parsed.find((t: any) => String(t.id) === String(ticketId));
+
+                if (cachedTicket) {
+                    setTicket(cachedTicket.ticket);
+                    setTournament(cachedTicket.tournament);
+                    setTeamsCount(cachedTicket.teamsCount);
+                    setEnrolledTeams(cachedTicket.enrolledTeams);
+                } else {
+                    console.error("Ticket not found in cache:", ticketId, cached);
+                }
+            } catch (cacheErr) {
+                console.error("Failed to load from cache:", cacheErr);
+            }
+        } finally {
+            setLoading(false);
         }
     };
 
     useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const token = await AsyncStorage.getItem("token");
-                const userId = await AsyncStorage.getItem("userId");
-
-                setToken(token);
-
-                // Fetch the ticket info
-                const ticketRes = await fetch(`${API_BASE_URL}/users/${userId}/tickets/${ticketId}/qr`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-
-
-                const ticketData = await ticketRes.json();
-                const ticketInfo = ticketData[0];
-                setTicket(ticketInfo);
-
-                console.log("Fetched ticketData:", ticketData);
-                // If ticket is valid, fetch tournament + team count
-                if (ticketInfo?.tournament_id) {
-                    const [tournamentRes, teamCountRes] = await Promise.all([
-                        fetch(`${API_BASE_URL}/tournaments/${ticketInfo.tournament_id}/info`),
-                        fetch(`${API_BASE_URL}/tournaments/${ticketInfo.tournament_id}/teams/count`, {
-                            headers: {
-                                Authorization: `Bearer ${token}`,
-                                "Content-Type": "application/json",
-                            },
-                        }),
-                    ]);
-
-                    const tournamentData = await tournamentRes.json();
-                    const teamCountData = teamCountRes.status !== 204 ? await teamCountRes.json() : [];
-
-                    if (tournamentRes.ok) {
-                        setTournament(tournamentData);
-                    }
-
-                    if (teamCountRes.ok) {
-                        setTeamsCount(teamCountData[0]?.team_count ?? 0);
-                    } else {
-                        setTeamsCount(0); // fallback for 204
-                    }
-                }
-
-                const enrolledRes = await fetch(`${API_BASE_URL}/tournaments/${ticketInfo.tournament_id}/enrolled`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                });
-                const enrolledData = await enrolledRes.json();
-                if (enrolledRes.ok) {
-                    setEnrolledTeams(enrolledData);
-                } else {
-                    console.error("Failed to fetch enrolled teams:", enrolledData.message);
-                }
-            } catch (err) {
-                console.warn("Falling back to cached data:", err);
-
-                try {
-                    const cached = await AsyncStorage.getItem("cachedTickets");
-                    console.log(cached)
-                    if (!cached) return;
-
-                    const parsed = JSON.parse(cached);
-                    const cachedTicket = parsed.find((t: any) => String(t.id) === String(ticketId));
-
-                    if (cachedTicket) {
-                        setTicket(cachedTicket.ticket);
-                        setTournament(cachedTicket.tournament);
-                        setTeamsCount(cachedTicket.teamsCount);
-                        setEnrolledTeams(cachedTicket.enrolledTeams);
-                    } else {
-                        console.error("Ticket not found in cache:", ticketId, cached);
-                    }
-                } catch (cacheErr) {
-                    console.error("Failed to load from cache:", cacheErr);
-                }
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchData();
     }, [ticketId]);
 
+    // Variable to store the theme styles
     const theme = useTheme();
     const styles = useMemo(() => getStyles(theme), [theme]);
 
@@ -132,18 +123,11 @@ export default function TicketDetailScreen() {
         return <View style={styles.centered}><Text>Failed to load data.</Text></View>;
     }
 
-    const shortDescription = tournament.additional_info?.slice(0, 120) ?? '';
-    const shouldShowReadMore = tournament.additional_info && tournament.additional_info.length > 120;
-
-    const daysUntil = Math.ceil((new Date(tournament.date).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-
-    const formattedDate = new Date(tournament.date).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-    });
+    const onRefresh = async () => {
+        setRefreshing(true);
+        await fetchData();
+        setRefreshing(false);
+    };
 
     return (
         <>
@@ -178,10 +162,13 @@ export default function TicketDetailScreen() {
                     keyboardShouldPersistTaps="handled"
                     contentContainerStyle={styles.scrollViewContent}
                     showsVerticalScrollIndicator={false}
+                    refreshControl={
+                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                    }
                 >
                     {/* White Sheet */}
 
-                    <View style={styles.swipeBar} />
+                    < View style={styles.swipeBar} />
                     <View style={styles.qrWrapper}>
                         <QRCode value={ticket.ticket} size={180} backgroundColor={theme.background} color={theme.qrCode} />
                     </View>
@@ -211,13 +198,13 @@ export default function TicketDetailScreen() {
                         <Text style={styles.joinedText}>{teamsCount ?? "0"} joined</Text>
                     </View>
 
-                    <Text style={styles.dateUnderTitle}>{formattedDate}</Text>
+                    <Text style={styles.dateUnderTitle}>{formatDate(tournament.date)}</Text>
 
                     {/* Stats */}
                     <TournamentStats
                         teamsCount={teamsCount ?? 0}
                         teamSize={tournament.max_team_size}
-                        daysUntil={daysUntil}
+                        date={tournament.date}
                     />
 
                     {/* Description */}

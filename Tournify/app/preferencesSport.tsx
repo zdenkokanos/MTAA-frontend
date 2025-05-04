@@ -11,7 +11,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // Zustand
 import { useSignUpStore } from "@/stores/signUpStore";
 import { useTheme } from '@/themes/theme';
-import OfflineBanner from '@/components/offlineBanner';
 
 export default function PreferencesSportScreen() {
   const [sportsData, setSportsData] = useState<any[]>([]);
@@ -74,6 +73,7 @@ export default function PreferencesSportScreen() {
     router.replace("/preferencesCity");
   };
 
+  // Variable to store the theme styles
   const theme = useTheme();
   const styles = useMemo(() => getStyles(theme), [theme]);
 
@@ -131,6 +131,7 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   },
   buttonContainer: {
     marginTop: 10,
+    paddingHorizontal: 20,
   },
   flatList: {
     flexGrow: 1,

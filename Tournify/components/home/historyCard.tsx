@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/themes/theme";
 import { useMemo } from "react";
-import Badge from "./tournamentDetail/badge";
+import Badge from "../tournamentDetail/badge";
 
 interface HistoryCardProps {
     title: string;
@@ -10,6 +10,11 @@ interface HistoryCardProps {
     position: any;
     imageUrl: any;
     onInfoPress: () => void;
+}
+
+function formatDate(dateString: string): string {
+    const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString(undefined, options);
 }
 
 const HistoryCard = ({ title, date, position, imageUrl, onInfoPress }: HistoryCardProps) => {
@@ -20,7 +25,7 @@ const HistoryCard = ({ title, date, position, imageUrl, onInfoPress }: HistoryCa
             <Image source={imageUrl} style={styles.image} />
             <View style={styles.content}>
                 <Text style={styles.title}>{title}</Text>
-                <Text style={styles.date}>{date}</Text>
+                <Text style={styles.date}>{formatDate(date)}</Text>
                 {position && (
                     <Badge position={String(position)} />
                 )}

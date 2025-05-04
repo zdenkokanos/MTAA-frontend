@@ -1,24 +1,21 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { View, Text, StyleSheet, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import StartButton from '../components/startButton';
 import API_BASE_URL from "../config/config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import SafeOfflineBanner from '@/components/offline/safeOfflineBanner';
 import 'react-native-get-random-values';
 
 // API Key
 import Constants from 'expo-constants';
 const apiKey = Constants?.expoConfig?.extra?.GOOGLE_MAPS_API_KEY ?? 'DEFAULT_FALLBACK_KEY';
 
-
 // Zustand
 import { useSignUpStore } from "@/stores/signUpStore";
 import { useTheme } from '@/themes/theme';
-import OfflineBanner from '@/components/safeOfflineBanner';
-import SafeOfflineBanner from '@/components/safeOfflineBanner';
 
 export default function CityPreferencesScreen() {
     const router = useRouter();
@@ -37,11 +34,6 @@ export default function CityPreferencesScreen() {
         setField,
         reset
     } = useSignUpStore();
-
-    useEffect(() => {
-        setField("preferredLongitude", -122.4194);
-        setField("preferredLatitude", 37.7749);
-    }, []);
 
     const handleSignUp = async () => {
         try {
@@ -92,6 +84,7 @@ export default function CityPreferencesScreen() {
         }
     };
 
+    // Variable to store the theme styles
     const theme = useTheme();
     const styles = useMemo(() => getStyles(theme), [theme]);
 
@@ -132,13 +125,6 @@ export default function CityPreferencesScreen() {
                                     types: '(cities)',
                                 }}
                                 styles={{
-                                    // textInput: {
-                                    //     backgroundColor: '#f2f2f2',
-                                    //     borderRadius: 12,
-                                    //     paddingHorizontal: 16,
-                                    //     height: 48,
-                                    //     fontSize: 16,
-                                    // },
                                     container: {
                                         flex: 0,
                                         zIndex: 10,
@@ -174,7 +160,10 @@ export default function CityPreferencesScreen() {
                                         display: 'none',
                                     },
                                 }}
-                                // All other default props explicitly defined
+                                onFail={(error) => {
+                                    console.error("Google Places API error:", error);
+                                }}
+                                // All other default props explicitly defined // StackOverflow fix
                                 autoFillOnNotFound={false}
                                 currentLocation={false}
                                 currentLocationLabel="Current location"
@@ -197,7 +186,6 @@ export default function CityPreferencesScreen() {
                                 minLength={1}
                                 nearbyPlacesAPI="GooglePlacesSearch"
                                 numberOfLines={1}
-                                onFail={() => { }}
                                 onNotFound={() => { }}
                                 onTimeout={() =>
                                     console.warn('google places autocomplete: request timeout')
