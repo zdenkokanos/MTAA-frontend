@@ -19,6 +19,7 @@ import AnimationCreateTournament from '@/components/create/animationCreateTourna
 
 // API Key
 import Constants from 'expo-constants';
+import OfflineBanner from '@/components/offlineBanner';
 const apiKey = Constants?.expoConfig?.extra?.GOOGLE_MAPS_API_KEY ?? 'DEFAULT_FALLBACK_KEY';
 
 export default function CreateTournament() {
@@ -140,6 +141,7 @@ export default function CreateTournament() {
 
     return (
         <SafeAreaView style={styles.safeArea}>
+            <OfflineBanner />
             <KeyboardAvoidingView style={styles.wrapper} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
                 <View style={styles.mainTitle}>
                     <MaterialIcons style={styles.icon} name="edit" size={24} color="black" />

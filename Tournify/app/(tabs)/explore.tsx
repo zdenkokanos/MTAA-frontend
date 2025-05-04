@@ -7,12 +7,13 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 
 import CategoryContainer from "@/components/explore/categoryContainer";
 import { useRouter } from "expo-router";
+import OfflineBanner from "@/components/offlineBanner";
 
 export default function ExploreScreen() {
 
     const [categories, setCategories] = useState<{ id: number; category_name: string; category_image: string; }[]>([]);
     const [loading, setLoading] = useState(false);
-    
+
     const theme = useTheme();
     const styles = useMemo(() => getStyles(theme), [theme]);
     const router = useRouter();
@@ -22,33 +23,34 @@ export default function ExploreScreen() {
             setLoading(true);
             try {
                 const response = await fetch(`${API_BASE_URL}/tournaments/categories`, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                },
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
                 });
-        
+
                 const data = await response.json();
-        
+
                 if (!response.ok) {
-                throw new Error(data.message || "Unable to load sports.");
+                    throw new Error(data.message || "Unable to load sports.");
                 }
 
                 setCategories(data);
                 setLoading(false);
-                
+
             } catch (error) {
                 console.error('❌ Error loading categories:', error);
             }
         };
-        
+
         fetchSports();
     }, []);
 
-      
+
 
     return (
         <SafeAreaView style={styles.safeArea}>
+            <OfflineBanner />
             <KeyboardAvoidingView style={styles.wrapper} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
                 <View style={styles.mainTitle}>
                     <FontAwesome style={styles.icon} name="search" size={24} color={theme.text} />
@@ -60,7 +62,7 @@ export default function ExploreScreen() {
                     data={categories}
                     keyExtractor={(item) => item.id.toString()}
                     showsVerticalScrollIndicator={false}
-                    renderItem={({item}) => (
+                    renderItem={({ item }) => (
                         <CategoryContainer
                             categoryName={item.category_name}
                             imageFilename={item.category_image}
@@ -68,8 +70,6 @@ export default function ExploreScreen() {
                         />
                     )}
                 />
-
-
 
             </KeyboardAvoidingView>
         </SafeAreaView>
@@ -145,5 +145,5 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
         fontSize: 24,
         textTransform: 'uppercase',
     },
-      
+
 });

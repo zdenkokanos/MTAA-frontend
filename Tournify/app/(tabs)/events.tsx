@@ -1,10 +1,15 @@
+import OfflineBanner from "@/components/offlineBanner";
 import { Text, View, StyleSheet } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function WelcomeScreen() {
     return (
-        <View style={styles.container}>
-            <Text style={styles.text}>Events Screen</Text>
-        </View>
+        <SafeAreaView>
+            <OfflineBanner />
+            <View style={styles.container}>
+                <Text style={styles.text}>Events Screen</Text>
+            </View>
+        </SafeAreaView>
     );
 }
 

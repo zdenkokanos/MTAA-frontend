@@ -2,7 +2,6 @@ import API_BASE_URL from "@/config/config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Text, View, StyleSheet, ScrollView, Image, FlatList, NativeSyntheticEvent, NativeScrollEvent, Dimensions } from "react-native";
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import TournamentCard from "@/components/tournamentCard";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import TicketCard from "@/components/ticketCard";
@@ -10,8 +9,9 @@ import HistoryCard from "@/components/historyCard";
 import { useIsFocused } from '@react-navigation/native';
 import { useTheme } from "@/themes/theme";
 import { router } from "expo-router";
-
-
+import OfflineBanner from "@/components/offlineBanner";
+import TournamentView from "@/components/explore/tournamentView";
+import { cacheAllTickets } from "@/utils/cacheTickets";
 
 export default function HomeScreen() {
 
@@ -113,6 +113,9 @@ export default function HomeScreen() {
                 console.error("History error:", historyData.message);
             }
 
+            // Cache Tickets for Offline use
+            await cacheAllTickets();
+
         } catch (err) {
             console.error("Failed to load home screen data:", err);
         }
@@ -150,7 +153,9 @@ export default function HomeScreen() {
             style={styles.safeArea}
             edges={['top', 'left', 'right']}
         >
-            <ScrollView showsVerticalScrollIndicator={false}>
+            <OfflineBanner />
+            <ScrollView showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: 40 }}>
                 <View style={styles.header}>
                     <View style={styles.profileRow}>
                         <Image
@@ -189,7 +194,7 @@ export default function HomeScreen() {
                         keyExtractor={(item) => item.id}
                         renderItem={({ item }) => (
                             <View style={{ width: CARD_WIDTH, marginRight: CARD_GAP }}>
-                                <TournamentCard
+                                <TournamentView
                                     title={item.tournament_name}
                                     dateText={formatDateRelative(item.date)}
                                     distanceText={`${item.distance} km from you`}

@@ -11,6 +11,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // Zustand
 import { useSignUpStore } from "@/stores/signUpStore";
 import { useTheme } from '@/themes/theme';
+import OfflineBanner from '@/components/offlineBanner';
 
 export default function PreferencesSportScreen() {
   const [sportsData, setSportsData] = useState<any[]>([]);
@@ -81,7 +82,7 @@ export default function PreferencesSportScreen() {
       style={styles.container}
       edges={['top', 'left', 'right', 'bottom']}
     >
-      <View style={{ flex: 1 }}>
+      <View style={{ flex: 1, padding: 20 }}>
         <Text style={styles.heading}>
           Choose your{'\n'}
           <Text style={styles.bold}>Sports</Text>
@@ -117,7 +118,6 @@ export default function PreferencesSportScreen() {
 const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
     backgroundColor: theme.background,
   },
   heading: {

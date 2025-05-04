@@ -20,6 +20,8 @@ import TournamentDescription from '@/components/tournamentDetail/tournamentDescr
 import Leaderboard from '@/components/leaderboard';
 import MapPreview from '@/components/tournamentDetail/mapPreview';
 import Badge from '@/components/tournamentDetail/badge';
+import OfflineBanner from '@/components/offlineBanner';
+import SafeOfflineBanner from '@/components/safeOfflineBanner';
 
 export default function TournamentInfoScreen() {
     const { tournamentId, position } = useLocalSearchParams();
@@ -108,58 +110,59 @@ export default function TournamentInfoScreen() {
         );
     }
 
-
-
     return (
-        <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
-            {/* Image and Back Button */}
-            <View style={styles.imageContainer}>
-                <Image
-                    source={{
-                        uri: `${API_BASE_URL}/category/images/${tournament.category_image}`,
-                        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
-                    }}
-                    style={styles.image}
-                />
-                <SafeAreaView style={styles.safeAreaBack}>
-                    <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-                        <Ionicons name="arrow-back" size={24} color="white" />
-                    </TouchableOpacity>
-                </SafeAreaView>
-            </View>
-
-            {/* Sheet */}
-            <View style={styles.sheet}>
-                <View style={styles.swipeBar} />
-                <View style={styles.headerRow}>
-                    <Text style={styles.title}>{tournament.tournament_name}</Text>
-                    {position && (
-                        <Badge position={String(position)} />
-                    )}
+        <>
+            <SafeOfflineBanner />
+            <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+                {/* Image and Back Button */}
+                <View style={styles.imageContainer}>
+                    <Image
+                        source={{
+                            uri: `${API_BASE_URL}/category/images/${tournament.category_image}`,
+                            headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+                        }}
+                        style={styles.image}
+                    />
+                    <SafeAreaView style={styles.safeAreaBack}>
+                        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+                            <Ionicons name="arrow-back" size={24} color="white" />
+                        </TouchableOpacity>
+                    </SafeAreaView>
                 </View>
 
-                <Text style={styles.subtitle}>
-                    sport • level • date • time • game setting • tournament structure • entry fee • price structure
-                </Text>
+                {/* Sheet */}
+                <View style={styles.sheet}>
+                    <View style={styles.swipeBar} />
+                    <View style={styles.headerRow}>
+                        <Text style={styles.title}>{tournament.tournament_name}</Text>
+                        {position && (
+                            <Badge position={String(position)} />
+                        )}
+                    </View>
 
-                <TournamentDescription
-                    description={tournament.additional_info || ''}
-                    isExpanded={isExpanded}
-                    onToggle={() => setIsExpanded(prev => !prev)}
-                />
+                    <Text style={styles.subtitle}>
+                        sport • level • date • time • game setting • tournament structure • entry fee • price structure
+                    </Text>
 
-                <Leaderboard data={leaderboard} />
-
-
-                {tournament.latitude && tournament.longitude && (
-                    <MapPreview
-                        latitude={tournament.latitude}
-                        longitude={tournament.longitude}
-                        tournamentName={tournament.tournament_name}
+                    <TournamentDescription
+                        description={tournament.additional_info || ''}
+                        isExpanded={isExpanded}
+                        onToggle={() => setIsExpanded(prev => !prev)}
                     />
-                )}
-            </View>
-        </ScrollView>
+
+                    <Leaderboard data={leaderboard} />
+
+
+                    {tournament.latitude && tournament.longitude && (
+                        <MapPreview
+                            latitude={tournament.latitude}
+                            longitude={tournament.longitude}
+                            tournamentName={tournament.tournament_name}
+                        />
+                    )}
+                </View>
+            </ScrollView>
+        </>
     );
 }
 
