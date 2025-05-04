@@ -1,6 +1,6 @@
 import API_BASE_URL from "@/config/config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Text, View, StyleSheet, ScrollView, Image, FlatList, NativeSyntheticEvent, NativeScrollEvent, Dimensions } from "react-native";
+import { Text, View, StyleSheet, ScrollView, Image, FlatList, NativeSyntheticEvent, NativeScrollEvent, Dimensions, RefreshControl, ActivityIndicator } from "react-native";
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -12,6 +12,7 @@ import { router } from "expo-router";
 import OfflineBanner from "@/components/offlineBanner";
 import TournamentView from "@/components/explore/tournamentView";
 import { cacheAllTickets } from "@/utils/cacheTickets";
+import { useOnShakeRefresh } from '@/hooks/useOnShakeRefresh';
 
 export default function HomeScreen() {
 
@@ -121,6 +122,14 @@ export default function HomeScreen() {
         }
     };
 
+    const [refreshing, setRefreshing] = useState(false);
+
+    const onRefresh = async () => {
+        setRefreshing(true);
+        await fetchData();
+        setRefreshing(false);
+    };
+
     // Initial fetch
     useEffect(() => {
         fetchData();
@@ -148,6 +157,8 @@ export default function HomeScreen() {
     const theme = useTheme();
     const styles = useMemo(() => getStyles(theme), [theme]);
 
+    useOnShakeRefresh(onRefresh);
+
     return (
         <SafeAreaView
             style={styles.safeArea}
@@ -155,7 +166,10 @@ export default function HomeScreen() {
         >
             <OfflineBanner />
             <ScrollView showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingBottom: 40 }}>
+                contentContainerStyle={{ paddingBottom: 40 }}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                }>
                 <View style={styles.header}>
                     <View style={styles.profileRow}>
                         <Image

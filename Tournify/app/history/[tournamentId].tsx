@@ -7,6 +7,7 @@ import {
     ScrollView,
     SafeAreaView,
     ActivityIndicator,
+    RefreshControl,
 } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
@@ -37,62 +38,71 @@ export default function TournamentInfoScreen() {
     const [leaderboard, setLeaderboard] = useState<{ position: number; name: string }[]>([]);
 
 
-    useEffect(() => {
-        const fetchTournament = async () => {
-            try {
-                const storedToken = await AsyncStorage.getItem('token');
-                if (!storedToken) {
-                    console.error('Token not found');
-                    return;
-                }
-                setToken(storedToken);
 
-                const [tournamentRes, teamCountRes, leaderboardRes] = await Promise.all([
-                    fetch(`${API_BASE_URL}/tournaments/${tournamentId}/info`),
-                    fetch(`${API_BASE_URL}/tournaments/${tournamentId}/teams/count`, {
-                        headers: {
-                            Authorization: `Bearer ${storedToken}`,
-                            'Content-Type': 'application/json',
-                        },
-                    }),
-                    fetch(`${API_BASE_URL}/tournaments/${tournamentId}/leaderboard`, {
-                        headers: {
-                            Authorization: `Bearer ${storedToken}`,
-                            'Content-Type': 'application/json',
-                        },
-                    }),
-                ]);
-
-                const tournamentData = await tournamentRes.json();
-                const teamCountData = teamCountRes.status !== 204 ? await teamCountRes.json() : {};
-                const leaderboardData = await leaderboardRes.json();
-
-                if (tournamentRes.ok) {
-                    setTournament(tournamentData);
-                } else {
-                    console.error('Tournament fetch error:', tournamentData.message);
-                }
-
-                if (teamCountRes.ok) {
-                    setTeamsCount(teamCountData[0]?.team_count ?? 0);
-                } else {
-                    console.error('Team count fetch error:', teamCountData.message);
-                }
-
-                if (leaderboardRes.ok) {
-                    setLeaderboard(leaderboardData);
-                } else {
-                    console.error('Leaderboard fetch error:', leaderboardData.message);
-                }
-            } catch (err) {
-                console.error('Error fetching tournament data:', err);
-            } finally {
-                setLoading(false);
+    const fetchTournament = async () => {
+        try {
+            const storedToken = await AsyncStorage.getItem('token');
+            if (!storedToken) {
+                console.error('Token not found');
+                return;
             }
-        };
+            setToken(storedToken);
 
+            const [tournamentRes, teamCountRes, leaderboardRes] = await Promise.all([
+                fetch(`${API_BASE_URL}/tournaments/${tournamentId}/info`),
+                fetch(`${API_BASE_URL}/tournaments/${tournamentId}/teams/count`, {
+                    headers: {
+                        Authorization: `Bearer ${storedToken}`,
+                        'Content-Type': 'application/json',
+                    },
+                }),
+                fetch(`${API_BASE_URL}/tournaments/${tournamentId}/leaderboard`, {
+                    headers: {
+                        Authorization: `Bearer ${storedToken}`,
+                        'Content-Type': 'application/json',
+                    },
+                }),
+            ]);
+
+            const tournamentData = await tournamentRes.json();
+            const teamCountData = teamCountRes.status !== 204 ? await teamCountRes.json() : {};
+            const leaderboardData = await leaderboardRes.json();
+
+            if (tournamentRes.ok) {
+                setTournament(tournamentData);
+            } else {
+                console.error('Tournament fetch error:', tournamentData.message);
+            }
+
+            if (teamCountRes.ok) {
+                setTeamsCount(teamCountData[0]?.team_count ?? 0);
+            } else {
+                console.error('Team count fetch error:', teamCountData.message);
+            }
+
+            if (leaderboardRes.ok) {
+                setLeaderboard(leaderboardData);
+            } else {
+                console.error('Leaderboard fetch error:', leaderboardData.message);
+            }
+        } catch (err) {
+            console.error('Error fetching tournament data:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
         fetchTournament();
     }, [tournamentId]);
+
+    const [refreshing, setRefreshing] = useState(false);
+
+    const onRefresh = async () => {
+        setRefreshing(true);
+        await fetchTournament();
+        setRefreshing(false);
+    };
 
     if (loading) {
         return (
@@ -113,7 +123,10 @@ export default function TournamentInfoScreen() {
     return (
         <>
             <SafeOfflineBanner />
-            <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+            <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                }>
                 {/* Image and Back Button */}
                 <View style={styles.imageContainer}>
                     <Image

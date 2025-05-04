@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, SafeAreaView, ActivityIndicator, TextInput, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, SafeAreaView, ActivityIndicator, TextInput, KeyboardAvoidingView, Platform, Alert, RefreshControl } from 'react-native';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
@@ -6,7 +6,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import API_BASE_URL from '@/config/config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '@/themes/theme';
-import iconSet from '@expo/vector-icons/build/Fontisto';
 import TournamentStats from '@/components/tournamentDetail/tournamentStats';
 import TournamentDescription from '@/components/tournamentDetail/tournamentDescription';
 import MapPreview from '@/components/tournamentDetail/mapPreview';
@@ -19,6 +18,7 @@ export default function TournamentDetailScreen() {
     const [token, setToken] = useState<string | null>(null);
     const [isExpanded, setIsExpanded] = useState(false);
     const [teamsCount, setTeamsCount] = useState<number | null>(null);
+    const [refreshing, setRefreshing] = useState(false);
 
     const [selectedOption, setSelectedOption] = useState<"new" | "existing" | null>(null);
     const [teamInput, setTeamInput] = useState("");
@@ -66,42 +66,44 @@ export default function TournamentDetailScreen() {
     };
 
     // Fetch tournament data
-    useEffect(() => {
-        const fetchTournament = async () => {
-            try {
-                const storedToken = await AsyncStorage.getItem("token");
-                setToken(storedToken);
 
-                const [tournamentRes, teamCountRes] = await Promise.all([
-                    fetch(`${API_BASE_URL}/tournaments/${tournamentId}/info`),
-                    fetch(`${API_BASE_URL}/tournaments/${tournamentId}/teams/count`, {
-                        headers: {
-                            Authorization: `Bearer ${storedToken}`,
-                            "Content-Type": "application/json",
-                        },
-                    }),
-                ]);
+    const fetchTournament = async () => {
+        try {
+            const storedToken = await AsyncStorage.getItem("token");
+            setToken(storedToken);
 
-                const tournamentData = await tournamentRes.json();
-                const teamCountData = teamCountRes.status !== 204 ? await teamCountRes.json() : {};
+            const [tournamentRes, teamCountRes] = await Promise.all([
+                fetch(`${API_BASE_URL}/tournaments/${tournamentId}/info`),
+                fetch(`${API_BASE_URL}/tournaments/${tournamentId}/teams/count`, {
+                    headers: {
+                        Authorization: `Bearer ${storedToken}`,
+                        "Content-Type": "application/json",
+                    },
+                }),
+            ]);
 
-                if (tournamentRes.ok) {
-                    setTournament(tournamentData);
-                } else {
-                    console.error('Tournament fetch error:', tournamentData.message);
-                }
+            const tournamentData = await tournamentRes.json();
+            const teamCountData = teamCountRes.status !== 204 ? await teamCountRes.json() : {};
 
-                if (teamCountRes.ok) {
-                    setTeamsCount(teamCountData[0]?.team_count ?? 0);
-                } else {
-                    console.error('Team count fetch error:', teamCountData.message);
-                }
-            } catch (err) {
-                console.error('Error fetching tournament:', err);
-            } finally {
-                setLoading(false);
+            if (tournamentRes.ok) {
+                setTournament(tournamentData);
+            } else {
+                console.error('Tournament fetch error:', tournamentData.message);
             }
-        };
+
+            if (teamCountRes.ok) {
+                setTeamsCount(teamCountData[0]?.team_count ?? 0);
+            } else {
+                console.error('Team count fetch error:', teamCountData.message);
+            }
+        } catch (err) {
+            console.error('Error fetching tournament:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
         fetchTournament();
     }, [tournamentId]);
 
@@ -137,6 +139,12 @@ export default function TournamentDetailScreen() {
         minute: '2-digit',
     });
 
+    const onRefresh = async () => {
+        setRefreshing(true);
+        await fetchTournament();
+        setRefreshing(false);
+    };
+
     return (
         <>
             <SafeOfflineBanner />
@@ -151,6 +159,9 @@ export default function TournamentDetailScreen() {
                 <ScrollView style={styles.container}
                     keyboardShouldPersistTaps="handled"
                     contentContainerStyle={styles.container}
+                    refreshControl={
+                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                    }
                 >
                     <View style={styles.imageContainer}>
                         <Image

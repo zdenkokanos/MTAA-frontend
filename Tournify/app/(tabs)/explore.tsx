@@ -1,4 +1,4 @@
-import { Text, View, StyleSheet, KeyboardAvoidingView, Platform, SafeAreaView, FlatList } from "react-native";
+import { Text, View, StyleSheet, KeyboardAvoidingView, Platform, SafeAreaView, FlatList, RefreshControl } from "react-native";
 import React, { useEffect, useMemo, useState } from "react";
 import { useTheme } from "@/themes/theme";
 import API_BASE_URL from "@/config/config";
@@ -8,6 +8,7 @@ import FontAwesome from '@expo/vector-icons/FontAwesome';
 import CategoryContainer from "@/components/explore/categoryContainer";
 import { useRouter } from "expo-router";
 import OfflineBanner from "@/components/offlineBanner";
+import useOnShakeRefresh from "@/hooks/useOnShakeRefresh";
 
 export default function ExploreScreen() {
 
@@ -18,35 +19,43 @@ export default function ExploreScreen() {
     const styles = useMemo(() => getStyles(theme), [theme]);
     const router = useRouter();
 
-    useEffect(() => {
-        const fetchSports = async () => {
-            setLoading(true);
-            try {
-                const response = await fetch(`${API_BASE_URL}/tournaments/categories`, {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                });
+    const fetchSports = async () => {
+        setLoading(true);
+        try {
+            const response = await fetch(`${API_BASE_URL}/tournaments/categories`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
 
-                const data = await response.json();
+            const data = await response.json();
 
-                if (!response.ok) {
-                    throw new Error(data.message || "Unable to load sports.");
-                }
-
-                setCategories(data);
-                setLoading(false);
-
-            } catch (error) {
-                console.error('❌ Error loading categories:', error);
+            if (!response.ok) {
+                throw new Error(data.message || "Unable to load sports.");
             }
-        };
 
+            setCategories(data);
+            setLoading(false);
+
+        } catch (error) {
+            console.error('❌ Error loading categories:', error);
+        }
+    };
+
+    useEffect(() => {
         fetchSports();
     }, []);
 
+    const [refreshing, setRefreshing] = useState(false);
 
+    const onRefresh = async () => {
+        setRefreshing(true);
+        await fetchSports();
+        setRefreshing(false);
+    };
+
+    useOnShakeRefresh(onRefresh);
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -62,6 +71,9 @@ export default function ExploreScreen() {
                     data={categories}
                     keyExtractor={(item) => item.id.toString()}
                     showsVerticalScrollIndicator={false}
+                    refreshControl={
+                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                    }
                     renderItem={({ item }) => (
                         <CategoryContainer
                             categoryName={item.category_name}
