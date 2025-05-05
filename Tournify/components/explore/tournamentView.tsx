@@ -5,18 +5,41 @@ import { useTheme } from "@/themes/theme";
 import { useMemo } from "react";
 import useRelativeDate from "@/hooks/useRelativeDate";
 
+import { getDistance } from 'geolib';
+
 interface TournamentCardProps {
     title: string;
     date: string;
-    distanceText: string;
     imageUrl: any;
     tournamentId: string;
+    lat: number;
+    lon: number;
+    userLat: number;
+    userLon: number;
+    defaultDistance: number;
 }
 
-const TournamentView = ({ title, date, distanceText, imageUrl, tournamentId }: TournamentCardProps) => {
+const TournamentView = ({ title, date, imageUrl, tournamentId, lat, lon, userLat, userLon, defaultDistance }: TournamentCardProps) => {
     const theme = useTheme();
     const styles = useMemo(() => getStyles(theme), [theme]);
     const router = useRouter();
+
+    const distance = useMemo(() => {
+        if ( userLat !== 0 && userLon !== 0 ) {
+            const distanceInMeters = getDistance(
+                { latitude: userLat, longitude: userLon },
+                { latitude: lat, longitude: lon }
+            );
+            const distanceInKm = Math.round((distanceInMeters / 1000) * 10) / 10;
+            return `${distanceInKm} km from you`;
+        }else if ( userLat === 0 && userLon === 0 ){
+            return `${defaultDistance} km from you`;
+        }
+        return "Distance unknown";
+    }, [userLat, userLon, lat, lon]);
+
+    
+
     return (
         <View style={styles.card}>
             <ImageBackground source={imageUrl} style={styles.image} imageStyle={{ borderRadius: 12 }}
@@ -33,7 +56,7 @@ const TournamentView = ({ title, date, distanceText, imageUrl, tournamentId }: T
                                 <Text style={styles.detailText}>{useRelativeDate(date)}</Text>
 
                                 <Ionicons name="location-outline" size={16} color="#000" style={{ marginLeft: 12 }} />
-                                <Text style={styles.detailText}>{distanceText}</Text>
+                                <Text style={styles.detailText}> {distance} </Text>
                             </View>
                         </View>
 
@@ -82,7 +105,7 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
         fontSize: 18,
         fontWeight: "bold",
         marginBottom: 8,
-        width: 200,
+        width: 230,
     },
     detailsRow: {
         flexDirection: "row",

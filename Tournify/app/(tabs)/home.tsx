@@ -13,6 +13,7 @@ import OfflineBanner from "@/components/offline/offlineBanner";
 import TournamentView from "@/components/explore/tournamentView";
 import { cacheAllTickets } from "@/utils/cacheTickets";
 import { useOnShakeRefresh } from '@/hooks/useOnShakeRefresh';
+import useLocation from '@/hooks/useLocation';
 
 export default function HomeScreen() {
 
@@ -41,6 +42,7 @@ export default function HomeScreen() {
         category_image: string;
     }
 
+    const { latitude, longitude, error, getUserLocation } = useLocation();
     const [history, setHistory] = useState<HistoryItem[]>([]);
     const [topPicks, setTopPicks] = useState<TopPick[]>([]);
     const [token, setToken] = useState<string | null>(null);
@@ -69,7 +71,7 @@ export default function HomeScreen() {
             if (topPicksResponse.ok) {
                 setTopPicks(topPicksData);
             } else {
-                console.error("Top Picks error:", topPicksData.message);
+                console.warn("Top Picks error:", topPicksData.message);
             }
 
             // Fetch User Info
@@ -98,7 +100,7 @@ export default function HomeScreen() {
             if (ticketsResponse.ok) {
                 setTickets(ticketsData);
             } else {
-                console.error("Tickets error:", ticketsData.message);
+                console.warn("Tickets error:", ticketsData.message);
             }
 
             // Fetch History
@@ -113,7 +115,7 @@ export default function HomeScreen() {
             if (historyResponse.ok) {
                 setHistory(historyData);
             } else {
-                console.error("History error:", historyData.message);
+                console.warn("History error:", historyData.message);
             }
 
             // Cache Tickets for Offline use
@@ -127,6 +129,10 @@ export default function HomeScreen() {
     // Initial fetch
     useEffect(() => {
         fetchData();
+    }, []);
+
+    useEffect(() => {
+        getUserLocation();
     }, []);
 
 
@@ -216,12 +222,13 @@ export default function HomeScreen() {
                                 <TournamentView
                                     title={item.tournament_name}
                                     date={item.date}
-                                    distanceText={`${item.distance} km from you`}
-                                    imageUrl={{
-                                        uri: `${API_BASE_URL}/category/images/${item.category_image}`,
-                                        headers: { Authorization: `Bearer ${token}` },
-                                    }}
+                                    imageUrl={{ uri: `${API_BASE_URL}/category/images/${item.category_image}` }}
                                     tournamentId={item.id}
+                                    lat={item.latitude}
+                                    lon={item.longitude}
+                                    userLat={latitude}
+                                    userLon={longitude}
+                                    defaultDistance={item.distance}
                                 />
                             </View>
                         )}
