@@ -14,6 +14,12 @@ import MapPreview from '@/components/tournamentDetail/mapPreview';
 import SafeOfflineBanner from '@/components/offline/safeOfflineBanner';
 import { formatDate } from '@/utils/formatDate';
 
+//***** Web Sockets ******/
+import io from 'socket.io-client';
+import { useRef } from 'react';
+const socketRef = useRef<any>(null);
+//***** Web Sockets ******/
+
 export default function TicketDetailScreen() {
     const { ticketId } = useLocalSearchParams();
     const [loading, setLoading] = useState(true);
@@ -110,6 +116,30 @@ export default function TicketDetailScreen() {
     useEffect(() => {
         fetchData();
     }, [ticketId]);
+
+    useEffect(() => {
+        if (!ticket?.tournament_id) return;
+    
+        socketRef.current = io(API_BASE_URL, {
+            transports: ['websocket'],
+        });
+    
+        socketRef.current.emit('join_room', `tournament-${ticket.tournament_id}`);
+    
+        socketRef.current.on('enrolled_updated', (data: { tournament_id: string | number }) => {
+            if (String(data.tournament_id) === String(ticket.tournament_id)) {
+                console.log("📥 Real-time update received in TicketDetailScreen");
+                fetchData();
+            }
+        });
+    
+        return () => {
+            socketRef.current?.disconnect();
+        };
+    }, [ticket?.tournament_id]);
+    
+    
+    
 
     // Variable to store the theme styles
     const theme = useTheme();
