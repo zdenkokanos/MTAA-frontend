@@ -1,4 +1,4 @@
-package com.anonymous.Tournify
+package com.humptee25.tournify
 import expo.modules.splashscreen.SplashScreenManager
 
 import android.os.Build

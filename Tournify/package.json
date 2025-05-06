@@ -62,7 +62,10 @@
     "react-native-webview": "13.13.5",
     "socket.io-client": "^4.8.1",
     "zustand": "^5.0.3",
-    "expo-image": "~2.1.6"
+    "expo-image": "~2.1.6",
+    "expo-notifications": "~0.31.1",
+    "expo-device": "~7.1.4",
+    "expo-dev-client": "~5.1.8"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

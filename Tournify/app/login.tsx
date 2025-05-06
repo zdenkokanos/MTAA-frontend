@@ -10,6 +10,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "@/config/config";
 import { useTheme } from "@/themes/theme";
 import SafeOfflineBanner from "@/components/offline/safeOfflineBanner";
+import { registerPushToken } from "@/utils/pushNotifications";
 
 export default function LoginScreen() {
     const router = useRouter();
@@ -44,6 +45,8 @@ export default function LoginScreen() {
             if (!response.ok) {
                 throw new Error(data.message || "Login failed");
             }
+
+            await registerPushToken(data.user.id);
 
             await AsyncStorage.setItem("token", data.token);
             await AsyncStorage.setItem("userId", String(data.user.id));

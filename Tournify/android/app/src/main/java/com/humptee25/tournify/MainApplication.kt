@@ -1,4 +1,4 @@
-package com.anonymous.Tournify
+package com.humptee25.tournify
 
 import android.app.Application
 import android.content.res.Configuration

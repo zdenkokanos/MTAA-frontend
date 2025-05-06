@@ -109,12 +109,12 @@ export const cacheAllTickets = async () => {
 
                 detailedTickets.push(cachedTicket);
 
-                console.log(`📦 Cached ticket: ${ticket.id}`, {
-                    ticket: cachedTicket.ticket,
-                    tournament: tournament.tournament_name,
-                    teamsCount: cachedTicket.teamsCount,
-                    enrolledTeams: cachedTicket.enrolledTeams.length,
-                });
+                // console.log(`📦 Cached ticket: ${ticket.id}`, {
+                //     ticket: cachedTicket.ticket,
+                //     tournament: tournament.tournament_name,
+                //     teamsCount: cachedTicket.teamsCount,
+                //     enrolledTeams: cachedTicket.enrolledTeams.length,
+                // });
 
             } catch (err) {
                 console.error(`Error caching ticket ${ticket.id}:`, err);
