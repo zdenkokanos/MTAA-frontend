@@ -14,8 +14,11 @@ import TournamentView from "@/components/explore/tournamentView";
 import { cacheAllTickets } from "@/utils/cacheTickets";
 import { useOnShakeRefresh } from '@/hooks/useOnShakeRefresh';
 import useLocation from '@/hooks/useLocation';
+import usePushNotifications from "@/hooks/usePushNotifications";
 
 export default function HomeScreen() {
+
+    const { expoPushToken, notification } = usePushNotifications();
 
     interface UserInfo {
         first_name: string;

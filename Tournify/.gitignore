@@ -47,3 +47,6 @@ Tournify/config/
 
 # Environment
 .env
+
+/android
+/ios
