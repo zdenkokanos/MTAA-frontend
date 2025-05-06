@@ -13,13 +13,16 @@ interface TournamentCardProps {
     imageUrl: any;
     tournamentId: string;
     lat: number | null;
-    lon: number| null;
-    userLat: number| null;
-    userLon: number| null;
+    lon: number | null;
+    userLat: number | null;
+    userLon: number | null;
     defaultDistance: number;
+    type: string;
+    ticketId?: string;
+    status?: string;
 }
 
-const TournamentView = ({ title, date, imageUrl, tournamentId, lat, lon, userLat, userLon, defaultDistance }: TournamentCardProps) => {
+const TournamentView = ({ title, date, imageUrl, tournamentId, lat, lon, userLat, userLon, defaultDistance, type, ticketId, status }: TournamentCardProps) => {
     const theme = useTheme();
     const styles = useMemo(() => getStyles(theme), [theme]);
     const router = useRouter();
@@ -27,23 +30,22 @@ const TournamentView = ({ title, date, imageUrl, tournamentId, lat, lon, userLat
     const distance = useMemo(() => {
         if (
             userLat !== null && userLon !== null &&
-            lat !== null && lon !== null)
-        {
-            if ( userLat !== 0 && userLon !== 0 ) {
+            lat !== null && lon !== null) {
+            if (userLat !== 0 && userLon !== 0) {
                 const distanceInMeters = getDistance(
                     { latitude: userLat, longitude: userLon },
                     { latitude: lat, longitude: lon }
                 );
                 const distanceInKm = Math.round((distanceInMeters / 1000) * 10) / 10;
                 return `${distanceInKm} km from you`;
-            }else if ( userLat === 0 && userLon === 0 ){
+            } else if (userLat === 0 && userLon === 0) {
                 return `${defaultDistance} km from you`;
             }
             return "Distance unknown";
         }
     }, [userLat, userLon, lat, lon]);
 
-    
+
 
     return (
         <View style={styles.card}>
@@ -73,9 +75,20 @@ const TournamentView = ({ title, date, imageUrl, tournamentId, lat, lon, userLat
 
                         <TouchableOpacity
                             style={styles.infoButton}
-                            onPress={() => router.push(`/tournament/${tournamentId}`)}
+                            onPress={() => {
+                                const route =
+                                    type === "owned"
+                                        ? status === "Ongoing"
+                                            ? `/tournament/manage/${tournamentId}/dashboard`
+                                            : `/tournament/manage/${tournamentId}/startEdit`
+                                        : type === "ticket"
+                                            ? `/ticket/${ticketId}`
+                                            : `/tournament/${tournamentId}`;
+
+                                router.push(route);
+                            }}
                         >
-                            <Text style={styles.infoText}>Info</Text>
+                            <Text style={styles.infoText}>{type == "owned" ? "Manage" : "Info"}</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
@@ -114,13 +127,13 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
         fontSize: 18,
         fontWeight: "bold",
         marginBottom: 8,
-        width: 230,
+        maxWidth: 220,
     },
     detailsRow: {
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-        width: 130,
+        maxWidth: 130,
     },
     infoGroup: {
         flexDirection: "row",

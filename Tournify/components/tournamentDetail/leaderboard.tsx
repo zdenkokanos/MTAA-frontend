@@ -17,12 +17,16 @@ export default function Leaderboard({ data }: Props) {
     return (
         <View style={styles.wrapper}>
             <Text style={styles.title}>Leaderboard</Text>
-            {data.map((entry) => (
-                <View key={entry.position} style={styles.row}>
-                    <Text style={styles.position}>{ordinal(entry.position)}</Text>
-                    <Text style={styles.name}>{entry.name}</Text>
-                </View>
-            ))}
+            {data.length === 0 ? (
+                <Text style={styles.empty}>Leaderboard was not published yet</Text>
+            ) : (
+                data.map((entry) => (
+                    <View key={entry.position} style={styles.row}>
+                        <Text style={styles.position}>{ordinal(entry.position)}</Text>
+                        <Text style={styles.name}>{entry.name}</Text>
+                    </View>
+                ))
+            )}
         </View>
     );
 }
@@ -60,5 +64,10 @@ const getStyles = (theme: ReturnType<typeof useTheme>) =>
         name: {
             flex: 1,
             color: theme.text,
+        },
+        empty: {
+            fontSize: 14,
+            color: '#999',
+            fontStyle: 'italic',
         },
     });

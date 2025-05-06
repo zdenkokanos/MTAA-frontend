@@ -230,6 +230,7 @@ export default function HomeScreen() {
                                     userLat={latitude}
                                     userLon={longitude}
                                     defaultDistance={item.distance}
+                                    type="detail"
                                 />
                             </View>
                         )}
