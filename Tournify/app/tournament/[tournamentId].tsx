@@ -184,6 +184,17 @@ export default function TournamentDetailScreen() {
                             date={tournament.date}
                         />
 
+                        <Text style={styles.subtitle}>
+                            {[
+                                tournament.level,
+                                tournament.game_setting,
+                                `Entry fee: ` + tournament.entry_fee + `€`,
+                                `Price: ` + tournament.prize_description,
+                            ]
+                                .filter(Boolean)
+                                .join(' • ')}
+                        </Text>
+
                         {/* Description */}
                         <TournamentDescription
                             description={tournament.additional_info || 'No description available.'}
@@ -453,6 +464,12 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     inputText: {
         flex: 1,
         color: theme.text,
+    },
+    subtitle: {
+        fontSize: 12,
+        color: '#666',
+        marginBottom: 8,
+        textAlign: 'justify',
     },
 });
 

@@ -294,7 +294,7 @@ export default function HomeScreen() {
                             }}
                             onInfoPress={() => router.push({
                                 pathname: `/history/${item.id}`,
-                                params: { position: item.position ? formatPosition(item.position) + `place` : null },
+                                params: { position: item.position ? formatPosition(item.position) : null },
                             })}
                         />
                     ))
