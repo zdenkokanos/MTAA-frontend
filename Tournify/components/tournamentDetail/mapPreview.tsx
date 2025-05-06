@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Text, StyleSheet, TouchableOpacity, Linking, Platform } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { useTheme } from '@/themes/theme';
@@ -11,7 +11,7 @@ interface Props {
 
 export default function MapPreview({ latitude, longitude, tournamentName }: Props) {
     const theme = useTheme();
-    const styles = getStyles(theme);
+    const styles = useMemo(() => getStyles(theme), [theme]);
 
     const openInMaps = (lat: number, lng: number, label: string) => {
         const url = Platform.select({
@@ -50,19 +50,18 @@ export default function MapPreview({ latitude, longitude, tournamentName }: Prop
     );
 }
 
-const getStyles = (theme: ReturnType<typeof useTheme>) =>
-    StyleSheet.create({
-        title: {
-            fontSize: 18,
-            fontWeight: 'bold',
-            color: theme.text,
-            marginBottom: 12,
-        },
-        map: {
-            width: '100%',
-            height: 180,
-            borderRadius: 12,
-            marginBottom: 24,
-            backgroundColor: '#eee',
-        },
-    });
+const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
+    title: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: theme.text,
+        marginBottom: 12,
+    },
+    map: {
+        width: '100%',
+        height: 180,
+        borderRadius: 12,
+        marginBottom: 24,
+        backgroundColor: '#eee',
+    },
+});

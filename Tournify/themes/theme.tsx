@@ -1,8 +1,7 @@
 import { useColorScheme } from 'react-native';
-import { Appearance } from 'react-native';
-import QRCode from 'react-native-qrcode-svg';
 
 export const lightTheme = {
+    id: 'lightTheme',
     background: '#ffffff',
     text: '#000000',
     mutedText: '#666666',
@@ -26,6 +25,7 @@ export const lightTheme = {
 };
 
 export const darkTheme = {
+    id: 'darkTheme',
     background: '#222222',
     text: '#ffffff',
     mutedText: '#aaaaaa',
@@ -49,10 +49,35 @@ export const darkTheme = {
     tableBorder: '#555555',
 };
 
+export const blackWhiteTheme = {
+    id: 'blackWhiteTheme',
+    background: '#000000',         // Pure black background
+    text: '#ffffff',               // Pure white text
+    mutedText: '#aaaaaa',          // Light gray for secondary text
+    card: '#111111',               // Very dark gray for card background
+    topBar: '#1a1a1a',             // Slightly lighter than background
+    dotActive: '#ffffff',          // White dot
+    dotInactive: '#555555',        // Mid-gray dot
+    historyCard: '#111111',        // Same dark gray as cards
+    tournamentCard: '#1a1a1a',     // Slightly lighter gray
+    inputBackground: '#000000',    // Keep it black
+    inputBorder: '#555555',        // Mid-gray border
+    teamButton: '#1a1a1a',         // Button same as card
+    descriptionText: '#cccccc',    // Light gray
+    createInputBackground: '#111111',
+    createInputBorder: '#555555',
+    placeholderText: '#888888',    // Medium gray placeholder
+    qrCode: '#ffffff',             // White on black
+    headerTable: '#111111',
+    tableRow: '#000000',
+    tableBorder: '#444444',
+};
+
 export const useTheme = () => {
     const scheme = useColorScheme();
     // console.log('Appearance.getColorScheme():', Appearance.getColorScheme());
     // console.log("Android detected scheme:", scheme);
     return scheme === 'dark' ? darkTheme : lightTheme;
     // return darkTheme;
+    // return blackWhiteTheme;
 };

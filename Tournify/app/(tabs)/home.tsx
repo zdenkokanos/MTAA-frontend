@@ -1,6 +1,6 @@
 import API_BASE_URL from "@/config/config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Text, View, StyleSheet, ScrollView, Image, FlatList, NativeSyntheticEvent, NativeScrollEvent, Dimensions, RefreshControl } from "react-native";
+import { Text, View, StyleSheet, ScrollView, FlatList, Image, NativeSyntheticEvent, NativeScrollEvent, Dimensions, RefreshControl } from "react-native";
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -192,7 +192,7 @@ export default function HomeScreen() {
                                             Authorization: `Bearer ${token}`,
                                         },
                                     }
-                                    : require("@/images/default-profile.jpg")
+                                    : require("@/assets/images/default-profile.jpg")
                             }
                             style={styles.avatar}
                             onError={(error) => {
@@ -301,7 +301,7 @@ export default function HomeScreen() {
                             }}
                             onInfoPress={() => router.push({
                                 pathname: `/history/${item.id}`,
-                                params: { position: item.position ? formatPosition(item.position) + `place` : null },
+                                params: { position: item.position ? formatPosition(item.position) : null },
                             })}
                         />
                     ))

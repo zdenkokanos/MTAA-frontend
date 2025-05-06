@@ -128,7 +128,17 @@ export default function TournamentInfoScreen() {
                     </View>
 
                     <Text style={styles.subtitle}>
-                        sport • level • date • time • game setting • tournament structure • entry fee • price structure
+                        {[
+                            tournament.category_name,
+                            tournament.level,
+                            tournament.time,
+                            tournament.game_setting,
+                            tournament.tournament_structure,
+                            `Entry fee: ` + tournament.entry_fee + `€`,
+                            tournament.price_description,
+                        ]
+                            .filter(Boolean)
+                            .join(' • ')}
                     </Text>
                     {/* TODO: add real data */}
 
@@ -217,6 +227,7 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
         fontSize: 12,
         color: '#666',
         marginBottom: 8,
+        textAlign: 'justify',
     },
     centered: {
         flex: 1,
