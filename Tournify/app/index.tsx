@@ -16,8 +16,8 @@ export default function Index() {
       <Link href="/preferencesSport" style={styles.button}>
         preferences sport
       </Link>
-      <Link href="/create" style={styles.button}>
-        create
+      <Link href="/events" style={styles.button}>
+        events
       </Link>
     </View>
   );
