@@ -10,6 +10,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import TournamentView from "@/components/explore/tournamentView";
 import useLocation from "@/hooks/useLocation";
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 interface Tournament {
     id: string;
@@ -167,7 +168,10 @@ export default function WelcomeScreen() {
                         }}
                     />
                 ) : (
-                    <Text style={styles.emptyText}>No top picks found.</Text>
+                    <View style={styles.container}>
+                        <MaterialIcons name="help-center" size={40} color={theme.text} />
+                        <Text style={styles.message}>You didn't host a tournament yet</Text>
+                    </View>
                 )}
                 <View style={styles.dotsContainer}>
                     {hostedTournaments.map((_, index) => (
@@ -195,7 +199,7 @@ export default function WelcomeScreen() {
                     <View>
                         {registeredTournaments.length > 0 ? (
                             registeredTournaments.map((item) => (
-                                <View key={item.id} style={{ marginHorizontal: 16, marginBottom: 16 }}>
+                                <View key={item.id} style={{ marginHorizontal: 10, marginBottom: 16 }}>
                                     <TournamentView
                                         title={item.tournament_name}
                                         date={item.date}
@@ -210,7 +214,7 @@ export default function WelcomeScreen() {
                                 </View>
                             ))
                         ) : (
-                            <Text style={styles.emptyText}>No upcoming events yet.</Text>
+                            <Text style={styles.emptyText}>You will see your registered tournaments here.</Text>
                         )}
                         </View>
 
@@ -248,7 +252,7 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
         color: theme.text,
     },
     sectionTitle: {
-        fontSize: 20,
+        fontSize: 12,
         fontWeight: "bold",
         margin: 20,
         color: theme.text,
@@ -280,5 +284,21 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     },
     inactiveDot: {
         color: theme.dotInactive,
+    },
+    container: {
+        backgroundColor: theme.card,
+        marginHorizontal: 20,
+        padding: 16,
+        borderRadius: 12,
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 12,
+        marginBottom: 12,
+        height: 100,
+    },
+    message: {
+        color: theme.text,
+        fontSize: 14,
+        fontWeight: 700,
     },
 });
