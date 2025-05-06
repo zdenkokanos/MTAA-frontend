@@ -14,6 +14,8 @@ export default function TabLayout() {
                 height: 95,
                 paddingTop: 10,
             },
+            tabBarActiveTintColor: '#128B53',
+            tabBarInactiveTintColor: '#999999',
         }} >
             <Tabs.Screen name="home" options={{ title: "Home", tabBarIcon: ({ focused, color }) => <Ionicons name="home" size={24} color={color} /> }} />
             <Tabs.Screen name="explore" options={{ title: "Explore", tabBarIcon: ({ focused, color }) => <Ionicons name="search" size={24} color={color} /> }} />

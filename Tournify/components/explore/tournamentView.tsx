@@ -12,10 +12,10 @@ interface TournamentCardProps {
     date: string;
     imageUrl: any;
     tournamentId: string;
-    lat: number;
-    lon: number;
-    userLat: number;
-    userLon: number;
+    lat: number | null;
+    lon: number| null;
+    userLat: number| null;
+    userLon: number| null;
     defaultDistance: number;
 }
 
@@ -25,17 +25,22 @@ const TournamentView = ({ title, date, imageUrl, tournamentId, lat, lon, userLat
     const router = useRouter();
 
     const distance = useMemo(() => {
-        if ( userLat !== 0 && userLon !== 0 ) {
-            const distanceInMeters = getDistance(
-                { latitude: userLat, longitude: userLon },
-                { latitude: lat, longitude: lon }
-            );
-            const distanceInKm = Math.round((distanceInMeters / 1000) * 10) / 10;
-            return `${distanceInKm} km from you`;
-        }else if ( userLat === 0 && userLon === 0 ){
-            return `${defaultDistance} km from you`;
+        if (
+            userLat !== null && userLon !== null &&
+            lat !== null && lon !== null)
+        {
+            if ( userLat !== 0 && userLon !== 0 ) {
+                const distanceInMeters = getDistance(
+                    { latitude: userLat, longitude: userLon },
+                    { latitude: lat, longitude: lon }
+                );
+                const distanceInKm = Math.round((distanceInMeters / 1000) * 10) / 10;
+                return `${distanceInKm} km from you`;
+            }else if ( userLat === 0 && userLon === 0 ){
+                return `${defaultDistance} km from you`;
+            }
+            return "Distance unknown";
         }
-        return "Distance unknown";
     }, [userLat, userLon, lat, lon]);
 
     
@@ -51,12 +56,16 @@ const TournamentView = ({ title, date, imageUrl, tournamentId, lat, lon, userLat
                         <View>
                             <Text style={styles.title}>{title}</Text>
 
-                            <View style={styles.detailsRow}>
+                            <View style={[styles.detailsRow, !distance && { justifyContent: 'flex-start' }]}>
                                 <Ionicons name="calendar-outline" size={16} color="#000" />
                                 <Text style={styles.detailText}>{useRelativeDate(date)}</Text>
 
-                                <Ionicons name="location-outline" size={16} color="#000" style={{ marginLeft: 12 }} />
-                                <Text style={styles.detailText}> {distance} </Text>
+                                {distance && (
+                                    <>
+                                        <Ionicons name="location-outline" size={16} color="#000" style={{ marginLeft: 12 }} />
+                                        <Text style={styles.detailText}> {distance} </Text>
+                                    </>
+                                )}
                             </View>
                         </View>
 

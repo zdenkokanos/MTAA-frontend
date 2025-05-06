@@ -180,7 +180,8 @@ export default function HomeScreen() {
                 contentContainerStyle={{ paddingBottom: 40 }}
                 refreshControl={
                     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-                }>
+                }
+            >
                 <View style={styles.header}>
                     <View style={styles.profileRow}>
                         <Image
