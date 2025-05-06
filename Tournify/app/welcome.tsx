@@ -7,7 +7,7 @@ export default function WelcomeScreen() {
 
     return (
         <ImageBackground
-            source={require("../images/welcome-background.jpg")}
+            source={require("@/assets/images/welcome-background.jpg")}
             style={styles.container}
         >
             <View style={styles.headerContainer}>
