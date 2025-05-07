@@ -17,10 +17,11 @@ import { formatDate } from '@/utils/formatDate';
 //***** Web Sockets ******/
 import io from 'socket.io-client';
 import { useRef } from 'react';
-const socketRef = useRef<any>(null);
 //***** Web Sockets ******/
 
 export default function TicketDetailScreen() {
+    const socketRef = useRef<any>(null);
+    
     const { ticketId } = useLocalSearchParams();
     const [loading, setLoading] = useState(true);
     const [ticket, setTicket] = useState<any>(null);

@@ -168,6 +168,7 @@ export default function HomeScreen() {
     // Variable to store the theme styles
     const theme = useTheme();
     const styles = useMemo(() => getStyles(theme), [theme]);
+    const isBW = theme.id === 'blackWhiteTheme';
 
     return (
         <SafeAreaView
@@ -274,7 +275,7 @@ export default function HomeScreen() {
                                 ticketId={ticket.id}
                                 date={ticket.date}
                                 imageUrl={{
-                                    uri: `${API_BASE_URL}/category/images/${ticket.category_image}`,
+                                    uri: `${API_BASE_URL}/category/images/${ticket.category_image}?grayscale=${isBW}`,
                                     headers: {
                                         Authorization: `Bearer ${token}`,
                                     },
@@ -295,7 +296,7 @@ export default function HomeScreen() {
                             date={item.date}
                             position={item.position ? formatPosition(item.position) : null}
                             imageUrl={{
-                                uri: `${API_BASE_URL}/category/images/${item.category_image}`,
+                                uri: `${API_BASE_URL}/category/images/${item.category_image}?grayscale=${isBW}`,
                                 headers: {
                                     Authorization: `Bearer ${token}`,
                                 },
