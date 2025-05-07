@@ -145,6 +145,7 @@ export default function TicketDetailScreen() {
     // Variable to store the theme styles
     const theme = useTheme();
     const styles = useMemo(() => getStyles(theme), [theme]);
+    const isBW = theme.id === 'blackWhiteTheme';
 
     if (loading) {
         return <View style={styles.centered}><ActivityIndicator size="large" /></View>;
@@ -167,9 +168,9 @@ export default function TicketDetailScreen() {
                 <View style={styles.imageContainer}>
                     <Image
                         source={{
-                            uri: tournament.localCategoryImage || `${API_BASE_URL}/category/images/${tournament.category_image}`,
+                            uri: tournament.localCategoryImage || `${API_BASE_URL}/category/images/${tournament.category_image}?grayscale=${isBW}`,
                             ...(tournament.localCategoryImage
-                                ? {} // no headers needed for local file
+                                ? {} 
                                 : token
                                     ? { headers: { Authorization: `Bearer ${token}` } }
                                     : {}),
@@ -272,124 +273,129 @@ export default function TicketDetailScreen() {
     );
 }
 
-const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
-    scrollViewContent: {
-        backgroundColor: theme.background,
-        paddingBottom: 50,
-    },
-    centered: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    joinedText: {
-        color: '#007AFF',
-        fontSize: 13,
-    },
-    enrolledTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginBottom: 10,
-        color: theme.text,
-    },
-    table: {
-        borderWidth: 1,
-        borderColor: theme.tableBorder,
-        borderRadius: 8,
-        overflow: 'hidden',
-    },
-    tableRow: {
-        flexDirection: 'row',
-        backgroundColor: theme.tableRow,
-    },
-    tableCell: {
-        flex: 1,
-        padding: 10,
-        fontSize: 14,
-        borderWidth: 1,
-        borderColor: theme.tableBorder,
-        color: theme.text,
-    },
-    headerCell: {
-        fontWeight: 'bold',
-        backgroundColor: theme.headerTable,
-    },
+const getStyles = (theme: ReturnType<typeof useTheme>) => {
+    const isBW = theme.id === 'blackWhiteTheme';
 
-    //this is from other file
-    imageContainer: {
-        position: 'relative',
-        height: 150,
-        zIndex: 1,
-    },
-    image: {
-        width: '100%',
-        height: '100%',
-        resizeMode: 'cover',
-    },
-    backButton: {
-        position: 'absolute',
-        top: 16,
-        left: 16,
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        padding: 10,
-        borderRadius: 25,
-    },
-    sheet: {
-        backgroundColor: theme.background,
-        borderTopLeftRadius: 32,
-        borderTopRightRadius: 32,
-        marginTop: -24,
-        paddingHorizontal: 25,
-        paddingTop: 20,
-        paddingBottom: 40,
-        position: 'relative',
-        zIndex: 2,
-    },
-    swipeBar: {
-        width: 60,
-        height: 5,
-        backgroundColor: '#ccc',
-        borderRadius: 2.5,
-        alignSelf: 'center',
-        marginBottom: 16,
-    },
-    headerRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 5,
-    },
-    title: {
-        fontSize: 22,
-        fontWeight: 'bold',
-        color: theme.text,
-        flexShrink: 1,
-    },
-    safeAreaBack: {
-        position: 'absolute',
-        top: 50,
-        left: 0,
-        right: 0,
-    },
-    dateUnderTitle: {
-        fontSize: 13,
-        color: '#999',
-        marginBottom: 6,
-    },
-    qrWrapper: {
-        alignItems: 'center',
-        marginVertical: 20,
-    },
-    qrTitle: {
-        textAlign: "center",
-        marginTop: 5,
-        color: theme.text,
-    },
-    teamCodeCopy: {
-        fontSize: 20,
-        fontWeight: '600',
-        color: '#007AFF',
-        textAlign: 'center',
-        marginVertical: 10,
-    },
-});
+    return StyleSheet.create({
+        scrollViewContent: {
+            backgroundColor: theme.background,
+            paddingBottom: 50,
+        },
+        centered: {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        joinedText: {
+            color: isBW ? '#eee' : '#007AFF',
+            fontSize: 13,
+        },
+        enrolledTitle: {
+            fontSize: 18,
+            fontWeight: 'bold',
+            marginBottom: 10,
+            color: theme.text,
+        },
+        table: {
+            borderWidth: 1,
+            borderColor: theme.tableBorder,
+            borderRadius: 8,
+            overflow: 'hidden',
+        },
+        tableRow: {
+            flexDirection: 'row',
+            backgroundColor: theme.tableRow,
+        },
+        tableCell: {
+            flex: 1,
+            padding: 10,
+            fontSize: 14,
+            borderWidth: 1,
+            borderColor: theme.tableBorder,
+            color: theme.text,
+        },
+        headerCell: {
+            fontWeight: 'bold',
+            backgroundColor: theme.headerTable,
+        },
+
+        //this is from other file
+        imageContainer: {
+            position: 'relative',
+            height: 150,
+            zIndex: 1,
+        },
+        image: {
+            width: '100%',
+            height: '100%',
+            resizeMode: 'cover',
+        },
+        backButton: {
+            position: 'absolute',
+            top: 16,
+            left: 16,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            padding: 10,
+            borderRadius: 25,
+        },
+        sheet: {
+            backgroundColor: theme.background,
+            borderTopLeftRadius: 32,
+            borderTopRightRadius: 32,
+            marginTop: -24,
+            paddingHorizontal: 25,
+            paddingTop: 20,
+            paddingBottom: 40,
+            position: 'relative',
+            zIndex: 2,
+        },
+        swipeBar: {
+            width: 60,
+            height: 5,
+            backgroundColor: '#ccc',
+            borderRadius: 2.5,
+            alignSelf: 'center',
+            marginBottom: 16,
+        },
+        headerRow: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 5,
+        },
+        title: {
+            fontSize: 22,
+            fontWeight: 'bold',
+            color: theme.text,
+            flexShrink: 1,
+        },
+        safeAreaBack: {
+            position: 'absolute',
+            top: 50,
+            left: 0,
+            right: 0,
+        },
+        dateUnderTitle: {
+            fontSize: 13,
+            color: '#999',
+            marginBottom: 6,
+        },
+        qrWrapper: {
+            alignItems: 'center',
+            marginVertical: 20,
+        },
+        qrTitle: {
+            textAlign: "center",
+            marginTop: 5,
+            color: theme.text,
+        },
+        teamCodeCopy: {
+            fontSize: 20,
+            fontWeight: '600',
+            color: isBW ? '#fff' : '#007AFF',
+            textDecorationLine: isBW ? 'underline' : 'none',
+            textAlign: 'center',
+            marginVertical: 10,
+        },
+    });
+};

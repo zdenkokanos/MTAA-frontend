@@ -16,6 +16,7 @@ export default function TournamentInfoScreen() {
     const { tournamentId, position } = useLocalSearchParams();
     const theme = useTheme();
     const styles = useMemo(() => getStyles(theme), [theme]);
+    const isBW = theme.id === 'blackWhiteTheme';
     const router = useRouter();
 
     const [tournament, setTournament] = useState<any>(null);
@@ -105,7 +106,7 @@ export default function TournamentInfoScreen() {
                 <View style={styles.imageContainer}>
                     <Image
                         source={{
-                            uri: `${API_BASE_URL}/category/images/${tournament.category_image}`,
+                            uri: `${API_BASE_URL}/category/images/${tournament.category_image}?grayscale=${isBW}`,
                             headers: token ? { Authorization: `Bearer ${token}` } : undefined,
                         }}
                         style={styles.image}
@@ -163,78 +164,82 @@ export default function TournamentInfoScreen() {
     );
 }
 
-const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: theme.background,
-    },
-    scrollContent: {
-        paddingBottom: 50,
-    },
-    imageContainer: {
-        height: 280,
-    },
-    image: {
-        width: '100%',
-        height: '100%',
-        resizeMode: 'cover',
-    },
-    safeAreaBack: {
-        position: 'absolute',
-        top: 50,
-        left: 0,
-        right: 0,
-        zIndex: 10,
-    },
-    backButton: {
-        position: 'absolute',
-        top: 16,
-        left: 16,
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        padding: 10,
-        borderRadius: 25,
-    },
-    sheet: {
-        backgroundColor: theme.background,
-        borderTopLeftRadius: 32,
-        borderTopRightRadius: 32,
-        marginTop: -24,
-        paddingHorizontal: 25,
-        paddingTop: 20,
-    },
-    swipeBar: {
-        width: 60,
-        height: 5,
-        backgroundColor: '#ccc',
-        borderRadius: 2.5,
-        alignSelf: 'center',
-        marginBottom: 16,
-    },
-    headerRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 6,
-    },
-    title: {
-        fontSize: 22,
-        fontWeight: 'bold',
-        color: theme.text,
-        flex: 1,
-        marginRight: 10,
-    },
-    subtitle: {
-        fontSize: 12,
-        color: '#666',
-        marginBottom: 8,
-        textAlign: 'justify',
-    },
-    centered: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    errorText: {
-        color: theme.text,
-    },
-});
+const getStyles = (theme: ReturnType<typeof useTheme>) => {
+    const isBW = theme.id === 'blackWhiteTheme';
+
+    return StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.background,
+        },
+        scrollContent: {
+            paddingBottom: 50,
+        },
+        imageContainer: {
+            height: 280,
+        },
+        image: {
+            width: '100%',
+            height: '100%',
+            resizeMode: 'cover',
+        },
+        safeAreaBack: {
+            position: 'absolute',
+            top: 50,
+            left: 0,
+            right: 0,
+            zIndex: 10,
+        },
+        backButton: {
+            position: 'absolute',
+            top: 16,
+            left: 16,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            padding: 10,
+            borderRadius: 25,
+        },
+        sheet: {
+            backgroundColor: theme.background,
+            borderTopLeftRadius: 32,
+            borderTopRightRadius: 32,
+            marginTop: -24,
+            paddingHorizontal: 25,
+            paddingTop: 20,
+        },
+        swipeBar: {
+            width: 60,
+            height: 5,
+            backgroundColor: '#ccc',
+            borderRadius: 2.5,
+            alignSelf: 'center',
+            marginBottom: 16,
+        },
+        headerRow: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 6,
+        },
+        title: {
+            fontSize: 22,
+            fontWeight: 'bold',
+            color: theme.text,
+            flex: 1,
+            marginRight: 10,
+        },
+        subtitle: {
+            fontSize: 12,
+            color: '#666',
+            marginBottom: 8,
+            textAlign: 'justify',
+        },
+        centered: {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        errorText: {
+            color: theme.text,
+        },
+    });
+};
