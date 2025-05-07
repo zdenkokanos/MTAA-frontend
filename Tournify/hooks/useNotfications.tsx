@@ -1,4 +1,3 @@
-// usePushToken.js
 import { useEffect, useState } from 'react';
 import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device';
