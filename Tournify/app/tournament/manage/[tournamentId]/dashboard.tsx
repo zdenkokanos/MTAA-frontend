@@ -68,6 +68,10 @@ export default function ManageTournamentScreen() {
                 setTournament(tournamentData);
             }
 
+            if (leaderboardRes.ok) {
+                setLeaderboard(leaderboardData);
+            }
+
             if (teamCountRes.ok) {
                 setTeamsCount(teamCountData[0]?.team_count ?? 0);
             } else {
@@ -84,39 +88,6 @@ export default function ManageTournamentScreen() {
             console.error('Error fetching tournament data:', err);
         } finally {
             setLoading(false);
-        }
-    };
-
-    const handleStart = async () => {
-        try {
-            const storedToken = await AsyncStorage.getItem('token');
-            if (!storedToken) {
-                Alert.alert("Unauthorized", "Token is missing.");
-                return;
-            }
-
-            const res = await fetch(`${API_BASE_URL}/tournaments/${tournamentId}/start`, {
-                method: 'PUT',
-                headers: {
-                    Authorization: `Bearer ${storedToken}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            const data = await res.json();
-
-            if (res.ok) {
-                Alert.alert("Success", "Tournament has started.");
-                fetchTournament();
-            } else {
-                console.error("Start error:", data.message);
-                Alert.alert("Error", data.message || "Failed to start tournament.");
-            }
-
-            router.replace(`/tournament/manage/${tournamentId}/dashboard`);
-        } catch (error) {
-            console.error("Start exception:", error);
-            Alert.alert("Error", "Something went wrong while starting the tournament.");
         }
     };
 
