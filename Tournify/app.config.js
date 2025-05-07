@@ -1,24 +1,26 @@
-import 'dotenv/config'; // load .env
+import 'dotenv/config';
 
 export default {
   expo: {
-    name: "Tourinify",
+    name: "Tournify",
     slug: "tournify",
-    scheme: "tournify",
+    icon: "./assets/images/icon.png",
     version: "1.0.0",
     sdkVersion: "53.0.0",
+    experiments: {
+      typedRoutes: true
+    },
     extra: {
       GOOGLE_MAPS_API_KEY: process.env.GOOGLE_MAPS_API_KEY,
+      "eas":{
+        "projectId": "54c22d57-3003-47b4-afe0-f75e0e5a4be8"
+      }
     },
-    "plugins": [
-      [
-        "expo-camera",
-        {
-          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
-          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
-          "recordAudioAndroid": true
-        }
-      ]
-    ]
+    "android": {
+      "package": "com.humptee25.tournify"
+    },
+    "ios": {
+      "bundleIdentifier": "com.humptee25.tournify"
+    }
   },
 };

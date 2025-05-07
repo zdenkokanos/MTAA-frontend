@@ -10,9 +10,12 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import API_BASE_URL from "@/config/config";
 import { useTheme } from "@/themes/theme";
 import SafeOfflineBanner from "@/components/offline/safeOfflineBanner";
+import { usePushToken } from "@/hooks/useNotfications";
 
 export default function LoginScreen() {
     const router = useRouter();
+
+    const pushToken = usePushToken();
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -36,7 +39,12 @@ export default function LoginScreen() {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ email, password }),
+                body: JSON.stringify({
+                    email,
+                    password,
+                    push_token: pushToken,
+                    platform: Platform.OS,
+                }),
             });
 
             const data = await response.json();

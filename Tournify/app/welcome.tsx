@@ -2,9 +2,18 @@ import { StyleSheet, ImageBackground, View, Animated, PanResponder, KeyboardAvoi
 import { router } from "expo-router";
 import StartButton from "@/components/startButton";
 import WelcomeHeader from "@/components/welcome/welcome-header";
+import { usePushToken } from "@/hooks/useNotfications";
+import { useEffect } from "react";
 
 export default function WelcomeScreen() {
 
+    const expoPushToken = usePushToken();
+    useEffect(() => {
+        if (expoPushToken) {
+            console.log("Expo push token:", expoPushToken);
+        }
+
+    }, [expoPushToken]);
     return (
         <ImageBackground
             source={require("@/assets/images/welcome-background.jpg")}

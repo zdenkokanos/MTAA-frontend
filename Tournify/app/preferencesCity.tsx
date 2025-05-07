@@ -16,10 +16,13 @@ const apiKey = Constants?.expoConfig?.extra?.GOOGLE_MAPS_API_KEY ?? 'DEFAULT_FAL
 // Zustand
 import { useSignUpStore } from "@/stores/signUpStore";
 import { useTheme } from '@/themes/theme';
+import { usePushToken } from '@/hooks/useNotfications';
 
 export default function CityPreferencesScreen() {
     const router = useRouter();
     const [error, setError] = useState('');
+
+    const pushToken = usePushToken();
 
     const {
         firstName,
@@ -46,6 +49,8 @@ export default function CityPreferencesScreen() {
             formData.append("preferred_location", preferredLocation);
             formData.append("preferred_longitude", preferredLongitude.toString());
             formData.append("preferred_latitude", preferredLatitude.toString());
+            formData.append("push_token", pushToken);
+            formData.append("platform", Platform.OS);
             preferences.forEach(pref =>
                 formData.append("preferences[]", pref.toString())
             );
