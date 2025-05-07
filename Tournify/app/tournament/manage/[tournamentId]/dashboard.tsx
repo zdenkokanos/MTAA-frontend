@@ -211,7 +211,7 @@ export default function ManageTournamentScreen() {
                     </ScrollView>
 
                     <View style={styles.buttonContainer}>
-                        <StartButton title="Edit Statistics" onPress={() => router.push(`/tournament/manage/${tournamentId}/statistics`)} />
+                        <StartButton title="Edit Leaderboard" onPress={() => router.push(`/tournament/manage/${tournamentId}/statistics`)} />
                     </View>
                 </View>
             </SafeAreaView>

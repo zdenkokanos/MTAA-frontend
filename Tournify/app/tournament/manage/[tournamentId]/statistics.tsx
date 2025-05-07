@@ -94,15 +94,29 @@ export default function EditLeaderboardScreen() {
             return;
         }
 
-        // Match input names to actual team IDs
         const teamNameToId = Object.fromEntries(joinedTeams.map(team => [team.team_name, team.id]));
 
         const requests = teamInputs.map((name, index) => {
             const trimmedName = name.trim();
             const teamId = teamNameToId[trimmedName];
+            const position = index + 1;
 
-            if (!trimmedName || !teamId) return null;
+            if (!trimmedName || !teamId) {
+                // DELETE request for empty inputs
+                return fetch(`${API_BASE_URL}/tournaments/leaderboard/remove`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({
+                        tournament_id: tournamentId,
+                        position: position,
+                    }),
+                });
+            }
 
+            // POST to add/update
             return fetch(`${API_BASE_URL}/tournaments/leaderboard/add`, {
                 method: 'POST',
                 headers: {
@@ -112,25 +126,26 @@ export default function EditLeaderboardScreen() {
                 body: JSON.stringify({
                     tournament_id: tournamentId,
                     team_id: teamId,
-                    position: index + 1,
+                    position: position,
                 }),
             });
-        }).filter(Boolean);
+        });
 
         try {
             const results = await Promise.all(requests);
-            const failed = results.filter((res): res is Response => res !== null && !res.ok);
+            const failed = results.filter(res => res && !res.ok);
 
             if (failed.length > 0) {
                 console.error(`${failed.length} records failed to submit.`);
             } else {
-                console.log('All records submitted successfully');
-                router.back();
+                console.log('Leaderboard updated successfully');
+                router.replace(`/tournament/manage/${tournamentId}/dashboard`);
             }
         } catch (error) {
             console.error('Submission error:', error);
         }
     };
+
 
 
     return (
@@ -146,7 +161,7 @@ export default function EditLeaderboardScreen() {
                             <TouchableOpacity onPress={() => router.back()} style={{ marginRight: 20 }}>
                                 <Ionicons name="arrow-back" size={24} color={theme.text} />
                             </TouchableOpacity>
-                            <Text style={styles.header}>Edit Statistics</Text>
+                            <Text style={styles.header}>Edit Leaderboard</Text>
                         </View>
 
                         {joinedTeams.map((team, index) => {
