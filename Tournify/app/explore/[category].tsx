@@ -123,6 +123,7 @@ export default function CategoryTournamentsScreen() {
                                         userLat={latitude}
                                         userLon={longitude}
                                         defaultDistance={item.distance}
+                                        type="detail"
                                     />
                                 </View>
                             )}
