@@ -1,10 +1,11 @@
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import API_BASE_URL from '@/config/config';
+import { useTheme } from "@/themes/theme";
 
 export default function QRScannerScreen() {
     const [permission, requestPermission] = useCameraPermissions();
@@ -12,6 +13,10 @@ export default function QRScannerScreen() {
     const [scanResult, setScanResult] = useState<'valid' | 'invalid' | null>(null);
     const router = useRouter();
     const { tournamentId } = useLocalSearchParams();
+
+    const theme = useTheme();
+    const styles = useMemo(() => getStyles(theme), [theme]);
+    const isBW = theme.id === 'blackWhiteTheme';
 
     const handleBarcodeScanned = async ({ data }: { data: string }) => {
         if (scanned) return;
@@ -60,6 +65,7 @@ export default function QRScannerScreen() {
             </View>
         );
     }
+    
 
     return (
         <View style={styles.container}>
@@ -97,78 +103,82 @@ export default function QRScannerScreen() {
     );
 }
 
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: 'black',
-    },
-    centered: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    permissionText: {
-        color: '#fff',
-        fontSize: 16,
-        marginBottom: 12,
-    },
-    permissionButton: {
-        padding: 12,
-        backgroundColor: '#2ecc71',
-        borderRadius: 8,
-    },
-    permissionButtonText: {
-        color: '#fff',
-        fontWeight: 'bold',
-    },
-    overlay: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    scanText: {
-        color: '#fff',
-        fontSize: 18,
-        marginBottom: 10,
-    },
-    scannerGuide: {
-        width: 200,
-        height: 200,
-        borderWidth: 3,
-        borderColor: '#fff',
-        borderRadius: 16,
-    },
-    backButton: {
-        position: 'absolute',
-        top: 50,
-        left: 20,
-        zIndex: 10,
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        padding: 10,
-        borderRadius: 25,
-    },
-    resultOverlay: {
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    valid: {
-        backgroundColor: 'rgba(46, 204, 113, 0.95)',
-    },
-    invalid: {
-        backgroundColor: 'rgba(231, 76, 60, 0.95)',
-    },
-    resultText: {
-        fontSize: 32,
-        fontWeight: 'bold',
-        color: '#fff',
-    },
-});
+const getStyles = (theme: ReturnType<typeof useTheme>) => {
+    const isBW = theme.id === 'blackWhiteTheme';
+
+    return StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: 'black',
+        },
+        centered: {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        permissionText: {
+            color: '#fff',
+            fontSize: 16,
+            marginBottom: 12,
+        },
+        permissionButton: {
+            padding: 12,
+            backgroundColor: '#2ecc71',
+            borderRadius: 8,
+        },
+        permissionButtonText: {
+            color: '#fff',
+            fontWeight: 'bold',
+        },
+        overlay: {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        scanText: {
+            color: '#fff',
+            fontSize: 18,
+            marginBottom: 10,
+        },
+        scannerGuide: {
+            width: 200,
+            height: 200,
+            borderWidth: 3,
+            borderColor: '#fff',
+            borderRadius: 16,
+        },
+        backButton: {
+            position: 'absolute',
+            top: 50,
+            left: 20,
+            zIndex: 10,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            padding: 10,
+            borderRadius: 25,
+        },
+        resultOverlay: {
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        valid: {
+            backgroundColor: isBW ? 'rgba(200, 200, 200, 0.95)' : 'rgba(46, 204, 113, 0.95)',
+        },
+        invalid: {
+            backgroundColor: isBW ? 'rgba(100, 100, 100, 0.95)' : 'rgba(231, 76, 60, 0.95)',
+        },
+        resultText: {
+            fontSize: 32,
+            fontWeight: 'bold',
+            color: '#fff',
+        },
+    });
+};
