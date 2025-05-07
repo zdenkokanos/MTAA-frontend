@@ -17,6 +17,8 @@ export default function ManageTournamentScreen() {
     const { tournamentId } = useLocalSearchParams();
     const theme = useTheme();
     const styles = useMemo(() => getStyles(theme), [theme]);
+    const isBW = theme.id === 'blackWhiteTheme';
+
     const router = useRouter();
 
     const [tournament, setTournament] = useState<any>(null);
@@ -157,7 +159,7 @@ export default function ManageTournamentScreen() {
                         <View style={styles.imageContainer}>
                             <Image
                                 source={{
-                                    uri: `${API_BASE_URL}/category/images/${tournament.category_image}`,
+                                    uri: `${API_BASE_URL}/category/images/${tournament.category_image}?grayscale=${isBW}`,
                                     headers: token ? { Authorization: `Bearer ${token}` } : undefined,
                                 }}
                                 style={styles.image}

@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Text, StyleSheet, TouchableOpacity, Linking, Platform } from 'react-native';
+import { Text, StyleSheet, TouchableOpacity, Linking, Platform, View } from 'react-native';
 import MapView, { Marker } from 'react-native-maps';
 import { useTheme } from '@/themes/theme';
 
@@ -10,8 +10,6 @@ interface Props {
 }
 
 export default function MapPreview({ latitude, longitude, tournamentName }: Props) {
-    const theme = useTheme();
-    const styles = useMemo(() => getStyles(theme), [theme]);
 
     const openInMaps = (lat: number, lng: number, label: string) => {
         const url = Platform.select({
@@ -23,6 +21,10 @@ export default function MapPreview({ latitude, longitude, tournamentName }: Prop
         }
     };
 
+    const theme = useTheme();
+    const styles = useMemo(() => getStyles(theme), [theme]);
+    const isBW = theme.id === 'blackWhiteTheme';
+
     return (
         <>
             <Text style={styles.title}>Map</Text>
@@ -30,21 +32,24 @@ export default function MapPreview({ latitude, longitude, tournamentName }: Prop
                 activeOpacity={0.9}
                 onPress={() => openInMaps(latitude, longitude, tournamentName)}
             >
-                <MapView
-                    style={styles.map}
-                    initialRegion={{
-                        latitude,
-                        longitude,
-                        latitudeDelta: 0.01,
-                        longitudeDelta: 0.01,
-                    }}
-                    scrollEnabled={false}
-                    zoomEnabled={false}
-                    pitchEnabled={false}
-                    rotateEnabled={false}
-                >
-                    <Marker coordinate={{ latitude, longitude }} title={tournamentName} />
-                </MapView>
+                <View style={styles.mapWrapper}>
+                    <MapView
+                        style={styles.map}
+                        initialRegion={{
+                            latitude,
+                            longitude,
+                            latitudeDelta: 0.01,
+                            longitudeDelta: 0.01,
+                        }}
+                        scrollEnabled={false}
+                        zoomEnabled={false}
+                        pitchEnabled={false}
+                        rotateEnabled={false}
+                    >
+                        {isBW && <View style={styles.overlay} />}
+                        <Marker coordinate={{ latitude, longitude }} title={tournamentName} />
+                    </MapView>
+                </View>
             </TouchableOpacity>
         </>
     );
@@ -63,5 +68,16 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
         borderRadius: 12,
         marginBottom: 24,
         backgroundColor: '#eee',
+    },
+    mapWrapper: {
+        position: 'relative',
+        borderRadius: 12,
+        overflow: 'hidden',
+        marginBottom: 24,
+    },
+    overlay: {
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: 'rgba(20, 20, 20, 0.6)',
+        zIndex: 2,
     },
 });

@@ -16,6 +16,8 @@ export default function ManageTournamentScreen() {
     const { tournamentId } = useLocalSearchParams();
     const theme = useTheme();
     const styles = useMemo(() => getStyles(theme), [theme]);
+    const isBW = theme.id === 'blackWhiteTheme';
+
     const router = useRouter();
 
     const [tournament, setTournament] = useState<any>(null);
@@ -147,7 +149,7 @@ export default function ManageTournamentScreen() {
                         <View style={styles.imageContainer}>
                             <Image
                                 source={{
-                                    uri: `${API_BASE_URL}/category/images/${tournament.category_image}`,
+                                    uri: `${API_BASE_URL}/category/images/${tournament.category_image}?grayscale=${isBW}`,
                                     headers: token ? { Authorization: `Bearer ${token}` } : undefined,
                                 }}
                                 style={styles.image}
@@ -231,141 +233,145 @@ export default function ManageTournamentScreen() {
 
 }
 
-const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: theme.background,
-    },
-    wrapper: {
-        flex: 1,
-        backgroundColor: theme.background,
-    },
-    fixedButtonContainer: {
-        position: 'absolute',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        padding: 16,
-        backgroundColor: theme.background,
-        borderTopWidth: 1,
-        borderTopColor: '#ccc',
-    },
-    scrollContent: {
-        paddingBottom: 10,
-    },
-    imageContainer: {
-        height: 280,
-    },
-    image: {
-        width: '100%',
-        height: '100%',
-        resizeMode: 'cover',
-    },
-    safeAreaBack: {
-        position: 'absolute',
-        top: 50,
-        left: 0,
-        right: 0,
-        zIndex: 10,
-    },
-    backButton: {
-        position: 'absolute',
-        top: 16,
-        left: 16,
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        padding: 10,
-        borderRadius: 25,
-    },
-    sheet: {
-        backgroundColor: theme.background,
-        borderTopLeftRadius: 32,
-        borderTopRightRadius: 32,
-        marginTop: -24,
-        paddingHorizontal: 25,
-        paddingTop: 20,
-    },
-    swipeBar: {
-        width: 60,
-        height: 5,
-        backgroundColor: '#ccc',
-        borderRadius: 2.5,
-        alignSelf: 'center',
-        marginBottom: 16,
-    },
-    title: {
-        fontSize: 22,
-        fontWeight: 'bold',
-        color: theme.text,
-        marginBottom: 6,
-    },
-    subtitle: {
-        fontSize: 12,
-        color: '#666',
-        marginBottom: 8,
-        textAlign: 'justify',
-    },
-    editButton: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        backgroundColor: '#F6D465',
-        padding: 15,
-        borderRadius: 20,
-        width: '100%',
-        alignSelf: 'center',
-        marginTop: 12,
-    },
-    editButtonText: {
-        color: '#000',
-        fontWeight: 'bold',
-        fontSize: 14,
-    },
-    sectionTitle: {
-        marginTop: 20,
-        fontWeight: 'bold',
-        fontSize: 16,
-        color: theme.text,
-    },
-    table: {
-        borderWidth: 1,
-        borderColor: theme.tableBorder,
-        borderRadius: 8,
-        overflow: 'hidden',
-        marginBottom: 20,
-    },
-    tableRow: {
-        flexDirection: 'row',
-        backgroundColor: theme.tableRow,
-    },
-    tableCell: {
-        flex: 1,
-        padding: 10,
-        fontSize: 14,
-        borderWidth: 1,
-        borderColor: theme.tableBorder,
-        color: theme.text,
-    },
-    headerCell: {
-        fontWeight: 'bold',
-        backgroundColor: theme.headerTable,
-    },
-    centered: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    errorText: {
-        color: theme.text,
-    },
-    enrolledTitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginTop: 20,
-        marginBottom: 10,
-        color: theme.text,
-    },
-    buttonContainer: {
-        paddingHorizontal: 20,
-        paddingBottom: 16,
-        backgroundColor: theme.background,
-    },
-});
+const getStyles = (theme: ReturnType<typeof useTheme>) => {
+    const isBW = theme.id === 'blackWhiteTheme';
+
+    return StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.background,
+        },
+        wrapper: {
+            flex: 1,
+            backgroundColor: theme.background,
+        },
+        fixedButtonContainer: {
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            padding: 16,
+            backgroundColor: theme.background,
+            borderTopWidth: 1,
+            borderTopColor: '#ccc',
+        },
+        scrollContent: {
+            paddingBottom: 10,
+        },
+        imageContainer: {
+            height: 280,
+        },
+        image: {
+            width: '100%',
+            height: '100%',
+            resizeMode: 'cover',
+        },
+        safeAreaBack: {
+            position: 'absolute',
+            top: 50,
+            left: 0,
+            right: 0,
+            zIndex: 10,
+        },
+        backButton: {
+            position: 'absolute',
+            top: 16,
+            left: 16,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            padding: 10,
+            borderRadius: 25,
+        },
+        sheet: {
+            backgroundColor: theme.background,
+            borderTopLeftRadius: 32,
+            borderTopRightRadius: 32,
+            marginTop: -24,
+            paddingHorizontal: 25,
+            paddingTop: 20,
+        },
+        swipeBar: {
+            width: 60,
+            height: 5,
+            backgroundColor: '#ccc',
+            borderRadius: 2.5,
+            alignSelf: 'center',
+            marginBottom: 16,
+        },
+        title: {
+            fontSize: 22,
+            fontWeight: 'bold',
+            color: theme.text,
+            marginBottom: 6,
+        },
+        subtitle: {
+            fontSize: 12,
+            color: '#666',
+            marginBottom: 8,
+            textAlign: 'justify',
+        },
+        editButton: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: isBW ? '#ccc' : '#F6D465',
+            padding: 15,
+            borderRadius: 20,
+            width: '100%',
+            alignSelf: 'center',
+            marginTop: 12,
+        },
+        editButtonText: {
+            color: '#000',
+            fontWeight: 'bold',
+            fontSize: 14,
+        },
+        sectionTitle: {
+            marginTop: 20,
+            fontWeight: 'bold',
+            fontSize: 16,
+            color: theme.text,
+        },
+        table: {
+            borderWidth: 1,
+            borderColor: theme.tableBorder,
+            borderRadius: 8,
+            overflow: 'hidden',
+            marginBottom: 20,
+        },
+        tableRow: {
+            flexDirection: 'row',
+            backgroundColor: theme.tableRow,
+        },
+        tableCell: {
+            flex: 1,
+            padding: 10,
+            fontSize: 14,
+            borderWidth: 1,
+            borderColor: theme.tableBorder,
+            color: theme.text,
+        },
+        headerCell: {
+            fontWeight: 'bold',
+            backgroundColor: theme.headerTable,
+        },
+        centered: {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        errorText: {
+            color: theme.text,
+        },
+        enrolledTitle: {
+            fontSize: 18,
+            fontWeight: 'bold',
+            marginTop: 20,
+            marginBottom: 10,
+            color: theme.text,
+        },
+        buttonContainer: {
+            paddingHorizontal: 20,
+            paddingBottom: 16,
+            backgroundColor: theme.background,
+        },
+    });
+};

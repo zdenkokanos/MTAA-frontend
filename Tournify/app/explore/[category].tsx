@@ -53,6 +53,7 @@ export default function CategoryTournamentsScreen() {
 
     const theme = useTheme();
     const styles = useMemo(() => getStyles(theme), [theme]);
+    const isBW = theme.id === 'blackWhiteTheme';
 
     // Refresh control for the FlatList
     const [refreshing, setRefreshing] = useState(false);
@@ -79,13 +80,20 @@ export default function CategoryTournamentsScreen() {
                     </View>
                 ) : tournaments.length === 0 ? (
                     <View style={styles.animationContainer}>
-                        <LottieView
-                            source={require('@/assets/animations/notFound.json')}
-                            autoPlay
-                            loop={true}
-                            style={styles.animation}
-                        />
-                        <Text style={styles.emptyText}>Sorry, no tournaments found.</Text>
+                        {!isBW ? (
+                            <>
+                            <LottieView
+                                source={require('@/assets/animations/notFound.json')}
+                                autoPlay
+                                loop={true}
+                                style={styles.animation}
+                                />
+                            <Text style={styles.emptyText}>Sorry, no tournaments found.</Text>
+                            </>
+                        ) : (
+                            <Text style={styles.emptyText}>Sorry, no tournaments found.</Text>
+                        )
+                        }
                     </View>
                 ) : (
                     <>

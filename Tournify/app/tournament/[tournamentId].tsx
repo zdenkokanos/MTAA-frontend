@@ -110,6 +110,7 @@ export default function TournamentDetailScreen() {
 
     const theme = useTheme();
     const styles = useMemo(() => getStyles(theme), [theme]);
+    const isBW = theme.id === 'blackWhiteTheme';
 
     if (loading) {
         return (
@@ -154,7 +155,7 @@ export default function TournamentDetailScreen() {
                     <View style={styles.imageContainer}>
                         <Image
                             source={{
-                                uri: `${API_BASE_URL}/category/images/${tournament.category_image}`,
+                                uri: `${API_BASE_URL}/category/images/${tournament.category_image}?grayscale=${isBW}`,
                                 headers: token ? { Authorization: `Bearer ${token}` } : undefined,
                             }}
                             style={styles.image}
@@ -289,187 +290,190 @@ export default function TournamentDetailScreen() {
     );
 }
 
-const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
-    container: {
-        flex: 1,
-        backgroundColor: theme.background,
-    },
-    imageContainer: {
-        position: 'relative',
-        height: 280,
-    },
-    image: {
-        width: '100%',
-        height: '100%',
-        resizeMode: 'cover',
-    },
-    backButton: {
-        position: 'absolute',
-        top: 16,
-        left: 16,
-        backgroundColor: 'rgba(0,0,0,0.5)',
-        padding: 10,
-        borderRadius: 25,
-    },
-    sheet: {
-        backgroundColor: theme.background,
-        borderTopLeftRadius: 32,
-        borderTopRightRadius: 32,
-        marginTop: -24,
-        paddingHorizontal: 25,
-        paddingTop: 20,
-        paddingBottom: 40,
-    },
-    swipeBar: {
-        width: 60,
-        height: 5,
-        backgroundColor: '#ccc',
-        borderRadius: 2.5,
-        alignSelf: 'center',
-        marginBottom: 16,
-    },
-    headerRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: 5,
-    },
-    title: {
-        fontSize: 22,
-        fontWeight: 'bold',
-        color: theme.text,
-        flexShrink: 1,
-    },
-    statsRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginVertical: 24,
-    },
-    stat: {
-        alignItems: 'center',
-        flex: 1,
-    },
-    statNumber: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        color: theme.text,
-    },
-    statLabel: {
-        fontSize: 13,
-        color: '#666',
-        marginTop: 4,
-    },
-    description: {
-        fontSize: 14,
-        color: theme.descriptionText,
-        marginBottom: 30,
-        textAlign: 'justify',
-        lineHeight: 20,
-        marginTop: 8,
-    },
-    readMoreInline: {
-        fontWeight: 'bold',
-        marginLeft: 4,
-        textDecorationLine: 'underline',
-    },
-    readMoreMore: {
-        color: '#007AFF', // blue
-    },
-    readMoreLess: {
-        color: '#999', // gray
-    },
-    teamButtons: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        marginBottom: 24,
-        color: theme.text,
-    },
-    teamButton: {
-        flex: 0.48,
-        backgroundColor: theme.teamButton,
-        paddingVertical: 12,
-        borderRadius: 12,
-        alignItems: 'center',
-    },
-    legalText: {
-        fontSize: 12,
-        color: '#999',
-        marginBottom: 20,
-        textAlign: 'justify',
-        lineHeight: 18,
-    },
-    continueButton: {
-        backgroundColor: '#38b381',
-        paddingVertical: 16,
-        borderRadius: 12,
-        alignItems: 'center',
-    },
-    continueButtonDisabled: {
-        backgroundColor: 'rgba(56, 179, 129, 0.4)'
-    },
-    continueText: {
-        color: '#fff',
-        fontWeight: 'bold',
-        fontSize: 16,
-    },
-    centered: {
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    safeAreaBack: {
-        position: 'absolute',
-        top: 50,
-        left: 0,
-        right: 0,
-        zIndex: 10,
-    },
-    dateUnderTitle: {
-        fontSize: 13,
-        color: '#999',
-        marginBottom: 6,
-    },
-    // Input styles
-    inputSection: {
-        marginBottom: 24,
-    },
-    inputLabel: {
-        fontSize: 14,
-        color: "#444",
-        marginBottom: 6,
-    },
-    inputBox: {
-        backgroundColor: theme.inputBackground,
-        borderWidth: 1,
-        borderColor: theme.inputBorder,
-        borderRadius: 12,
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-        flexDirection: "row",
-        alignItems: "center",
-    },
-    teamButtonSelected: {
-        backgroundColor: "#38b381",
-    },
-    teamButtonTextSelected: {
-        color: "#fff",
-        fontWeight: "bold",
-    },
-    icons: {
-        color: theme.text,
-    },
-    teamsButtonText: {
-        color: theme.text,
-    },
-    inputText: {
-        flex: 1,
-        color: theme.text,
-    },
-    subtitle: {
-        fontSize: 12,
-        color: '#666',
-        marginBottom: 8,
-        textAlign: 'justify',
-    },
-});
+const getStyles = (theme: ReturnType<typeof useTheme>) => {
+    const isBW = theme.id === 'blackWhiteTheme';
 
+    return StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme.background,
+        },
+        imageContainer: {
+            position: 'relative',
+            height: 280,
+        },
+        image: {
+            width: '100%',
+            height: '100%',
+            resizeMode: 'cover',
+        },
+        backButton: {
+            position: 'absolute',
+            top: 16,
+            left: 16,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            padding: 10,
+            borderRadius: 25,
+        },
+        sheet: {
+            backgroundColor: theme.background,
+            borderTopLeftRadius: 32,
+            borderTopRightRadius: 32,
+            marginTop: -24,
+            paddingHorizontal: 25,
+            paddingTop: 20,
+            paddingBottom: 40,
+        },
+        swipeBar: {
+            width: 60,
+            height: 5,
+            backgroundColor: '#ccc',
+            borderRadius: 2.5,
+            alignSelf: 'center',
+            marginBottom: 16,
+        },
+        headerRow: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: 5,
+        },
+        title: {
+            fontSize: 22,
+            fontWeight: 'bold',
+            color: theme.text,
+            flexShrink: 1,
+        },
+        statsRow: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            marginVertical: 24,
+        },
+        stat: {
+            alignItems: 'center',
+            flex: 1,
+        },
+        statNumber: {
+            fontSize: 20,
+            fontWeight: 'bold',
+            color: theme.text,
+        },
+        statLabel: {
+            fontSize: 13,
+            color: '#666',
+            marginTop: 4,
+        },
+        description: {
+            fontSize: 14,
+            color: theme.descriptionText,
+            marginBottom: 30,
+            textAlign: 'justify',
+            lineHeight: 20,
+            marginTop: 8,
+        },
+        readMoreInline: {
+            fontWeight: 'bold',
+            marginLeft: 4,
+            textDecorationLine: 'underline',
+        },
+        readMoreMore: {
+            color: '#007AFF', // blue
+        },
+        readMoreLess: {
+            color: '#999', // gray
+        },
+        teamButtons: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            marginBottom: 24,
+            color: theme.text,
+        },
+        teamButton: {
+            flex: 0.48,
+            backgroundColor: theme.teamButton,
+            paddingVertical: 12,
+            borderRadius: 12,
+            alignItems: 'center',
+        },
+        legalText: {
+            fontSize: 12,
+            color: '#999',
+            marginBottom: 20,
+            textAlign: 'justify',
+            lineHeight: 18,
+        },
+        continueButton: {
+            backgroundColor:  isBW ? '#bbb' : '#38b381',
+            paddingVertical: 16,
+            borderRadius: 12,
+            alignItems: 'center',
+        },
+        continueButtonDisabled: {
+            backgroundColor: isBW ? 'rgba(187, 187, 187, 0.4)' : 'rgba(56, 179, 129, 0.4)'
+        },
+        continueText: {
+            color: '#fff',
+            fontWeight: 'bold',
+            fontSize: 16,
+        },
+        centered: {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        safeAreaBack: {
+            position: 'absolute',
+            top: 50,
+            left: 0,
+            right: 0,
+            zIndex: 10,
+        },
+        dateUnderTitle: {
+            fontSize: 13,
+            color: '#999',
+            marginBottom: 6,
+        },
+        // Input styles
+        inputSection: {
+            marginBottom: 24,
+        },
+        inputLabel: {
+            fontSize: 14,
+            color: "#444",
+            marginBottom: 6,
+        },
+        inputBox: {
+            backgroundColor: theme.inputBackground,
+            borderWidth: 1,
+            borderColor: theme.inputBorder,
+            borderRadius: 12,
+            paddingHorizontal: 16,
+            paddingVertical: 12,
+            flexDirection: "row",
+            alignItems: "center",
+        },
+        teamButtonSelected: {
+            backgroundColor: isBW ? "#888" : "#38b381",
+        },
+        teamButtonTextSelected: {
+            color: "#fff",
+            fontWeight: "bold",
+        },
+        icons: {
+            color: theme.text,
+        },
+        teamsButtonText: {
+            color: theme.text,
+        },
+        inputText: {
+            flex: 1,
+            color: theme.text,
+        },
+        subtitle: {
+            fontSize: 12,
+            color: '#666',
+            marginBottom: 8,
+            textAlign: 'justify',
+        },
+    });
+};

@@ -136,6 +136,7 @@ export default function CreateTournament() {
     // Variable to store the theme styles
     const theme = useTheme();
     const styles = useMemo(() => getStyles(theme), [theme]);
+    const isBW = theme.id === 'blackWhiteTheme';
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -336,7 +337,7 @@ export default function CreateTournament() {
                                             >
                                                 {isActive ? (
                                                     <LinearGradient
-                                                        colors={["#64CA76", "#2E8B57"]}
+                                                        colors={isBW ? ["#999", "#777"] : ["#64CA76", "#2E8B57"]}
                                                         start={{ x: 0, y: 0 }}
                                                         end={{ x: 1, y: 1 }}
                                                         style={styles.optionButton}
@@ -420,166 +421,170 @@ export default function CreateTournament() {
 }
 
 
-const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
-    safeArea: {
-        flex: 1,
-        backgroundColor: theme.background,
-        paddingTop: Platform.OS === 'ios' ? 0 : 40,
-    },
-    wrapper: {
-        flex: 1,
-        backgroundColor: theme.background,
-    },
-    container: {
-        padding: 24,
-    },
-    mainTitle: {
-        flexDirection: 'row',
-        textAlignVertical: 'center',
-        marginTop: 20,
-        marginLeft: 25,
-    },
-    title: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 25,
-        color: theme.text,
-    },
-    icon: {
-        marginTop: 4,
-        marginRight: 10,
-        color: theme.text,
-    },
-    row: {
-        flexDirection: 'row',
-        textAlignVertical: 'center',
-    },
-    label: {
-        fontSize: 14,
-        fontWeight: '500',
-        marginBottom: 5,
-        marginTop: 10,
-        marginLeft: 15,
-        color: theme.text,
-    },
-    inputWrapper: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        backgroundColor: theme.createInputBackground,
-        borderColor: theme.createInputBorder,
-        borderWidth: 1,
-        borderRadius: 10,
-        paddingHorizontal: 12,
-        paddingVertical: 10,
-        height: 50,
-    },
-    input: {
-        flex: 1,
-        fontSize: 16,
-        paddingVertical: 0,
-        color: theme.text,
-    },
-    inputIcon: {
-        marginRight: 7,
-    },
-    pickerWrapper: {
-        marginVertical: 10,
-    },
-    inputRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'baseline',
-    },
-    numInput: {
-        backgroundColor: theme.createInputBackground,
+const getStyles = (theme: ReturnType<typeof useTheme>) => {
+    const isBW = theme.id === 'blackWhiteTheme';
 
-        borderColor: theme.createInputBorder,
-        borderWidth: 1,
-        borderLeftWidth: 0,
-        borderRightWidth: 0,
+    return StyleSheet.create({
 
-        paddingHorizontal: 20,
-        paddingVertical: 10,
-        height: 50,
-        fontSize: 16,
-        color: theme.text,
-        textAlign: 'left',
-        marginLeft: 5,
-    },
-    gameSettingRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        gap: 10,
-        marginTop: 5,
-    },
-    optionButton: {
-        paddingVertical: 12,
-        backgroundColor: theme.createInputBackground,
-        borderColor: theme.createInputBorder,
-        borderWidth: 1,
+        safeArea: {
+            flex: 1,
+            backgroundColor: theme.background,
+            paddingTop: Platform.OS === 'ios' ? 0 : 40,
+        },
+        wrapper: {
+            flex: 1,
+            backgroundColor: theme.background,
+        },
+        container: {
+            padding: 24,
+        },
+        mainTitle: {
+            flexDirection: 'row',
+            textAlignVertical: 'center',
+            marginTop: 20,
+            marginLeft: 25,
+        },
+        title: {
+            fontSize: 24,
+            fontWeight: 'bold',
+            marginBottom: 25,
+            color: theme.text,
+        },
+        icon: {
+            marginTop: 4,
+            marginRight: 10,
+            color: theme.text,
+        },
+        row: {
+            flexDirection: 'row',
+            textAlignVertical: 'center',
+        },
+        label: {
+            fontSize: 14,
+            fontWeight: '500',
+            marginBottom: 5,
+            marginTop: 10,
+            marginLeft: 15,
+            color: theme.text,
+        },
+        inputWrapper: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            backgroundColor: theme.createInputBackground,
+            borderColor: theme.createInputBorder,
+            borderWidth: 1,
+            borderRadius: 10,
+            paddingHorizontal: 12,
+            paddingVertical: 10,
+            height: 50,
+        },
+        input: {
+            flex: 1,
+            fontSize: 16,
+            paddingVertical: 0,
+            color: theme.text,
+        },
+        inputIcon: {
+            marginRight: 7,
+        },
+        pickerWrapper: {
+            marginVertical: 10,
+        },
+        inputRow: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'baseline',
+        },
+        numInput: {
+            backgroundColor: theme.createInputBackground,
 
-        borderRadius: 25,
-        width: '100%',
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
-    optionButtonActive: {
-        backgroundColor: '#64CA76',
-    },
-    optionText: {
-        fontSize: 14,
-        color: '#666',
-    },
-    optionTextActive: {
-        fontWeight: '900',
-        color: '#eee',
-    },
-    euroCircle: {
-        width: 24,
-        height: 24,
-        borderRadius: 12,
-        borderWidth: 2,
-        borderColor: theme.text,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginLeft: 8,
-    },
-    euroText: {
-        fontSize: 14,
-        fontWeight: 'bold',
-        color: theme.text,
-    },
-    buttonWrapper: {
-        width: '100%',
-        marginTop: 30
-    },
-    error: {
-        color: '#d9534f',
-        fontSize: 14,
-        marginBottom: 10,
-        textAlign: 'center',
-    },
-    textAreaWrapper: {
-        backgroundColor: theme.createInputBackground,
-        borderColor: theme.createInputBorder,
-        borderWidth: 1,
-        borderRadius: 15,
-        paddingHorizontal: 12,
-        paddingVertical: 10,
-        flexDirection: 'row',
-        alignItems: 'flex-start',
-        position: 'relative',
-    },
-    textArea: {
-        flex: 1,
-        fontSize: 16,
-        color: theme.text,
-        textAlignVertical: 'top', // needed for android
-        minHeight: 100,
-    },
-    formContent: {
-        gap: 15,
-    },
+            borderColor: theme.createInputBorder,
+            borderWidth: 1,
+            borderLeftWidth: 0,
+            borderRightWidth: 0,
 
-});
+            paddingHorizontal: 20,
+            paddingVertical: 10,
+            height: 50,
+            fontSize: 16,
+            color: theme.text,
+            textAlign: 'left',
+            marginLeft: 5,
+        },
+        gameSettingRow: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            gap: 10,
+            marginTop: 5,
+        },
+        optionButton: {
+            paddingVertical: 12,
+            backgroundColor: theme.createInputBackground,
+            borderColor: theme.createInputBorder,
+            borderWidth: 1,
+
+            borderRadius: 25,
+            width: '100%',
+            justifyContent: 'center',
+            alignItems: 'center'
+        },
+        optionButtonActive: {
+            backgroundColor: isBW ? '#000' : '#64CA76',
+        },
+        optionText: {
+            fontSize: 14,
+            color: '#666',
+        },
+        optionTextActive: {
+            fontWeight: '900',
+            color: '#eee',
+        },
+        euroCircle: {
+            width: 24,
+            height: 24,
+            borderRadius: 12,
+            borderWidth: 2,
+            borderColor: theme.text,
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginLeft: 8,
+        },
+        euroText: {
+            fontSize: 14,
+            fontWeight: 'bold',
+            color: theme.text,
+        },
+        buttonWrapper: {
+            width: '100%',
+            marginTop: 30
+        },
+        error: {
+            color: '#d9534f',
+            fontSize: 14,
+            marginBottom: 10,
+            textAlign: 'center',
+        },
+        textAreaWrapper: {
+            backgroundColor: theme.createInputBackground,
+            borderColor: theme.createInputBorder,
+            borderWidth: 1,
+            borderRadius: 15,
+            paddingHorizontal: 12,
+            paddingVertical: 10,
+            flexDirection: 'row',
+            alignItems: 'flex-start',
+            position: 'relative',
+        },
+        textArea: {
+            flex: 1,
+            fontSize: 16,
+            color: theme.text,
+            textAlignVertical: 'top', // needed for android
+            minHeight: 100,
+        },
+        formContent: {
+            gap: 15,
+        },
+    });
+};
