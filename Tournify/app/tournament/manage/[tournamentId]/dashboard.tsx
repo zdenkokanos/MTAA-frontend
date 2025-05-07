@@ -240,7 +240,7 @@ export default function ManageTournamentScreen() {
                     </ScrollView>
 
                     <View style={styles.buttonContainer}>
-                        <StartButton title="Edit Statistics" onPress={handleStart} />
+                        <StartButton title="Edit Statistics" onPress={() => router.push(`/tournament/manage/${tournamentId}/statistics`)} />
                     </View>
                 </View>
             </SafeAreaView>

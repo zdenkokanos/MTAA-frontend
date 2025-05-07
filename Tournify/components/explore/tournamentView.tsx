@@ -51,7 +51,7 @@ const TournamentView = ({ title, date, imageUrl, tournamentId, lat, lon, userLat
 
     return (
         <View style={styles.card}>
-            
+
             <ImageBackground source={{ uri: `${imageUrl.uri}?grayscale=${isBW}` }} style={styles.image} imageStyle={{ borderRadius: 12 }}
                 onError={(error) => {
                     console.log("Image failed to load:", error.nativeEvent.error);
@@ -63,12 +63,12 @@ const TournamentView = ({ title, date, imageUrl, tournamentId, lat, lon, userLat
                             <Text style={styles.title}>{title}</Text>
 
                             <View style={[styles.detailsRow, !distance && { justifyContent: 'flex-start' }]}>
-                                <Ionicons name="calendar-outline" size={16} color={theme.text} />
+                                <Ionicons name="calendar-outline" size={16} color={theme.cardColor} />
                                 <Text style={styles.detailText}>{useRelativeDate(date)}</Text>
 
                                 {distance && (
                                     <>
-                                        <Ionicons name="location-outline" size={16} color={theme.text} style={{ marginLeft: 12 }} />
+                                        <Ionicons name="location-outline" size={16} color={theme.cardColor} style={{ marginLeft: 12 }} />
                                         <Text style={styles.detailText}> {distance} </Text>
                                     </>
                                 )}
@@ -89,7 +89,7 @@ const TournamentView = ({ title, date, imageUrl, tournamentId, lat, lon, userLat
                                             ? `/ticket/${ticketId}`
                                             : `/tournament/${tournamentId}`;
 
-                                router.push(route);
+                                router.push(route as any);
                             }}
                         >
                             <Text style={styles.infoText}>{type == "owned" ? "Manage" : "Info"}</Text>
@@ -130,7 +130,7 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => {
             zIndex: 2,
         },
         title: {
-            color: theme.text,
+            color: theme.cardColor,
             fontSize: 18,
             fontWeight: "bold",
             marginBottom: 8,
@@ -146,7 +146,7 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => {
             flexDirection: "row",
         },
         detailText: {
-            color: theme.text,
+            color: theme.cardColor,
             marginLeft: 4,
             fontSize: 12,
         },
@@ -162,7 +162,7 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => {
             fontWeight: "600",
             fontSize: 15,
         },
-          
+
     });
 };
 
