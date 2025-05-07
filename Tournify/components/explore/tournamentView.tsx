@@ -25,6 +25,8 @@ interface TournamentCardProps {
 const TournamentView = ({ title, date, imageUrl, tournamentId, lat, lon, userLat, userLon, defaultDistance, type, ticketId, status }: TournamentCardProps) => {
     const theme = useTheme();
     const styles = useMemo(() => getStyles(theme), [theme]);
+    const isBW = theme.id === 'blackWhiteTheme';
+
     const router = useRouter();
 
     const distance = useMemo(() => {
@@ -49,22 +51,24 @@ const TournamentView = ({ title, date, imageUrl, tournamentId, lat, lon, userLat
 
     return (
         <View style={styles.card}>
-            <ImageBackground source={imageUrl} style={styles.image} imageStyle={{ borderRadius: 12 }}
+            
+            <ImageBackground source={{ uri: `${imageUrl.uri}?grayscale=${isBW}` }} style={styles.image} imageStyle={{ borderRadius: 12 }}
                 onError={(error) => {
                     console.log("Image failed to load:", error.nativeEvent.error);
-                }}>
+                }}
+            >
                 <View style={styles.overlay}>
                     <View style={styles.rowContainer}>
                         <View>
                             <Text style={styles.title}>{title}</Text>
 
                             <View style={[styles.detailsRow, !distance && { justifyContent: 'flex-start' }]}>
-                                <Ionicons name="calendar-outline" size={16} color="#000" />
+                                <Ionicons name="calendar-outline" size={16} color={theme.text} />
                                 <Text style={styles.detailText}>{useRelativeDate(date)}</Text>
 
                                 {distance && (
                                     <>
-                                        <Ionicons name="location-outline" size={16} color="#000" style={{ marginLeft: 12 }} />
+                                        <Ionicons name="location-outline" size={16} color={theme.text} style={{ marginLeft: 12 }} />
                                         <Text style={styles.detailText}> {distance} </Text>
                                     </>
                                 )}
@@ -101,59 +105,64 @@ const TournamentView = ({ title, date, imageUrl, tournamentId, lat, lon, userLat
 
 export default TournamentView;
 
-const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
-    rowContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-    },
-    card: {
-        width: '100%',
-        alignSelf: 'center',
-        borderRadius: 20,
-        overflow: 'hidden',
-        marginBottom: 20,
-    },
-    image: {
-        width: "100%",
-        height: 210,
-        justifyContent: "flex-end",
-    },
-    overlay: {
-        backgroundColor: theme.tournamentCard,
-        padding: 18,
-    },
-    title: {
-        color: "#000",
-        fontSize: 18,
-        fontWeight: "bold",
-        marginBottom: 8,
-        maxWidth: 220,
-    },
-    detailsRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        maxWidth: 130,
-    },
-    infoGroup: {
-        flexDirection: "row",
-    },
-    detailText: {
-        color: "#000",
-        marginLeft: 4,
-        fontSize: 12,
-    },
-    infoButton: {
-        backgroundColor: "#3f7368",
-        paddingHorizontal: 30,
-        paddingVertical: 10,
-        borderRadius: 10,
-        marginLeft: 20,
-    },
-    infoText: {
-        color: "#fff",
-        fontWeight: "600",
-        fontSize: 15,
-    },
-});
+const getStyles = (theme: ReturnType<typeof useTheme>) => {
+    const isBW = theme.id === 'blackWhiteTheme';
+    return StyleSheet.create({
+        rowContainer: {
+            flexDirection: "row",
+            alignItems: "center",
+        },
+        card: {
+            width: '100%',
+            alignSelf: 'center',
+            borderRadius: 20,
+            overflow: 'hidden',
+            marginBottom: 20,
+        },
+        image: {
+            width: "100%",
+            height: 210,
+            justifyContent: "flex-end",
+        },
+        overlay: {
+            backgroundColor: theme.tournamentCard,
+            padding: 18,
+            zIndex: 2,
+        },
+        title: {
+            color: theme.text,
+            fontSize: 18,
+            fontWeight: "bold",
+            marginBottom: 8,
+            maxWidth: 220,
+        },
+        detailsRow: {
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            maxWidth: 130,
+        },
+        infoGroup: {
+            flexDirection: "row",
+        },
+        detailText: {
+            color: theme.text,
+            marginLeft: 4,
+            fontSize: 12,
+        },
+        infoButton: {
+            backgroundColor: isBW ? '#888' : "#3f7368",
+            paddingHorizontal: 30,
+            paddingVertical: 10,
+            borderRadius: 10,
+            marginLeft: 20,
+        },
+        infoText: {
+            color: "#fff",
+            fontWeight: "600",
+            fontSize: 15,
+        },
+          
+    });
+};
 

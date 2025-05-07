@@ -13,6 +13,7 @@ interface Props {
 export default function CategoryContainer({ categoryName, imageFilename, onPress }: Props) {
     const theme = useTheme();
     const styles = useMemo(() => getStyles(theme), [theme]);
+    const isBW = theme.id === 'blackWhiteTheme';
 
 
     return (
@@ -22,7 +23,7 @@ export default function CategoryContainer({ categoryName, imageFilename, onPress
                     <ImageBackground
                         style={styles.image}
                         source={{
-                            uri: `${API_BASE_URL}/category/images/${imageFilename}`,
+                            uri: `${API_BASE_URL}/category/images/${imageFilename}?grayscale=${isBW}`,
                         }}
                         onError={(error) => {
                             console.log("Image failed to load:", error.nativeEvent.error);
