@@ -26,9 +26,10 @@ interface MenuItemProps {
     label: string;
     icon: React.ReactNode;
     onPress: () => void;
+    expanded?: boolean;
 }
 
-const MenuItem = ({ label, icon, onPress }: MenuItemProps) => {
+const MenuItem = ({ label, icon, onPress, expanded = false }: MenuItemProps) => {
     const theme = useTheme();
     const menuStyles = useMemo(() => getMenuStyles(theme), [theme]);
 
@@ -38,7 +39,12 @@ const MenuItem = ({ label, icon, onPress }: MenuItemProps) => {
           {icon}
           <Text style={menuStyles.label}>{label}</Text>
         </View>
-        <Ionicons name="chevron-forward" size={20} color="gray" />
+        <Ionicons 
+            name="chevron-forward" 
+            size={20} 
+            color="gray" 
+            style={{ transform: [{ rotate: expanded ? '90deg' : '0deg' }] }}
+        />
       </TouchableOpacity>
     );
 };
@@ -171,6 +177,7 @@ export default function ProfileScreen() {
                                 else if(editMode) setEditMode(false)
                             }
                         }
+                        expanded={editMode} // 🔄
                     />
                     {editMode && userData && token && (
                         <EditProfile
@@ -191,6 +198,7 @@ export default function ProfileScreen() {
                                 else if(showPassword) setShowPassword(false)
                             }
                         }
+                        expanded={showPassword} // 🔄
                     />
                     {showPassword && token && userData?.id && (
                         <ChangePasswordForm
