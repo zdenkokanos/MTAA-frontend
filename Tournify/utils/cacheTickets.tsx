@@ -28,7 +28,7 @@ export const cacheAllTickets = async () => {
 
         if (!ticketsRes.ok) {
             const err = await ticketsRes.json();
-            console.error('Failed to fetch ticket list:', err);
+            // console.error('Failed to fetch ticket list:', err);
             return;
         }
 

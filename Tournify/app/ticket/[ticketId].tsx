@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, ActivityIndicator, Image, TouchableOpacity, Platform, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, ActivityIndicator, Image, TouchableOpacity, Platform, RefreshControl, Modal } from 'react-native';
 import Toast from 'react-native-toast-message';
 import React, { useEffect, useMemo, useState } from 'react';
 import QRCode from 'react-native-qrcode-svg';
@@ -31,6 +31,9 @@ export default function TicketDetailScreen() {
     const [teamsCount, setTeamsCount] = useState<number | null>(null);
     const [enrolledTeams, setEnrolledTeams] = useState([]);
     const [refreshing, setRefreshing] = useState(false);
+
+    const [qrModalVisible, setQrModalVisible] = useState(false);
+
 
     const fetchData = async () => {
         try {
@@ -202,8 +205,41 @@ export default function TicketDetailScreen() {
 
                     < View style={styles.swipeBar} />
                     <View style={styles.qrWrapper}>
-                        <QRCode value={ticket.ticket} size={180} backgroundColor={theme.background} color={theme.qrCode} />
+                        <TouchableOpacity onPress={() => setQrModalVisible(true)}>
+                            <QRCode
+                                value={ticket.ticket}
+                                size={180}
+                                backgroundColor={theme.background}
+                                color={theme.qrCode}
+                            />
+                        </TouchableOpacity>
                     </View>
+
+                    {qrModalVisible && (
+                        <Modal
+                            transparent
+                            visible={qrModalVisible}
+                            animationType="fade"
+                            onRequestClose={() => setQrModalVisible(false)}
+                        >
+                            <TouchableOpacity
+                                style={styles.modalBackground}
+                                onPress={() => setQrModalVisible(false)}
+                                activeOpacity={1}
+                            >
+                                <View style={styles.modalContent}>
+                                    <QRCode
+                                        value={ticket.ticket}
+                                        size={300}
+                                        backgroundColor={theme.background}
+                                        color={theme.qrCode}
+                                    />
+                                </View>
+                            </TouchableOpacity>
+                        </Modal>
+                    )}
+
+
 
                     <Text style={styles.qrTitle}>Code for other members:</Text>
                     <TouchableOpacity
@@ -397,5 +433,17 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => {
             textAlign: 'center',
             marginVertical: 10,
         },
+        modalBackground: {
+            flex: 1,
+            backgroundColor: 'rgba(0,0,0,0.9)',
+            justifyContent: 'center',
+            alignItems: 'center',
+        },
+        modalContent: {
+            backgroundColor: theme.background,
+            padding: 20,
+            borderRadius: 20,
+        },
+        
     });
 };

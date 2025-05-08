@@ -1,6 +1,6 @@
 import API_BASE_URL from "@/config/config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Text, View, StyleSheet, ScrollView, FlatList, Image, NativeSyntheticEvent, NativeScrollEvent, Dimensions, RefreshControl } from "react-native";
+import { Text, View, StyleSheet, ScrollView, FlatList, Image, NativeSyntheticEvent, NativeScrollEvent, Dimensions, RefreshControl, TouchableOpacity } from "react-native";
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -196,34 +196,45 @@ export default function HomeScreen() {
                     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
                 }
             >
-                <View style={styles.header}>
-                    <View style={styles.profileRow}>
-                        <Image
-                            source={
-                                userInfo && userInfo.image_path !== "null" && userInfo.image_path && token
-                                    ? {
-                                        uri: `${API_BASE_URL}/uploads/${userInfo.image_path}?grayscale=${isBW}`,
-                                        headers: {
-                                            Authorization: `Bearer ${token}`,
-                                        },
-                                    }
-                                    : require("@/assets/images/default-profile.jpg")
-                            }
-                            style={styles.avatar}
-                            onError={(error) => {
-                                console.log("Image failed to load:", error.nativeEvent.error);
-                            }}
-                        />
-                        <View>
-                            <Text style={styles.name}>
-                                {userInfo ? `${userInfo.first_name} ${userInfo.last_name}` : "Loading..."}
-                            </Text>
-                            <Text style={styles.level}>Intermediate</Text>
+                <TouchableOpacity
+                    style={styles.profileRow}
+                    onPress={() => router.push({
+                        pathname: "/profileScreen",
+                        params: {
+                            first_name: userInfo?.first_name ?? '',
+                            last_name: userInfo?.last_name ?? '',
+                            image_path: userInfo?.image_path ?? '',
+                        },
+                    })}
+                >
+                    <View style={styles.header}>
+                        <View style={styles.profileRow}>
+                            <Image
+                                source={
+                                    userInfo && userInfo.image_path !== "null" && userInfo.image_path && token
+                                        ? {
+                                            uri: `${API_BASE_URL}/uploads/${userInfo.image_path}?grayscale=${isBW}`,
+                                            headers: {
+                                                Authorization: `Bearer ${token}`,
+                                            },
+                                        }
+                                        : require("@/assets/images/default-profile.jpg")
+                                }
+                                style={styles.avatar}
+                                onError={(error) => {
+                                    console.log("Image failed to load:", error.nativeEvent.error);
+                                }}
+                            />
+                            <View>
+                                <Text style={styles.name}>
+                                    {userInfo ? `${userInfo.first_name} ${userInfo.last_name}` : "Loading..."}
+                                </Text>
+                                <Text style={styles.level}>Intermediate</Text>
+                            </View>
                         </View>
-                        <Ionicons name="notifications-outline" size={24} style={styles.bellIcon} />
-                    </View>
 
-                </View>
+                    </View>
+                </TouchableOpacity>
 
                 <Text style={styles.sectionTitle}>Top Picks</Text>
                 {topPicks.length > 0 ? (
@@ -300,7 +311,14 @@ export default function HomeScreen() {
                     <Text style={styles.emptyText}>You have no tickets yet.</Text>
                 )}
                 {/* History */}
-                <Text style={styles.sectionTitle}>History</Text>
+                <View style={styles.sectionRow}>
+                    <Text style={styles.historyTitle}>History</Text>
+                    {history.length > 0 && (
+                        <TouchableOpacity onPress={() => router.push("/historyScreen")}>
+                            <Text style={styles.viewAll}>View All</Text>
+                        </TouchableOpacity>
+                    )}
+                </View>
                 {history.length > 0 ? (
                     <FlatList
                         data={history}
@@ -341,106 +359,128 @@ const formatPosition = (n: number) => { // Generated by OpenAI
     return `${position} place`;
 };
 
-const getStyles = (theme: ReturnType<typeof useTheme>, isLargeScreen: boolean) => StyleSheet.create({
-    safeArea: {
-        backgroundColor: theme.background,
-        minHeight: '100%',
-    },
-    header: {
-        marginTop: 20,
-        paddingHorizontal: 16,
-        paddingTop: 12,
-        paddingBottom: 10,
-    },
-    profileRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-    },
-    avatar: {
-        width: 50,
-        height: 50,
-        borderRadius: 25,
-        marginRight: 12,
-    },
-    name: {
-        fontSize: 16,
-        fontWeight: "bold",
-        color: theme.text,
-    },
-    level: {
-        fontSize: 13,
-        color: theme.mutedText,
-        marginTop: 2,
-    },
-    bellIcon: {
-        marginLeft: "auto",
-        marginRight: 20,
-        color: theme.text,
-    },
-    sectionTitle: {
-        fontSize: 20,
-        fontWeight: "bold",
-        margin: 20,
-        color: theme.text,
-    },
-    scrollContainer: {
-        paddingHorizontal: 16,
-        flexDirection: "row",
-        gap: 16,
-    },
-    horizontalList: {
-        paddingLeft: 16,
-        gap: 16,
-    },
-    emptyText: {
-        padding: 20,
-        fontSize: 14,
-        color: theme.mutedText,
-        fontStyle: "italic",
-        marginRight: 20,
-        marginBottom: 10,
-        marginLeft: 20,
-        backgroundColor: theme.card,
-        borderRadius: 10,
-    },
-    dotsContainer: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        alignItems: 'center',
-        marginTop: 12,
-    },
-    dot: {
-        fontSize: 10,
-        marginHorizontal: 4,
-        color: theme.dotInactive,
-    },
-    activeDot: {
-        color: theme.dotActive,
-    },
-    inactiveDot: {
-        color: theme.dotInactive,
-    },
-    historyCardWrapper: {
-        flex: 1,
-        marginHorizontal: isLargeScreen ? 8 : 0,
-        width: isLargeScreen
-            ? (Dimensions.get('window').width - 48) / 2
-            : undefined,
-    },
-    historyColumnWrapper: {
-        justifyContent: isLargeScreen ? 'space-between' : 'center',
-        marginBottom: 16,
-    },
-    topPicksRow: {
-        width: Dimensions.get('window').width,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingHorizontal: 16,
-    },
-    topPicksCardSideBySide: {
-        width: isLargeScreen
-            ? (Dimensions.get('window').width - 48) / 2  // Two cards
-            : Dimensions.get('window').width - 32,       // Full width for single card
-    },
-});
+const getStyles = (theme: ReturnType<typeof useTheme>, isLargeScreen: boolean) => {
+    const isBW = theme.id === 'blackWhiteTheme';
+    return StyleSheet.create({
+        safeArea: {
+            backgroundColor: theme.background,
+            minHeight: '100%',
+        },
+        header: {
+            marginTop: 20,
+            paddingHorizontal: 16,
+            paddingTop: 12,
+            paddingBottom: 10,
+        },
+        profileRow: {
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+        },
+        avatar: {
+            width: 50,
+            height: 50,
+            borderRadius: 25,
+            marginRight: 12,
+        },
+        name: {
+            fontSize: 16,
+            fontWeight: "bold",
+            color: theme.text,
+        },
+        level: {
+            fontSize: 13,
+            color: theme.mutedText,
+            marginTop: 2,
+        },
+        bellIcon: {
+            marginLeft: "auto",
+            marginRight: 20,
+            color: theme.text,
+        },
+        sectionTitle: {
+            fontSize: 20,
+            fontWeight: "bold",
+            margin: 20,
+            color: theme.text,
+        },
+        scrollContainer: {
+            paddingHorizontal: 16,
+            flexDirection: "row",
+            gap: 16,
+        },
+        horizontalList: {
+            paddingLeft: 16,
+            gap: 16,
+        },
+        emptyText: {
+            padding: 20,
+            fontSize: 14,
+            color: theme.mutedText,
+            fontStyle: "italic",
+            marginRight: 20,
+            marginBottom: 10,
+            marginLeft: 20,
+            backgroundColor: theme.card,
+            borderRadius: 10,
+        },
+        dotsContainer: {
+            flexDirection: 'row',
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginTop: 12,
+        },
+        dot: {
+            fontSize: 10,
+            marginHorizontal: 4,
+            color: theme.dotInactive,
+        },
+        activeDot: {
+            color: theme.dotActive,
+        },
+        inactiveDot: {
+            color: theme.dotInactive,
+        },
+        historyCardWrapper: {
+            flex: 1,
+            marginHorizontal: isLargeScreen ? 8 : 0,
+            width: isLargeScreen
+                ? (Dimensions.get('window').width - 48) / 2
+                : undefined,
+        },
+        historyColumnWrapper: {
+            justifyContent: isLargeScreen ? 'space-between' : 'center',
+            marginBottom: 16,
+        },
+        topPicksRow: {
+            width: Dimensions.get('window').width,
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            paddingHorizontal: 16,
+        },
+        topPicksCardSideBySide: {
+            width: isLargeScreen
+                ? (Dimensions.get('window').width - 48) / 2  // Two cards
+                : Dimensions.get('window').width - 32,       // Full width for single card
+        },
+        historyTitle: {
+            fontSize: 20,
+            fontWeight: "bold",
+            marginTop: 20,
+            color: theme.text,
+        },
+        sectionRow: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'flex-end',
+            marginHorizontal: 20,
+            marginBottom: 10,
+        },
+        viewAll: {
+            fontSize: 16,
+            color: isBW ? '#eee' : '#007AFF',
+            fontWeight: '600',
+            textDecorationLine: 'underline',
+        },
+    });
+}
