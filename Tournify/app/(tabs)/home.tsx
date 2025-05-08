@@ -1,6 +1,6 @@
 import API_BASE_URL from "@/config/config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Text, View, StyleSheet, ScrollView, FlatList, Image, NativeSyntheticEvent, NativeScrollEvent, Dimensions, RefreshControl } from "react-native";
+import { Text, View, StyleSheet, ScrollView, FlatList, Image, NativeSyntheticEvent, NativeScrollEvent, Dimensions, RefreshControl, TouchableOpacity } from "react-native";
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -183,11 +183,22 @@ export default function HomeScreen() {
                     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
                 }
             >
-                <View style={styles.header}>
-                    <View style={styles.profileRow}>
-                        <Image
-                            source={
-                                userInfo && userInfo.image_path !== "null" && userInfo.image_path && token
+                <TouchableOpacity
+                style={styles.profileRow}
+                onPress={() => router.push({
+                    pathname: "/profileScreen",
+                    params: {
+                      first_name: userInfo?.first_name ?? '',
+                      last_name: userInfo?.last_name ?? '',
+                      image_path: userInfo?.image_path ?? '',
+                    },
+                    })}
+                >
+                    <View style={styles.header}>
+                        <View style={styles.profileRow}>
+                            <Image
+                                source={
+                                    userInfo && userInfo.image_path !== "null" && userInfo.image_path && token
                                     ? {
                                         uri: `${API_BASE_URL}/uploads/${userInfo.image_path}`,
                                         headers: {
@@ -195,22 +206,22 @@ export default function HomeScreen() {
                                         },
                                     }
                                     : require("@/assets/images/default-profile.jpg")
-                            }
-                            style={styles.avatar}
-                            onError={(error) => {
-                                console.log("Image failed to load:", error.nativeEvent.error);
-                            }}
-                        />
-                        <View>
-                            <Text style={styles.name}>
-                                {userInfo ? `${userInfo.first_name} ${userInfo.last_name}` : "Loading..."}
-                            </Text>
-                            <Text style={styles.level}>Intermediate</Text>
+                                }
+                                style={styles.avatar}
+                                onError={(error) => {
+                                    console.log("Image failed to load:", error.nativeEvent.error);
+                                }}
+                                />
+                            <View>
+                                <Text style={styles.name}>
+                                    {userInfo ? `${userInfo.first_name} ${userInfo.last_name}` : "Loading..."}
+                                </Text>
+                                <Text style={styles.level}>Intermediate</Text>
+                            </View>
                         </View>
-                        <Ionicons name="notifications-outline" size={24} style={styles.bellIcon} />
-                    </View>
 
-                </View>
+                    </View>
+                </TouchableOpacity>
 
                 <Text style={styles.sectionTitle}>Top Picks</Text>
                 {topPicks.length > 0 ? (
@@ -338,7 +349,7 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     profileRow: {
         flexDirection: "row",
         alignItems: "center",
-        justifyContent: "space-between",
+        justifyContent: "flex-start",
     },
     avatar: {
         width: 50,

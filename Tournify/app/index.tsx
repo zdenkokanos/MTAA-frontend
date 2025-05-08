@@ -1,7 +1,15 @@
 import { Text, View, StyleSheet } from "react-native";
 import { Link } from "expo-router";
+import { useThemeStore } from '@/stores/themeStore';
+import { useEffect } from "react";
 
 export default function Index() {
+  const loadTheme = useThemeStore((s) => s.loadTheme);
+
+  useEffect(() => {
+    loadTheme();
+  }, []);
+  
   return (
     <View style={styles.container}>
       <Text style={styles.text}>Hello World</Text>

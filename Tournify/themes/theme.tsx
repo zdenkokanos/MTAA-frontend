@@ -1,4 +1,5 @@
 import { useColorScheme } from 'react-native';
+import { useThemeStore } from '@/stores/themeStore';
 
 export const lightTheme = {
     id: 'lightTheme',
@@ -77,10 +78,13 @@ export const blackWhiteTheme = {
 };
 
 export const useTheme = () => {
-    const scheme = useColorScheme();
-    // console.log('Appearance.getColorScheme():', Appearance.getColorScheme());
-    // console.log("Android detected scheme:", scheme);
-    return scheme === 'dark' ? darkTheme : lightTheme;
-    // return darkTheme;
-    // return blackWhiteTheme;
+    const selected = useThemeStore((s) => s.theme);
+    const system = useColorScheme();
+  
+    if (selected === 'light') return lightTheme;
+    if (selected === 'dark') return darkTheme;
+    if (selected === 'bw') return blackWhiteTheme;
+    return system === 'dark' ? darkTheme : lightTheme; // system default
 };
+
+//** Theme switching was made with help from ChatGPT */
