@@ -146,7 +146,7 @@ export default function ManageTournamentScreen() {
                                 style={styles.image}
                             />
                             <SafeAreaView style={styles.safeAreaBack}>
-                                <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+                                <TouchableOpacity style={styles.backButton} onPress={() => router.navigate("/(tabs)/events")}>
                                     <Ionicons name="arrow-back" size={24} color="white" />
                                 </TouchableOpacity>
                             </SafeAreaView>
@@ -155,7 +155,23 @@ export default function ManageTournamentScreen() {
                         <View style={styles.sheet}>
                             <View style={styles.swipeBar} />
                             <View style={styles.headerRow}>
-                                <Text style={styles.title}>{tournament.tournament_name}</Text>
+                                <View style={{ flex: 1 }}>
+                                    <Text style={styles.title}>{tournament.tournament_name}</Text>
+                                    {tournament.status && (
+                                        <Text
+                                            style={[
+                                                styles.statusText,
+                                                tournament.status === 'Ongoing'
+                                                    ? { color: 'green' }
+                                                    : tournament.status === 'Closed'
+                                                        ? { color: 'red' }
+                                                        : { color: '#888' },
+                                            ]}
+                                        >
+                                            {tournament.status}
+                                        </Text>
+                                    )}
+                                </View>
                                 <TouchableOpacity
                                     style={styles.qrIconContainer}
                                     onPress={() => router.push(`/tournament/manage/${tournamentId}/scan`)}
@@ -221,7 +237,12 @@ export default function ManageTournamentScreen() {
                     </ScrollView>
 
                     <View style={styles.buttonContainer}>
-                        <StartButton title="Edit Leaderboard" onPress={() => router.push(`/tournament/manage/${tournamentId}/statistics`)} />
+                        <StartButton
+                            title="Edit Leaderboard"
+                            onPress={() =>
+                                router.push(`/tournament/manage/${tournamentId}/statistics?t_status=${encodeURIComponent(tournament.status)}`)
+                            }
+                        />
                     </View>
                 </View>
             </SafeAreaView>
@@ -385,5 +406,10 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         marginBottom: 5,
+    },
+    statusText: {
+        fontSize: 14,
+        fontWeight: '600',
+        marginBottom: 6,
     },
 });

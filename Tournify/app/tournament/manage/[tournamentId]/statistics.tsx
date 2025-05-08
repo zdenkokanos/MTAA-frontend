@@ -17,12 +17,15 @@ function getOrdinal(n: number) {
 
 export default function EditLeaderboardScreen() {
     // states for dropdown
-    const [status, setStatus] = useState('Ongoing');
+    const { tournamentId, t_status } = useLocalSearchParams(); // Get tournamentId from URL params
+    console.log('Status:', t_status);
+    const [status, setStatus] = useState(() => {
+        return t_status === 'Ongoing' || t_status === 'Closed' ? t_status : 'Ongoing';
+    });
     const [open, setOpen] = useState(false);
     const [items, setItems] = useState([
         { label: 'Ongoing', value: 'Ongoing' },
         { label: 'Closed', value: 'Closed' },
-        { label: 'Suspended', value: 'Suspended' },
     ]);
 
     // keeps information about which input is focused and their references
@@ -33,8 +36,6 @@ export default function EditLeaderboardScreen() {
     const [joinedTeams, setJoinedTeams] = useState<{ id: number; team_name: string }[]>([]);
     const [teamInputs, setTeamInputs] = useState<string[]>([]);
     const [suggestions, setSuggestions] = useState<{ id: number; team_name: string }[]>([]);
-
-    const { tournamentId } = useLocalSearchParams(); // Get tournamentId from URL params
 
     useEffect(() => {
         const fetchData = async () => {
@@ -68,15 +69,13 @@ export default function EditLeaderboardScreen() {
                 // Create a map from team ID to name for easier lookup.
                 const teamMap = Object.fromEntries(teams.map((t: { id: number; team_name: string }) => [t.id, t.team_name]));
 
-                const prefilledInputs: string[] = [];
+                const prefilledInputs: string[] = new Array(teams.length).fill('');
                 leaderboardData.forEach((entry: any) => {
-                    prefilledInputs[entry.position - 1] = teamMap[entry.team_id] || '';
+                    const teamName = teamMap[entry.team_id];
+                    if (teamName) {
+                        prefilledInputs[entry.position - 1] = teamName;
+                    }
                 });
-
-                // Fill remaining with empty strings if needed
-                while (prefilledInputs.length < teams.length) {
-                    prefilledInputs.push('');
-                }
 
                 setTeamInputs(prefilledInputs);
 
@@ -99,46 +98,79 @@ export default function EditLeaderboardScreen() {
             return;
         }
 
-        // Map team names to their IDs.
-        const teamNameToId = Object.fromEntries(joinedTeams.map(team => [team.team_name, team.id]));
+        try {
+            // Update tournament status first
+            let statusEndpoint = '';
+            if (status === 'Ongoing') {
+                statusEndpoint = `${API_BASE_URL}/tournaments/${tournamentId}/start`;
+            } else if (status === 'Closed') {
+                statusEndpoint = `${API_BASE_URL}/tournaments/${tournamentId}/stop`;
+            }
 
-        const requests = teamInputs.map((name, index) => {
-            const trimmedName = name.trim();
-            const teamId = teamNameToId[trimmedName];
-            const position = index + 1;
+            if (statusEndpoint) {
+                const statusRes = await fetch(statusEndpoint, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
 
-            if (!trimmedName || !teamId) {
-                // DELETE request for empty inputs
-                return fetch(`${API_BASE_URL}/tournaments/leaderboard/remove`, {
-                    method: 'DELETE',
+                if (!statusRes.ok) {
+                    const errText = await statusRes.text();
+                    console.error(`Failed to update tournament status. Status: ${statusRes.status}, Response: ${errText}`);
+                    return;
+                }
+
+                console.log(`Tournament status updated to ${status}`);
+            }
+
+            // Map team names to their IDs
+            const teamNameToId = Object.fromEntries(joinedTeams.map(team => [team.team_name, team.id]));
+
+            const requests = teamInputs.map((name, index) => {
+                const trimmedName = name.trim();
+                const teamId = teamNameToId[trimmedName];
+                const position = index + 1;
+
+                if (!trimmedName || !teamId) {
+                    // DELETE request for empty inputs
+                    return fetch(`${API_BASE_URL}/tournaments/leaderboard/remove`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: `Bearer ${token}`,
+                        },
+                        body: JSON.stringify({
+                            tournament_id: tournamentId,
+                            position: position,
+                        }),
+                    });
+                }
+
+                // POST to add/update
+                return fetch(`${API_BASE_URL}/tournaments/leaderboard/add`, {
+                    method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         Authorization: `Bearer ${token}`,
                     },
                     body: JSON.stringify({
                         tournament_id: tournamentId,
+                        team_id: teamId,
                         position: position,
                     }),
                 });
-            }
-
-            // POST to add/update
-            return fetch(`${API_BASE_URL}/tournaments/leaderboard/add`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({
-                    tournament_id: tournamentId,
-                    team_id: teamId,
-                    position: position,
-                }),
             });
-        });
 
-        try {
             const results = await Promise.all(requests);
+
+            results.forEach((res, i) => {
+                if (!res.ok) {
+                    console.warn(`Request at index ${i} failed with status ${res.status}`);
+                }
+            });
+
             const failed = results.filter(res => res && !res.ok);
 
             if (failed.length > 0) {
@@ -147,10 +179,12 @@ export default function EditLeaderboardScreen() {
                 console.log('Leaderboard updated successfully');
                 router.replace(`/tournament/manage/${tournamentId}/dashboard`);
             }
+
         } catch (error) {
             console.error('Submission error:', error);
         }
     };
+
 
 
     return (

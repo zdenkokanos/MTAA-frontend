@@ -302,10 +302,9 @@ export default function HomeScreen() {
                                     Authorization: `Bearer ${token}`,
                                 },
                             }}
-                            onInfoPress={() => router.push({
-                                pathname: `/history/${item.id}`,
-                                params: { position: item.position ? formatPosition(item.position) : null },
-                            })}
+                            onInfoPress={() => router.push(
+                                `/history/${item.id}?position=${encodeURIComponent(item.position ? formatPosition(item.position) : '')}`
+                            )}
                         />
                     ))
                 ) : (
