@@ -16,7 +16,7 @@ function getOrdinal(n: number) {
 }
 
 export default function EditLeaderboardScreen() {
-    const insets = useSafeAreaInsets();
+    // states for dropdown
     const [status, setStatus] = useState('Ongoing');
     const [open, setOpen] = useState(false);
     const [items, setItems] = useState([
@@ -24,13 +24,17 @@ export default function EditLeaderboardScreen() {
         { label: 'Closed', value: 'Closed' },
         { label: 'Suspended', value: 'Suspended' },
     ]);
+
+    // keeps information about which input is focused and their references
     const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
     const inputRefs = useRef<(TextInput | null)[]>([]);
+
+    // variables for team names and suggestions
     const [joinedTeams, setJoinedTeams] = useState<{ id: number; team_name: string }[]>([]);
     const [teamInputs, setTeamInputs] = useState<string[]>([]);
     const [suggestions, setSuggestions] = useState<{ id: number; team_name: string }[]>([]);
 
-    const { tournamentId } = useLocalSearchParams();
+    const { tournamentId } = useLocalSearchParams(); // Get tournamentId from URL params
 
     useEffect(() => {
         const fetchData = async () => {
@@ -57,14 +61,15 @@ export default function EditLeaderboardScreen() {
                 const enrolledData = await enrolledRes.json();
                 const leaderboardData = await leaderboardRes.json();
 
-                const teams = enrolledData.teams || enrolledData;
+                const teams = enrolledData;
                 setJoinedTeams(teams);
                 setSuggestions(teams);
 
+                // Create a map from team ID to name for easier lookup.
                 const teamMap = Object.fromEntries(teams.map((t: { id: number; team_name: string }) => [t.id, t.team_name]));
 
                 const prefilledInputs: string[] = [];
-                leaderboardData.forEach((entry: any, i: number) => {
+                leaderboardData.forEach((entry: any) => {
                     prefilledInputs[entry.position - 1] = teamMap[entry.team_id] || '';
                 });
 
@@ -94,6 +99,7 @@ export default function EditLeaderboardScreen() {
             return;
         }
 
+        // Map team names to their IDs.
         const teamNameToId = Object.fromEntries(joinedTeams.map(team => [team.team_name, team.id]));
 
         const requests = teamInputs.map((name, index) => {
@@ -147,18 +153,17 @@ export default function EditLeaderboardScreen() {
     };
 
 
-
     return (
         <SafeAreaView style={styles.container}>
             <View style={{ flex: 1 }}>
                 <KeyboardAvoidingView
                     behavior={Platform.OS === 'ios' ? 'padding' : undefined}
                     style={{ flex: 1 }}
-                    keyboardVerticalOffset={insets.top + 60}
+                    keyboardVerticalOffset={60}
                 >
                     <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
                         <View style={styles.headerRow}>
-                            <TouchableOpacity onPress={() => router.back()} style={{ marginRight: 20 }}>
+                            <TouchableOpacity onPress={() => router.replace(`/tournament/manage/${tournamentId}/dashboard`)} style={{ marginRight: 20 }}>
                                 <Ionicons name="arrow-back" size={24} color={theme.text} />
                             </TouchableOpacity>
                             <Text style={styles.header}>Edit Leaderboard</Text>
@@ -279,7 +284,7 @@ export default function EditLeaderboardScreen() {
                     </ScrollView>
                 </KeyboardAvoidingView>
 
-                <View style={[styles.buttonContainer, { paddingBottom: insets.bottom || 16 }]}>
+                <View style={[styles.buttonContainer, { paddingBottom: 16 }]}>
                     <View style={styles.dropdownWrapper}>
                         <Text style={styles.statusLabel}>Change status</Text>
                         <DropDownPicker
