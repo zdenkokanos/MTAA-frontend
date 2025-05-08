@@ -1,4 +1,5 @@
 import { useColorScheme } from 'react-native';
+import { useThemeStore } from '@/stores/themeStore';
 
 export const lightTheme = {
     id: 'lightTheme',
@@ -77,10 +78,13 @@ export const blackWhiteTheme = {
 };
 
 export const useTheme = () => {
-    const scheme = useColorScheme();
-    // console.log('Appearance.getColorScheme():', Appearance.getColorScheme());
-    // console.log("Android detected scheme:", scheme);
-    return scheme === 'dark' ? darkTheme : lightTheme;
-    // return darkTheme;
-    // return blackWhiteTheme;
+    return useThemeStore((state) => state.getThemeObject());
 };
+// export const useTheme = () => {
+//     const scheme = useColorScheme();
+//     // console.log('Appearance.getColorScheme():', Appearance.getColorScheme());
+//     // console.log("Android detected scheme:", scheme);
+//     return scheme === 'dark' ? darkTheme : lightTheme;
+//     // return darkTheme;
+//     // return blackWhiteTheme;
+// };

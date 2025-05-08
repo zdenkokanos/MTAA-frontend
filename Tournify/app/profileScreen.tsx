@@ -9,6 +9,9 @@ import EditProfile from '../components/profile/editProfile';
 import OfflineBanner from '@/components/offline/safeOfflineBanner';
 import ChangePasswordForm from '@/components/profile/changePassword';
 
+import { useThemeStore } from '@/stores/themeStore';
+
+
 interface UserData{
     id: number;
     first_name: string;
@@ -89,9 +92,15 @@ export default function ProfileScreen() {
         // logout logic tu
     };
 
-    const theme = useTheme();
+    // const theme = useTheme();
+    // const isBW = theme.id === 'blackWhiteTheme';
+    // const themeStore = useThemeStore();
+    
+    const themeName = useThemeStore((s) => s.theme); // 'light' | 'dark' | 'bw'
+    const theme = useThemeStore((s) => s.getThemeObject());
+    const setTheme = useThemeStore((s) => s.setTheme);
     const styles = useMemo(() => getStyles(theme), [theme]);
-    const isBW = theme.id === 'blackWhiteTheme';
+
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -169,10 +178,14 @@ export default function ProfileScreen() {
 
 
                     <MenuItem
-                        label="Theme Mode"
+                        label={`Theme: ${themeName.toUpperCase()}`}
                         icon={<MaterialIcons name="brightness-6" size={20} color={theme.text} />}
-                        onPress={() => console.log("Open theme selector")}
+                        onPress={() => {
+                            const next = themeName === 'light' ? 'dark' : themeName === 'dark' ? 'bw' : 'light';
+                            setTheme(next);
+                        }}
                     />
+
                     <MenuItem
                         label="Sign Out"
                         icon={<Ionicons name="exit-outline" size={20} color={theme.text} />}

@@ -125,7 +125,6 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
   container: {
     paddingVertical: 10,
     paddingHorizontal: 10,
-    backgroundColor: '#f8f8f8',
     borderRadius: 12,
     marginTop: 10,
 },
