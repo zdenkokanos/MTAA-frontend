@@ -56,11 +56,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   option: {
-    paddingVertical: 12,
+    paddingVertical: 6,
   },
   optionText: {
     fontSize: 16,
     textAlign: 'center',
+    borderBottomColor: '#ccc',
+    borderBottomWidth: 1,
+    paddingBottom: 10,
   },
   cancel: {
     paddingTop: 10,

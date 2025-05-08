@@ -126,6 +126,15 @@ export default function ProfileScreen() {
                     <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
                 }
             >
+                <TouchableOpacity style={styles.backButton} onPress={() => {
+                    if (router.canGoBack()) {
+                        router.back();
+                    } else {
+                        router.replace("/(tabs)/home");
+                    }
+                }}>
+                    <Ionicons name="arrow-back" size={24} color="white" />
+                </TouchableOpacity>
                 <View style={styles.header}>
                     <Image
                         source={
@@ -219,6 +228,14 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => {
             flex: 1,
             backgroundColor: theme.background,
             paddingTop: Platform.OS === 'ios' ? 0 : 40,
+        },
+        backButton: {
+            position: 'absolute',
+            top: 16,
+            left: 16,
+            backgroundColor: 'rgba(0,0,0,0.5)',
+            padding: 10,
+            borderRadius: 25,
         },
         header: {
             paddingTop: 60,

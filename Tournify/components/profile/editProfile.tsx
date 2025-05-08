@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, Alert } from 'react-native';
 import API_BASE_URL from '@/config/config';
 
 interface EditProfileProps {
@@ -16,8 +16,13 @@ interface EditProfileProps {
 export default function EditProfile({ user, token, onDone }: EditProfileProps) {
   const [firstName, setFirstName] = useState(user.first_name);
   const [lastName, setLastName] = useState(user.last_name);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSave = async () => {
+    if(!firstName || !lastName){
+        Alert.alert("Missing fields", "Please enter both passwords.");
+        return;
+    }
     try {
       const response = await fetch(`${API_BASE_URL}/users/editProfile`, {
         method: 'PUT',
