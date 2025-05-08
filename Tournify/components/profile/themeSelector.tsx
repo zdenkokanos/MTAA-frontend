@@ -70,3 +70,5 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
+
+//** Theme switching was made with help from ChatGPT */

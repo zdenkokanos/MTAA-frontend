@@ -10,6 +10,7 @@ import OfflineBanner from '@/components/offline/safeOfflineBanner';
 import ChangePasswordForm from '@/components/profile/changePassword';
 
 import { useThemeStore } from '@/stores/themeStore';
+import ThemeSelectorModal from '@/components/profile/themeSelector';
 
 
 interface UserData{
@@ -92,14 +93,13 @@ export default function ProfileScreen() {
         // logout logic tu
     };
 
-    // const theme = useTheme();
-    // const isBW = theme.id === 'blackWhiteTheme';
-    // const themeStore = useThemeStore();
-    
-    const themeName = useThemeStore((s) => s.theme); // 'light' | 'dark' | 'bw'
-    const theme = useThemeStore((s) => s.getThemeObject());
-    const setTheme = useThemeStore((s) => s.setTheme);
+    const theme = useTheme(); 
     const styles = useMemo(() => getStyles(theme), [theme]);
+    const themeName = useThemeStore((s) => s.theme); // 'system', 'light', ...
+    const setTheme = useThemeStore((s) => s.setTheme);
+
+
+    const [showThemeModal, setShowThemeModal] = useState(false);
 
 
     return (
@@ -177,13 +177,23 @@ export default function ProfileScreen() {
 
 
 
-                    <MenuItem
+                    {/* <MenuItem
                         label={`Theme: ${themeName.toUpperCase()}`}
                         icon={<MaterialIcons name="brightness-6" size={20} color={theme.text} />}
                         onPress={() => {
                             const next = themeName === 'light' ? 'dark' : themeName === 'dark' ? 'bw' : 'light';
                             setTheme(next);
                         }}
+                    /> */}
+                    <MenuItem
+                        label={`Theme: ${themeName.toUpperCase()}`}
+                        icon={<MaterialIcons name="brightness-6" size={20} color={theme.text} />}
+                        onPress={() => setShowThemeModal(true)}
+                    />
+
+                    <ThemeSelectorModal
+                        visible={showThemeModal}
+                        onClose={() => setShowThemeModal(false)}
                     />
 
                     <MenuItem

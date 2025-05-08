@@ -1,21 +1,16 @@
+// themeStore.ts
 import { create } from 'zustand';
-import { lightTheme, darkTheme, blackWhiteTheme } from '@/themes/theme';
 
-type ThemeType = 'light' | 'dark' | 'bw';
+type ThemeType = 'system' | 'light' | 'dark' | 'bw';
 
 interface ThemeStore {
   theme: ThemeType;
   setTheme: (theme: ThemeType) => void;
-  getThemeObject: () => typeof lightTheme;
 }
 
-export const useThemeStore = create<ThemeStore>((set, get) => ({
-  theme: 'light',
+export const useThemeStore = create<ThemeStore>((set) => ({
+  theme: 'system',
   setTheme: (theme) => set({ theme }),
-  getThemeObject: () => {
-    const current = get().theme;
-    if (current === 'dark') return darkTheme;
-    if (current === 'bw') return blackWhiteTheme;
-    return lightTheme;
-  },
 }));
+
+//** Theme switching was made with help from ChatGPT */
