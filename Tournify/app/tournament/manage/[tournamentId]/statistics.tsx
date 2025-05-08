@@ -185,7 +185,147 @@ export default function EditLeaderboardScreen() {
         }
     };
 
+    const renderContent = () => (
+        <>
+            <View style={styles.headerRow}>
+                <TouchableOpacity onPress={() => router.replace(`/tournament/manage/${tournamentId}/dashboard`)} style={{ marginRight: 20 }}>
+                    <Ionicons name="arrow-back" size={24} color={theme.text} />
+                </TouchableOpacity>
+                <Text style={styles.header}>Edit Leaderboard</Text>
+            </View>
 
+            {
+                joinedTeams.map((team, index) => {
+                    if (focusedIndex !== null && focusedIndex !== index) return null;
+
+                    const isFocused = focusedIndex === index;
+                    const isEmpty = teamInputs[index] === '';
+
+                    return (
+                        <View
+                            key={team.id}
+                            style={[
+                                styles.row,
+                                {
+                                    backgroundColor:
+                                        index === 0 ? '#FBBF24' :
+                                            index === 1 ? '#FACC15' :
+                                                index === 2 ? '#FDE68A' :
+                                                    '#FEF3C7'
+                                }
+                            ]}
+                        >
+                            <Text style={styles.rankText}>{`${index + 1}${getOrdinal(index + 1)}`}</Text>
+
+                            <TextInput
+                                ref={(ref) => { inputRefs.current[index] = ref; }}
+                                style={styles.input}
+                                value={teamInputs[index] || ''}
+                                onChangeText={(text) => {
+                                    const updated = [...teamInputs];
+                                    updated[index] = text;
+                                    setTeamInputs(updated);
+
+                                    const filtered = joinedTeams
+                                        .filter(t =>
+                                            t.team_name.toLowerCase().includes(text.toLowerCase()) &&
+                                            !teamInputs.includes(t.team_name)
+                                        );
+                                    setSuggestions(filtered);
+                                }}
+                                onFocus={() => {
+                                    setFocusedIndex(index);
+                                    const filtered = joinedTeams.filter(t =>
+                                        !teamInputs.includes(t.team_name) || t.team_name === teamInputs[index]
+                                    );
+                                    setSuggestions(filtered);
+                                }}
+                                onBlur={() => {
+                                    const entered = teamInputs[index]?.trim();
+                                    const isValid = joinedTeams.some(t => t.team_name === entered);
+
+                                    if (!isValid) {
+                                        const updated = [...teamInputs];
+                                        updated[index] = '';
+                                        setTeamInputs(updated);
+                                    }
+
+                                    setFocusedIndex(null);
+                                }}
+                                onPress={() => {
+                                    if (!isEmpty) {
+                                        const updated = [...teamInputs];
+                                        updated[index] = '';
+                                        setTeamInputs(updated);
+                                    } else {
+                                        setFocusedIndex(index);
+                                        setTimeout(() => {
+                                            inputRefs.current[index]?.focus();
+                                        }, 0);
+                                    }
+                                }}
+                                placeholder={isFocused ? 'Enter team name' : ''}
+                                placeholderTextColor="#999"
+                            />
+
+                            {isFocused ? (
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        inputRefs.current[index]?.blur();
+                                    }}
+                                    style={{ marginLeft: 10 }}
+                                >
+                                    <Ionicons name="send-sharp" size={24} color="#000" />
+                                </TouchableOpacity>
+                            ) : (
+                                <TouchableOpacity
+                                    onPress={() => {
+                                        if (!isEmpty) {
+                                            const updated = [...teamInputs];
+                                            updated[index] = '';
+                                            setTeamInputs(updated);
+                                        } else {
+                                            setFocusedIndex(index);
+                                            setTimeout(() => {
+                                                inputRefs.current[index]?.focus();
+                                            }, 0);
+                                        }
+                                    }}
+                                    style={{ marginLeft: 10 }}
+                                >
+                                    <Ionicons
+                                        name={isEmpty ? 'add-circle-outline' : 'remove-circle-outline'}
+                                        size={24}
+                                        color="#000"
+                                    />
+                                </TouchableOpacity>
+                            )}
+
+                            {isFocused && suggestions.length > 0 && (
+                                <View style={styles.suggestionBox}>
+                                    {suggestions.map((suggestedTeam) => (
+                                        <TouchableOpacity
+                                            key={suggestedTeam.id}
+                                            onPress={() => {
+                                                const updated = [...teamInputs];
+                                                updated[index] = suggestedTeam.team_name;
+                                                setTeamInputs(updated);
+                                                inputRefs.current[index]?.blur();
+                                                setFocusedIndex(null);
+                                            }}
+                                            style={styles.suggestionItem}
+                                        >
+                                            <Text style={styles.suggestionText}>{suggestedTeam.team_name}</Text>
+                                        </TouchableOpacity>
+                                    ))}
+                                </View>
+                            )}
+                        </View>
+                    );
+                })
+            }
+        </>
+    );
 
     return (
         <SafeAreaView style={styles.container}>
@@ -195,127 +335,15 @@ export default function EditLeaderboardScreen() {
                     style={{ flex: 1 }}
                     keyboardVerticalOffset={60}
                 >
-                    <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-                        <View style={styles.headerRow}>
-                            <TouchableOpacity onPress={() => router.replace(`/tournament/manage/${tournamentId}/dashboard`)} style={{ marginRight: 20 }}>
-                                <Ionicons name="arrow-back" size={24} color={theme.text} />
-                            </TouchableOpacity>
-                            <Text style={styles.header}>Edit Leaderboard</Text>
+                    {focusedIndex === null ? (
+                        <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+                            {renderContent()}
+                        </ScrollView>
+                    ) : (
+                        <View style={styles.scrollContainer}>
+                            {renderContent()}
                         </View>
-
-                        {joinedTeams.map((team, index) => {
-                            if (focusedIndex !== null && focusedIndex !== index) return null;
-
-                            const isFocused = focusedIndex === index;
-                            const isEmpty = teamInputs[index] === '';
-
-                            return (
-                                <View
-                                    key={team.id}
-                                    style={[
-                                        styles.row,
-                                        {
-                                            backgroundColor:
-                                                index === 0 ? '#FBBF24' :
-                                                    index === 1 ? '#FACC15' :
-                                                        index === 2 ? '#FDE68A' :
-                                                            '#FEF3C7'
-                                        }
-                                    ]}
-                                >
-                                    <Text style={styles.rankText}>{`${index + 1}${getOrdinal(index + 1)}`}</Text>
-
-                                    <TextInput
-                                        ref={(ref) => { inputRefs.current[index] = ref; }}
-                                        style={styles.input}
-                                        value={teamInputs[index] || ''}
-                                        onChangeText={(text) => {
-                                            const updated = [...teamInputs];
-                                            updated[index] = text;
-                                            setTeamInputs(updated);
-
-                                            const filtered = joinedTeams
-                                                .filter(t =>
-                                                    t.team_name.toLowerCase().includes(text.toLowerCase()) &&
-                                                    !teamInputs.includes(t.team_name)
-                                                );
-                                            setSuggestions(filtered);
-                                        }}
-                                        onFocus={() => {
-                                            setFocusedIndex(index);
-                                            const filtered = joinedTeams.filter(t => !teamInputs.includes(t.team_name));
-                                            setSuggestions(filtered);
-                                        }}
-                                        onBlur={() => {
-                                            const entered = teamInputs[index]?.trim();
-                                            const isValid = joinedTeams.some(t => t.team_name === entered);
-
-                                            if (!isValid) {
-                                                const updated = [...teamInputs];
-                                                updated[index] = '';
-                                                setTeamInputs(updated);
-                                            }
-
-                                            setFocusedIndex(null);
-                                        }}
-                                        placeholder={isFocused ? 'Enter team name' : ''}
-                                        placeholderTextColor="#999"
-                                    />
-
-                                    {isFocused ? (
-                                        <TouchableOpacity
-                                            onPress={() => {
-                                                inputRefs.current[index]?.blur();
-                                            }}
-                                            style={{ marginLeft: 10 }}
-                                        >
-                                            <Ionicons name="send-sharp" size={24} color="#000" />
-                                        </TouchableOpacity>
-                                    ) : (
-                                        <TouchableOpacity
-                                            onPress={() => {
-                                                if (!isEmpty) {
-                                                    const updated = [...teamInputs];
-                                                    updated[index] = '';
-                                                    setTeamInputs(updated);
-                                                } else {
-                                                    inputRefs.current[index]?.focus();
-                                                    setFocusedIndex(index);
-                                                }
-                                            }}
-                                            style={{ marginLeft: 10 }}
-                                        >
-                                            <Ionicons
-                                                name={isEmpty ? 'add-circle-outline' : 'remove-circle-outline'}
-                                                size={24}
-                                                color="#000"
-                                            />
-                                        </TouchableOpacity>
-                                    )}
-
-                                    {isFocused && suggestions.length > 0 && (
-                                        <View style={styles.suggestionBox}>
-                                            {suggestions.map((suggestedTeam) => (
-                                                <TouchableOpacity
-                                                    key={suggestedTeam.id}
-                                                    onPress={() => {
-                                                        const updated = [...teamInputs];
-                                                        updated[index] = suggestedTeam.team_name;
-                                                        setTeamInputs(updated);
-                                                        inputRefs.current[index]?.blur();
-                                                        setFocusedIndex(null);
-                                                    }}
-                                                    style={styles.suggestionItem}
-                                                >
-                                                    <Text style={styles.suggestionText}>{suggestedTeam.team_name}</Text>
-                                                </TouchableOpacity>
-                                            ))}
-                                        </View>
-                                    )}
-                                </View>
-                            );
-                        })}
-                    </ScrollView>
+                    )}
                 </KeyboardAvoidingView>
 
                 <View style={[styles.buttonContainer, { paddingBottom: 16 }]}>
