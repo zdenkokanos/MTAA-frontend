@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Platform, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Platform, RefreshControl, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialIcons, MaterialCommunityIcons, Feather } from '@expo/vector-icons';
 import { useTheme } from '@/themes/theme';
@@ -8,6 +8,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import EditProfile from '../components/profile/editProfile';
 import OfflineBanner from '@/components/offline/safeOfflineBanner';
 import ChangePasswordForm from '@/components/profile/changePassword';
+import { router } from "expo-router";
 
 import { useThemeStore } from '@/stores/themeStore';
 import ThemeSelectorModal from '@/components/profile/themeSelector';
@@ -89,8 +90,21 @@ export default function ProfileScreen() {
     };
       
 
-    const handleSignOut = () => {
-        // logout logic tu
+    const confirmLogout = () => {
+        Alert.alert(
+          "Sign Out",
+          "Are you sure you want to log out?",
+          [
+            { text: "Cancel", style: "cancel" },
+            { text: "Yes", onPress: handleSignOut }
+          ],
+          { cancelable: true }
+        );
+    };
+
+    const handleSignOut = async () => {
+        await AsyncStorage.multiRemove(["token", "userId"]);
+        router.replace("/login");
     };
 
     const theme = useTheme(); 
@@ -175,16 +189,6 @@ export default function ProfileScreen() {
                         />
                     )}
 
-
-
-                    {/* <MenuItem
-                        label={`Theme: ${themeName.toUpperCase()}`}
-                        icon={<MaterialIcons name="brightness-6" size={20} color={theme.text} />}
-                        onPress={() => {
-                            const next = themeName === 'light' ? 'dark' : themeName === 'dark' ? 'bw' : 'light';
-                            setTheme(next);
-                        }}
-                    /> */}
                     <MenuItem
                         label={`Theme: ${themeName.toUpperCase()}`}
                         icon={<MaterialIcons name="brightness-6" size={20} color={theme.text} />}
@@ -199,7 +203,7 @@ export default function ProfileScreen() {
                     <MenuItem
                         label="Sign Out"
                         icon={<Ionicons name="exit-outline" size={20} color={theme.text} />}
-                        onPress={() => console.log("Log user out")}
+                        onPress={confirmLogout}
                     />
                 </View>
             </ScrollView>
