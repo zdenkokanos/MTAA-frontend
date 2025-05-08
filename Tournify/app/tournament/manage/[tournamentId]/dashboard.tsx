@@ -162,10 +162,10 @@ export default function ManageTournamentScreen() {
                                             style={[
                                                 styles.statusText,
                                                 tournament.status === 'Ongoing'
-                                                    ? { color: 'green' }
+                                                    ? { color: isBW ? 'gray' : 'green' }
                                                     : tournament.status === 'Closed'
-                                                        ? { color: 'red' }
-                                                        : { color: '#888' },
+                                                        ? { color: isBW ? 'gray' : 'red' }
+                                                        : { color: isBW ? 'gray' : '#888' },
                                             ]}
                                         >
                                             {tournament.status}

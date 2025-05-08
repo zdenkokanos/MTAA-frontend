@@ -20,6 +20,7 @@ interface Tournament {
     distance: number;
     latitude: number | null;
     longitude: number | null;
+    status: string | undefined;
 }
 
 export default function WelcomeScreen() {
@@ -98,22 +99,29 @@ export default function WelcomeScreen() {
         setRefreshing(false);
     };
 
-    const theme = useTheme();
-    const styles = useMemo(() => getStyles(theme), [theme]);
-
-
     const screenWidth = Dimensions.get('window').width;
-    const CARD_WIDTH = screenWidth * 0.95;
-    const CARD_GAP = 16;
-    const flatListRef = useRef<FlatList>(null);
     const [activeIndex, setActiveIndex] = useState(0); // State to track the active index of the FlatList
+    const isLargeScreen = useMemo(() => screenWidth >= 768, [screenWidth]);
+
+    const theme = useTheme();
+    const styles = useMemo(() => getStyles(theme, isLargeScreen), [theme]);
 
     const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
         const index = Math.round(event.nativeEvent.contentOffset.x / screenWidth);
         setActiveIndex(index);
     }; // Function to handle the scroll event and update the active index
 
+    const chunkArray = <T,>(array: T[], size: number): T[][] => {
+        const result: T[][] = [];
+        for (let i = 0; i < array.length; i += size) {
+            result.push(array.slice(i, i + size));
+        }
+        return result;
+    };
 
+    const hostedPairs = isLargeScreen
+        ? chunkArray(hostedTournaments, 2)
+        : hostedTournaments.map((t) => [t]);
 
     return (
         <SafeAreaView style={styles.safeArea} >
@@ -137,38 +145,36 @@ export default function WelcomeScreen() {
                     <Text style={styles.sectionTitle}>You are hosting these tournaments: </Text>
                     {hostedTournaments.length > 0 ? (
                         <FlatList
-                            ref={flatListRef}
-                            data={hostedTournaments}
+                            data={hostedPairs}
+                            keyExtractor={(_, index) => `hosted-page-${index}`}
                             horizontal
-                            keyExtractor={(item) => item.id}
-                            renderItem={({ item }) => (
-                                <View style={{ width: CARD_WIDTH, marginRight: CARD_GAP }}>
-                                    <TournamentView
-                                        title={item.tournament_name}
-                                        date={item.date}
-                                        imageUrl={{ uri: `${API_BASE_URL}/category/images/${item.category_image}` }}
-                                        tournamentId={item.id}
-                                        lat={null}
-                                        lon={null}
-                                        userLat={null}
-                                        userLon={null}
-                                        defaultDistance={item.distance}
-                                        type="owned"
-                                        status={item.status}
-                                    />
-                                </View>
-                            )}
+                            pagingEnabled
                             showsHorizontalScrollIndicator={false}
-                            pagingEnabled={false} // must be false for snapToInterval to work
-                            snapToAlignment="start"
-                            snapToInterval={CARD_WIDTH + CARD_GAP}
-                            decelerationRate="fast"
                             onScroll={handleScroll}
                             scrollEventThrottle={16}
-                            contentContainerStyle={{
-                                paddingHorizontal: (screenWidth - CARD_WIDTH) / 2,
-                            }}
+                            renderItem={({ item: pair }) => (
+                                <View style={styles.hostedRow}>
+                                    {pair.map((item) => (
+                                        <View key={item.id} style={styles.hostedCard}>
+                                            <TournamentView
+                                                title={item.tournament_name}
+                                                date={item.date}
+                                                imageUrl={{ uri: `${API_BASE_URL}/category/images/${item.category_image}` }}
+                                                tournamentId={item.id}
+                                                lat={null}
+                                                lon={null}
+                                                userLat={null}
+                                                userLon={null}
+                                                defaultDistance={item.distance}
+                                                type="owned"
+                                                status={item.status}
+                                            />
+                                        </View>
+                                    ))}
+                                </View>
+                            )}
                         />
+
                     ) : (
                         <View style={styles.container}>
                             <MaterialIcons name="help-center" size={40} color={theme.text} />
@@ -176,7 +182,7 @@ export default function WelcomeScreen() {
                         </View>
                     )}
                     <View style={styles.dotsContainer}>
-                        {hostedTournaments.map((_, index) => (
+                        {hostedPairs.map((_, index) => (
                             <Text
                                 key={index}
                                 style={[
@@ -189,7 +195,6 @@ export default function WelcomeScreen() {
                         ))}
                     </View>
                 </View>
-
                 {/* Upcomming tournaments */}
                 <View>
                     <View style={styles.mainTitle}>
@@ -198,26 +203,36 @@ export default function WelcomeScreen() {
                     </View>
                     <View>
                         {registeredTournaments.length > 0 ? (
-                            registeredTournaments.map((item) => (
-                                <View key={item.id} style={{ marginHorizontal: 10, marginBottom: 16 }}>
-                                    <TournamentView
-                                        title={item.tournament_name}
-                                        date={item.date}
-                                        imageUrl={{ uri: `${API_BASE_URL}/category/images/${item.category_image}` }}
-                                        tournamentId={item.id}
-                                        lat={null}
-                                        lon={null}
-                                        userLat={null}
-                                        userLon={null}
-                                        defaultDistance={item.distance}
-                                        type="ticket"
-                                        ticketId={item.id}
-                                    />
-                                </View>
-                            ))
+                            <FlatList
+                                data={registeredTournaments}
+                                keyExtractor={(item) => item.id}
+                                numColumns={isLargeScreen ? 2 : 1}
+                                columnWrapperStyle={isLargeScreen ? styles.registeredColumnWrapper : undefined}
+                                contentContainerStyle={styles.registeredList}
+                                scrollEnabled={false}
+                                renderItem={({ item }) => (
+                                    <View style={styles.registeredCardWrapper}>
+                                        <TournamentView
+                                            title={item.tournament_name}
+                                            date={item.date}
+                                            imageUrl={{ uri: `${API_BASE_URL}/category/images/${item.category_image}` }}
+                                            tournamentId={item.id}
+                                            lat={null}
+                                            lon={null}
+                                            userLat={null}
+                                            userLon={null}
+                                            defaultDistance={item.distance}
+                                            type="ticket"
+                                            ticketId={item.id}
+                                        />
+                                    </View>
+                                )}
+                            />
+
                         ) : (
                             <Text style={styles.emptyText}>You will see your registered tournaments here.</Text>
                         )}
+
                     </View>
 
                 </View>
@@ -230,7 +245,7 @@ export default function WelcomeScreen() {
 }
 
 
-const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
+const getStyles = (theme: ReturnType<typeof useTheme>, isLargeScreen: boolean) => StyleSheet.create({
     safeArea: {
         flex: 1,
         backgroundColor: theme.background,
@@ -303,4 +318,33 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
         fontSize: 14,
         fontWeight: 700,
     },
+    hostedRow: {
+        width: Dimensions.get('window').width,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingHorizontal: 16,
+    },
+    hostedCard: {
+        flex: 1,
+        width: isLargeScreen
+            ? (Dimensions.get('window').width - 48) / 2
+            : undefined,
+        marginHorizontal: isLargeScreen ? 8 : 0,
+    },
+    registeredList: {
+        paddingHorizontal: 16,
+        paddingBottom: 20,
+    },
+    registeredColumnWrapper: {
+        justifyContent: 'space-between',
+        marginBottom: 16,
+    },
+    registeredCardWrapper: {
+        marginHorizontal: isLargeScreen ? 8 : 0,
+        width: isLargeScreen
+            ? (Dimensions.get('window').width - 48) / 2 // 2 cards with spacing
+            : undefined,     // full width on small screens
+        height: 220,
+    },
+
 });

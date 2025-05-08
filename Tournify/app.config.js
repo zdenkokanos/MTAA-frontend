@@ -7,6 +7,7 @@ export default {
     icon: "./assets/images/icon.png",
     version: "1.0.0",
     sdkVersion: "53.0.0",
+    orientation: "portrait",
     experiments: {
       typedRoutes: true
     },

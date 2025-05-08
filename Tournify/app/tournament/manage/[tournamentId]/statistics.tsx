@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, StyleSheet, KeyboardAvoidingView, Platform, TextInput } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import DropDownPicker from 'react-native-dropdown-picker';
 import StartButton from '@/components/startButton';
 import { Ionicons } from '@expo/vector-icons';
@@ -90,6 +90,7 @@ export default function EditLeaderboardScreen() {
 
     const theme = useTheme();
     const styles = useMemo(() => getStyles(theme), [theme]);
+    const isBW = theme.id === 'blackWhiteTheme';
 
     const handleSubmit = async () => {
         const token = await AsyncStorage.getItem('token');
@@ -207,11 +208,21 @@ export default function EditLeaderboardScreen() {
                             style={[
                                 styles.row,
                                 {
-                                    backgroundColor:
-                                        index === 0 ? '#FBBF24' :
-                                            index === 1 ? '#FACC15' :
-                                                index === 2 ? '#FDE68A' :
-                                                    '#FEF3C7'
+                                    backgroundColor: isBW
+                                        ? index === 0
+                                            ? '#E5E7EB'  // 1st place — lightest gray
+                                            : index === 1
+                                                ? '#D1D5DB'  // 2nd place
+                                                : index === 2
+                                                    ? '#6B7280'  // 3rd place
+                                                    : '#4B5563'  // others — darkest
+                                        : index === 0
+                                            ? '#FBBF24'
+                                            : index === 1
+                                                ? '#FACC15'
+                                                : index === 2
+                                                    ? '#FDE68A'
+                                                    : '#FEF3C7'
                                 }
                             ]}
                         >
@@ -456,7 +467,7 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
         borderColor: '#ddd',
     },
     suggestionItem: {
-        paddingVertical: 8,
+        paddingVertical: 14,
         paddingHorizontal: 12,
     },
     suggestionText: {

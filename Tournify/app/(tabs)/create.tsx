@@ -98,7 +98,7 @@ export default function CreateTournament() {
                 tournament_name: tournamentName,
                 category_id: sportId,
                 location_name: tournamentPlace,
-                latitude: latitude, 
+                latitude: latitude,
                 longitude: longitude,
                 level: level,
                 max_team_size: Number(teamSize),
@@ -129,8 +129,14 @@ export default function CreateTournament() {
             setShowSuccess(true);
             console.log('Tournament created successfully:', result);
 
-        } catch (error) {
-            console.error('Error creating tournament:', error);
+        } catch (error: any) {
+            const message = error.message?.toLowerCase?.() || '';
+
+            if (message.includes('already exists')) {
+                Alert.alert('Tournament Name Taken', 'A tournament with that name already exists. Please choose another name.');
+            } else {
+                Alert.alert('Error', 'Failed to create tournament. Please try again.');
+            }
         }
     };
 
@@ -411,13 +417,13 @@ export default function CreateTournament() {
                                 <StartButton title="Submit" onPress={handleSubmit} />
                             </View>
 
-                            <AnimationCreateTournament 
-                                show={showSuccess} 
+                            <AnimationCreateTournament
+                                show={showSuccess}
                                 caption="Successfully created!"
                                 onHide={() => {
-                                        setShowSuccess(false)
-                                        router.push(`/events`)
-                                    } 
+                                    setShowSuccess(false)
+                                    router.push(`/events`)
+                                }
                                 }
                             />
 

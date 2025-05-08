@@ -3,6 +3,17 @@ import { Text, StyleSheet, TouchableOpacity, Linking, Platform, View } from 'rea
 import MapView, { Marker } from 'react-native-maps';
 import { useTheme } from '@/themes/theme';
 
+const grayscaleMapStyle = [
+    { elementType: 'geometry', stylers: [{ color: '#e5e5e5' }] },
+    { elementType: 'labels.text.fill', stylers: [{ color: '#6b6b6b' }] },
+    { elementType: 'labels.text.stroke', stylers: [{ color: '#ffffff' }] },
+    { featureType: 'administrative', elementType: 'geometry', stylers: [{ visibility: 'off' }] },
+    { featureType: 'poi', stylers: [{ visibility: 'off' }] },
+    { featureType: 'road', stylers: [{ color: '#cccccc' }] },
+    { featureType: 'transit', stylers: [{ visibility: 'off' }] },
+    { featureType: 'water', stylers: [{ color: '#dcdcdc' }] }
+];
+
 interface Props {
     latitude: number;
     longitude: number;
@@ -10,7 +21,6 @@ interface Props {
 }
 
 export default function MapPreview({ latitude, longitude, tournamentName }: Props) {
-
     const openInMaps = (lat: number, lng: number, label: string) => {
         const url = Platform.select({
             ios: `http://maps.apple.com/?ll=${lat},${lng}&q=${encodeURIComponent(label)}`,
@@ -34,6 +44,7 @@ export default function MapPreview({ latitude, longitude, tournamentName }: Prop
             >
                 <View style={styles.mapWrapper}>
                     <MapView
+                        {...(isBW ? { provider: 'google', customMapStyle: grayscaleMapStyle } : {})}
                         style={styles.map}
                         initialRegion={{
                             latitude,
@@ -46,8 +57,8 @@ export default function MapPreview({ latitude, longitude, tournamentName }: Prop
                         pitchEnabled={false}
                         rotateEnabled={false}
                     >
-                        {isBW && <View style={styles.overlay} />}
-                        <Marker coordinate={{ latitude, longitude }} title={tournamentName} />
+                        <Marker coordinate={{ latitude, longitude }} title={tournamentName}
+                            image={isBW ? require('@/assets/images/marker-gray.png') : undefined} />
                     </MapView>
                 </View>
             </TouchableOpacity>
@@ -70,14 +81,8 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
         backgroundColor: '#eee',
     },
     mapWrapper: {
-        position: 'relative',
         borderRadius: 12,
         overflow: 'hidden',
         marginBottom: 24,
-    },
-    overlay: {
-        ...StyleSheet.absoluteFillObject,
-        backgroundColor: 'rgba(20, 20, 20, 0.6)',
-        zIndex: 2,
     },
 });
