@@ -155,7 +155,7 @@ export default function ManageTournamentScreen() {
                                 style={styles.image}
                             />
                             <SafeAreaView style={styles.safeAreaBack}>
-                                <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+                                <TouchableOpacity style={styles.backButton} onPress={() => router.replace(`/events`) }>
                                     <Ionicons name="arrow-back" size={24} color="white" />
                                 </TouchableOpacity>
                             </SafeAreaView>
@@ -190,7 +190,7 @@ export default function ManageTournamentScreen() {
                                 onToggle={() => setIsExpanded(prev => !prev)}
                             />
 
-                            <TouchableOpacity style={styles.editButton}>
+                            <TouchableOpacity style={styles.editButton} onPress={() => router.replace(`/tournament/manage/${tournamentId}/edit`)}>
                                 <Ionicons name="pencil" size={16} color="#000" style={{ marginRight: 8 }} />
                                 <Text style={styles.editButtonText}>Edit tournament</Text>
                             </TouchableOpacity>

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Text, View, StyleSheet, KeyboardAvoidingView, Platform, SafeAreaView, TextInput, TouchableOpacity, Alert, FlatList } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -6,7 +6,8 @@ import { format } from 'date-fns';
 import API_BASE_URL from "@/config/config";
 import { useTheme } from "@/themes/theme";
 
-import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
+import { useTournamentStore } from '@/stores/useTournamentsStore';
+
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
 
@@ -20,10 +21,10 @@ import AnimationCreateTournament from '@/components/create/animationCreateTourna
 // API Key
 import Constants from 'expo-constants';
 import OfflineBanner from '@/components/offline/offlineBanner';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 const apiKey = Constants?.expoConfig?.extra?.GOOGLE_MAPS_API_KEY ?? 'DEFAULT_FALLBACK_KEY';
 
-export default function CreateTournament() {
+export default function EditTournament() {
 
     const [tournamentName, setTournamentName] = useState('');
     const [tournamentPlace, setTournamentPlace] = useState('');
@@ -34,6 +35,8 @@ export default function CreateTournament() {
     const [sportId, setSportId] = useState(0);
 
     const [tournamentDate, setTournamentDate] = useState(new Date());
+    const { setShouldRefresh } = useTournamentStore();
+
     const [tournamentTime, setTournamentTime] = useState(new Date());
 
     const [teamSize, setTeamSize] = useState('');
@@ -46,10 +49,44 @@ export default function CreateTournament() {
 
     const [showSuccess, setShowSuccess] = useState(false);
 
+    const { tournamentId } = useLocalSearchParams();
 
+    useEffect(() => {
+        const fetchTournament = async () => {
+            const token = await AsyncStorage.getItem('token');
+            const res = await fetch(`${API_BASE_URL}/tournaments/${tournamentId}/info`, {
+            headers: { Authorization: `Bearer ${token}` }
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                setTournamentName(data.tournament_name);
+                setSport(data.category_name);
+                setSportId(data.category_id);
+                setTournamentPlace(data.location_name);
+                setLatitude(data.latitude);
+                setLongitude(data.longitude);
+                setLevel(data.level);
+                setTeamSize(data.max_team_size.toString());
+                setGameSetting(data.game_setting);
+                setEntryFee(data.entry_fee.toString());
+                setPrizeDescription(data.prize_description);
+                setAdditionalInfo(data.additional_info);
+                const dt = new Date(data.date);
+                setTournamentDate(dt);
+                setTournamentTime(dt);
+            } else {
+                Alert.alert('Error', data.message || 'Failed to load tournament');
+            }
+        };
+        
+        fetchTournament();
+    }, [tournamentId]);
+
+    
     const handleSubmit = async () => {
         const token = await AsyncStorage.getItem('token');
-
+        
         if (!tournamentName || tournamentName.trim().length < 3) {
             Alert.alert('Validation Error', 'Please enter a valid tournament name (at least 3 characters).');
             return;
@@ -98,9 +135,9 @@ export default function CreateTournament() {
                 tournament_name: tournamentName,
                 category_id: sportId,
                 location_name: tournamentPlace,
-                latitude: latitude, 
-                longitude: longitude,
-                level: level,
+                latitude, 
+                longitude,
+                level,
                 max_team_size: Number(teamSize),
                 game_setting: gameSetting === 'other' ? customSetting : gameSetting,
                 entry_fee: parseFloat(entryFee),
@@ -111,8 +148,8 @@ export default function CreateTournament() {
                 date: dateCombined,
             };
 
-            const response = await fetch(`${API_BASE_URL}/tournaments`, {
-                method: 'POST',
+            const response = await fetch(`${API_BASE_URL}/tournaments/${tournamentId}/edit`, {
+                method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`,
@@ -123,14 +160,14 @@ export default function CreateTournament() {
             const result = await response.json();
 
             if (!response.ok) {
-                throw new Error(result.message || 'Failed to create tournament');
+                throw new Error(result.message || 'Failed to edit tournament');
             }
 
             setShowSuccess(true);
-            console.log('Tournament created successfully:', result);
+            console.log('Tournament updated successfully:', result);
 
         } catch (error) {
-            console.error('Error creating tournament:', error);
+            console.error('Error updating tournament:', error);
         }
     };
 
@@ -138,8 +175,8 @@ export default function CreateTournament() {
     const theme = useTheme();
     const styles = useMemo(() => getStyles(theme), [theme]);
     const isBW = theme.id === 'blackWhiteTheme';
-
     const router = useRouter();
+
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -147,7 +184,7 @@ export default function CreateTournament() {
             <KeyboardAvoidingView style={styles.wrapper} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
                 <View style={styles.mainTitle}>
                     <MaterialIcons style={styles.icon} name="edit" size={24} color="black" />
-                    <Text style={styles.title}>Create Tournament</Text>
+                    <Text style={styles.title}>Edit Tournament</Text>
                 </View>
                 <FlatList
                     data={[{}]} // dummy 1-item list
@@ -181,149 +218,6 @@ export default function CreateTournament() {
                                 </View>
                             </View>
 
-                            {/* Tournament place */}
-                            <View>
-                                <Text style={styles.label}>Event place</Text>
-                                <View>
-                                    <GooglePlacesAutocomplete
-                                        placeholder="Enter your city"
-                                        onPress={(data, details) => {
-                                            if (!details) return;
-                                            const cityName = data.description;
-                                            const { lat, lng } = details.geometry.location;
-                                            setTournamentPlace(cityName);
-                                            setLatitude(lat);
-                                            setLongitude(lng);
-                                        }}
-                                        predefinedPlaces={[]}
-                                        fetchDetails={true}
-                                        query={{
-                                            key: apiKey,
-                                            language: 'en',
-                                            types: 'address',
-                                        }}
-                                        textInputProps={{
-                                            placeholderTextColor: theme.mutedText,
-                                        }}
-                                        styles={{
-                                            container: {
-                                                flex: 0,
-                                                zIndex: 10,
-                                                position: 'relative',
-
-                                            },
-                                            textInputContainer: { zIndex: 11 },
-                                            textInput: {
-                                                zIndex: 12,
-                                                backgroundColor: theme.createInputBackground,
-                                                borderColor: theme.createInputBorder,
-                                                color: theme.text,
-                                                borderWidth: 1,
-                                                borderRadius: 12,
-                                                paddingHorizontal: 16,
-                                                height: 48,
-                                                fontSize: 16,
-                                            },
-                                            row: {
-                                                backgroundColor: theme.createInputBackground,
-                                            },
-                                            description: {
-                                                color: theme.text,
-                                            },
-                                            listView: {
-                                                position: 'absolute',
-                                                top: 48,
-                                                zIndex: 50,
-                                                elevation: 5,
-                                                borderRadius: 10,
-                                                width: '100%',
-                                            },
-                                            poweredContainer: {
-                                                display: 'none',
-                                            },
-                                        }}
-                                        onFail={(error) => {
-                                            console.error("Google Places API error:", error);
-                                        }}
-                                        // All other default props explicitly defined // StackOverflow fix
-                                        autoFillOnNotFound={false}
-                                        currentLocation={false}
-                                        currentLocationLabel="Current location"
-                                        debounce={0}
-                                        disableScroll={false}
-                                        enableHighAccuracyLocation={true}
-                                        enablePoweredByContainer={true}
-                                        filterReverseGeocodingByTypes={[]}
-                                        GooglePlacesDetailsQuery={{}}
-                                        GooglePlacesSearchQuery={{
-                                            rankby: 'distance',
-                                            type: 'restaurant',
-                                        }}
-                                        GoogleReverseGeocodingQuery={{}}
-                                        isRowScrollable={true}
-                                        keyboardShouldPersistTaps="always"
-                                        listUnderlayColor="#c8c7cc"
-                                        listViewDisplayed="auto"
-                                        keepResultsAfterBlur={false}
-                                        minLength={1}
-                                        nearbyPlacesAPI="GooglePlacesSearch"
-                                        numberOfLines={1}
-                                        onNotFound={() => { }}
-                                        onTimeout={() =>
-                                            console.warn('google places autocomplete: request timeout')
-                                        }
-                                        predefinedPlacesAlwaysVisible={false}
-                                        suppressDefaultStyles={false}
-                                        textInputHide={false}
-                                        timeout={20000}
-                                    />
-                                </View>
-                            </View>
-
-                            {/* Tournament date and time */}
-                            <View style={styles.inputRow}>
-                                <View style={{ width: '50%' }}>
-                                    <DateTimePickerInput date={tournamentDate} setDate={setTournamentDate} />
-                                </View>
-                                <View style={{ width: '50%' }}>
-                                    <TimePickerInput time={tournamentTime} setTime={setTournamentTime} />
-                                </View>
-                            </View>
-
-
-                            {/* Team size and entry fee */}
-                            <View style={styles.inputRow}>
-                                <View style={{ width: '50%', paddingRight: 5 }}>
-                                    <Text style={styles.label}>Entry fee</Text>
-                                    <View style={styles.inputWrapper}>
-                                        <TextInput
-                                            placeholder="5.00"
-                                            value={entryFee}
-                                            onChangeText={setEntryFee}
-                                            style={styles.input}
-                                            keyboardType="numeric"
-                                            placeholderTextColor="#888"
-                                        />
-                                        <View style={styles.euroCircle}>
-                                            <Text style={styles.euroText}>€</Text>
-                                        </View>
-                                    </View>
-                                </View>
-                                <View style={{ width: '50%', paddingLeft: 5 }}>
-                                    <Text style={styles.label}>Team Size</Text>
-                                    <View style={styles.inputWrapper}>
-                                        <TextInput
-                                            placeholder="2"
-                                            placeholderTextColor={theme.placeholderText}
-                                            value={teamSize}
-                                            onChangeText={setTeamSize}
-                                            style={styles.numInput}
-                                            keyboardType="numeric"
-                                        />
-                                        <FontAwesome6 name="keyboard" size={20} color={theme.text} style={styles.inputIcon} />
-                                    </View>
-                                </View>
-                            </View>
 
                             {/* Game setting */}
                             <View>
@@ -372,6 +266,40 @@ export default function CreateTournament() {
                                 )}
                             </View>
 
+                            {/* Team size and entry fee */}
+                            <View style={styles.inputRow}>
+                                <View style={{ width: '50%', paddingRight: 5 }}>
+                                    <Text style={styles.label}>Entry fee</Text>
+                                    <View style={styles.inputWrapper}>
+                                        <TextInput
+                                            placeholder="5.00"
+                                            value={entryFee}
+                                            onChangeText={setEntryFee}
+                                            style={styles.input}
+                                            keyboardType="numeric"
+                                            placeholderTextColor="#888"
+                                        />
+                                        <View style={styles.euroCircle}>
+                                            <Text style={styles.euroText}>€</Text>
+                                        </View>
+                                    </View>
+                                </View>
+                                <View style={{ width: '50%', paddingLeft: 5 }}>
+                                    <Text style={styles.label}>Team Size</Text>
+                                    <View style={styles.inputWrapper}>
+                                        <TextInput
+                                            placeholder="2"
+                                            placeholderTextColor={theme.placeholderText}
+                                            value={teamSize}
+                                            onChangeText={setTeamSize}
+                                            style={styles.numInput}
+                                            keyboardType="numeric"
+                                        />
+                                        <FontAwesome6 name="keyboard" size={20} color={theme.text} style={styles.inputIcon} />
+                                    </View>
+                                </View>
+                            </View>
+
                             {/* Prize description */}
                             <View style={styles.inputRow}>
                                 <View style={{ width: '100%' }}>
@@ -408,16 +336,17 @@ export default function CreateTournament() {
 
                             {/*  submit  */}
                             <View style={styles.buttonWrapper}>
-                                <StartButton title="Submit" onPress={handleSubmit} />
+                                <StartButton title="Update" onPress={handleSubmit} />
                             </View>
 
                             <AnimationCreateTournament 
                                 show={showSuccess} 
-                                caption="Successfully created!"
+                                caption="Succesfully Updated!" 
                                 onHide={() => {
-                                        setShowSuccess(false)
-                                        router.push(`/events`)
-                                    } 
+                                        setShowSuccess(false)  
+                                        setShouldRefresh(true);
+                                        router.push(`/tournament/manage/${tournamentId}/startEdit`);
+                                    }
                                 }
                             />
 
