@@ -17,6 +17,7 @@ export default function RootLayout() {
         <Stack.Screen name="preferencesSport" />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="ticket/[ticketId]" />
+        {/* <Stack.Screen name="profileScreen" /> */}
       </Stack>
     </>
   );

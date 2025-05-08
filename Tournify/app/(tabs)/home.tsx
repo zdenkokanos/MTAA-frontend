@@ -198,14 +198,9 @@ export default function HomeScreen() {
             >
                 <TouchableOpacity
                     style={styles.profileRow}
-                    onPress={() => router.push({
-                        pathname: "/profileScreen",
-                        params: {
-                            first_name: userInfo?.first_name ?? '',
-                            last_name: userInfo?.last_name ?? '',
-                            image_path: userInfo?.image_path ?? '',
-                        },
-                    })}
+                    onPress={() =>
+                        router.push("/profileScreen")
+                    }
                 >
                     <View style={styles.header}>
                         <View style={styles.profileRow}>
@@ -324,6 +319,7 @@ export default function HomeScreen() {
                         data={history}
                         keyExtractor={(item) => item.id}
                         numColumns={isLargeScreen ? 2 : 1}
+                        scrollEnabled={false}
                         columnWrapperStyle={isLargeScreen ? styles.historyColumnWrapper : undefined}
                         renderItem={({ item }) => (
                             <View style={styles.historyCardWrapper}>
