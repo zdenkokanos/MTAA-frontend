@@ -24,7 +24,7 @@ export function usePushToken() {
     const registerForPushNotificationsAsync = async () => {
         try {
             if (!Device.isDevice) {
-                alert('Must use physical device for Push Notifications');
+                console.warn('Must use physical device for Push Notifications');
                 return;
             }
 

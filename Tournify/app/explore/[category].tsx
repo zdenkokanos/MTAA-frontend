@@ -1,5 +1,5 @@
 import { useLocalSearchParams } from 'expo-router';
-import { View, Text, StyleSheet, FlatList, SafeAreaView, Platform, RefreshControl, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, FlatList, SafeAreaView, Platform, RefreshControl, ActivityIndicator, Dimensions, TextInput } from 'react-native';
 import { useEffect, useMemo, useState } from 'react';
 import API_BASE_URL from '@/config/config';
 import useLocation from '@/hooks/useLocation';
@@ -21,8 +21,16 @@ export default function CategoryTournamentsScreen() {
     const categoryId = categoryParts?.[0];
     const categoryName = categoryParts?.slice(1).join(' ');
 
+    // Search functionality
+    const [searchQuery, setSearchQuery] = useState('');
+    const filteredTournaments = useMemo(() => {
+        return tournaments.filter((tournament) =>
+            tournament.tournament_name.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+    }, [searchQuery, tournaments]);
+
     // TODO:
-    // GPSko, search
+    // search
 
     const fetchTournaments = async () => {
 
@@ -50,11 +58,6 @@ export default function CategoryTournamentsScreen() {
         getUserLocation();
     }, []);
 
-
-    const theme = useTheme();
-    const styles = useMemo(() => getStyles(theme), [theme]);
-    const isBW = theme.id === 'blackWhiteTheme';
-
     // Refresh control for the FlatList
     const [refreshing, setRefreshing] = useState(false);
 
@@ -66,6 +69,12 @@ export default function CategoryTournamentsScreen() {
 
     useOnShakeRefresh(onRefresh);
 
+    const screenWidth = Dimensions.get('window').width;
+    const isLargeScreen = useMemo(() => screenWidth >= 768, [screenWidth]);
+
+    const theme = useTheme();
+    const styles = useMemo(() => getStyles(theme, isLargeScreen), [theme]);
+    const isBW = theme.id === 'blackWhiteTheme';
 
     return (
         <SafeAreaView
@@ -73,6 +82,13 @@ export default function CategoryTournamentsScreen() {
         >
             <OfflineBanner />
             <View style={styles.container}>
+                <View style={styles.GPSinfo}>
+                    {latitude != 0 ? (
+                        <Text style={styles.GPSinfoText}>(Tournify is using your current location)</Text>
+                    ) : (
+                        <Text style={styles.GPSinfoText}>(Tournify is using your prefered location from profile)</Text>
+                    )}
+                </View>
                 <Text style={styles.title}>Tournaments for <Text style={styles.titleSport}>{categoryName}</Text> </Text>
                 {loading ? (
                     <View style={styles.loadingContainer}>
@@ -82,13 +98,13 @@ export default function CategoryTournamentsScreen() {
                     <View style={styles.animationContainer}>
                         {!isBW ? (
                             <>
-                            <LottieView
-                                source={require('@/assets/animations/notFound.json')}
-                                autoPlay
-                                loop={true}
-                                style={styles.animation}
+                                <LottieView
+                                    source={require('@/assets/animations/notFound.json')}
+                                    autoPlay
+                                    loop={true}
+                                    style={styles.animation}
                                 />
-                            <Text style={styles.emptyText}>Sorry, no tournaments found.</Text>
+                                <Text style={styles.emptyText}>Sorry, no tournaments found.</Text>
                             </>
                         ) : (
                             <Text style={styles.emptyText}>Sorry, no tournaments found.</Text>
@@ -97,22 +113,28 @@ export default function CategoryTournamentsScreen() {
                     </View>
                 ) : (
                     <>
-                        <View style={styles.GPSinfo}>
-                            {latitude != 0 ? (
-                                <Text style={styles.GPSinfoText}>(Tournify is using your current location)</Text>
-                            ) : (
-                                <Text style={styles.GPSinfoText}>(Tournify is using your prefered location from profile)</Text>
-                            )}
+                        <View style={styles.searchContainer}>
+                            <TextInput
+                                placeholder="Search"
+                                placeholderTextColor={theme.mutedText}
+                                value={searchQuery}
+                                onChangeText={setSearchQuery}
+                                style={styles.searchInput}
+                            />
                         </View>
+
                         <FlatList
-                            data={tournaments}
+                            data={filteredTournaments}
                             keyExtractor={(item) => item.id.toString()}
+                            numColumns={isLargeScreen ? 2 : 1}
                             showsVerticalScrollIndicator={false}
                             refreshControl={
                                 <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
                             }
+                            columnWrapperStyle={isLargeScreen ? styles.columnWrapper : undefined}
+                            contentContainerStyle={{ paddingBottom: 20 }}
                             renderItem={({ item }) => (
-                                <View>
+                                <View style={styles.cardWrapper}>
                                     <TournamentView
                                         title={item.tournament_name}
                                         date={item.date}
@@ -127,7 +149,6 @@ export default function CategoryTournamentsScreen() {
                                     />
                                 </View>
                             )}
-                            contentContainerStyle={{ paddingBottom: 20 }}
                         />
                     </>
                 )}
@@ -137,7 +158,7 @@ export default function CategoryTournamentsScreen() {
 
 };
 
-const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
+const getStyles = (theme: ReturnType<typeof useTheme>, isLargeScreen: boolean) => StyleSheet.create({
     safeArea: {
         flex: 1,
         backgroundColor: theme.background,
@@ -194,5 +215,28 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         marginTop: 40,
+    },
+    searchContainer: {
+        marginBottom: 16,
+        paddingHorizontal: 10,
+    },
+    searchInput: {
+        backgroundColor: theme.card,
+        borderRadius: 12,
+        paddingHorizontal: 16,
+        paddingVertical: Platform.OS === 'ios' ? 12 : 8,
+        fontSize: 16,
+        color: theme.text,
+        borderWidth: 1,
+        borderColor: theme.inputBorder,
+    },
+    columnWrapper: {
+        justifyContent: 'space-between',
+        marginBottom: 16,
+    },
+    cardWrapper: {
+        width: isLargeScreen
+            ? (Dimensions.get('window').width - 45) / 2 // 2 cards with spacing
+            : undefined,     // full width on small screens
     },
 });

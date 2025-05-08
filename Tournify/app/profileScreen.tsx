@@ -14,7 +14,7 @@ import { useThemeStore } from '@/stores/themeStore';
 import ThemeSelectorModal from '@/components/profile/themeSelector';
 
 
-interface UserData{
+interface UserData {
     id: number;
     first_name: string;
     last_name: string;
@@ -34,21 +34,21 @@ const MenuItem = ({ label, icon, onPress, expanded = false }: MenuItemProps) => 
     const menuStyles = useMemo(() => getMenuStyles(theme), [theme]);
 
     return (
-      <TouchableOpacity style={menuStyles.item} onPress={onPress}>
-        <View style={menuStyles.row}>
-          {icon}
-          <Text style={menuStyles.label}>{label}</Text>
-        </View>
-        <Ionicons 
-            name="chevron-forward" 
-            size={20} 
-            color="gray" 
-            style={{ transform: [{ rotate: expanded ? '90deg' : '0deg' }] }}
-        />
-      </TouchableOpacity>
+        <TouchableOpacity style={menuStyles.item} onPress={onPress}>
+            <View style={menuStyles.row}>
+                {icon}
+                <Text style={menuStyles.label}>{label}</Text>
+            </View>
+            <Ionicons
+                name="chevron-forward"
+                size={20}
+                color="gray"
+                style={{ transform: [{ rotate: expanded ? '90deg' : '0deg' }] }}
+            />
+        </TouchableOpacity>
     );
 };
- 
+
 
 
 export default function ProfileScreen() {
@@ -74,13 +74,13 @@ export default function ProfileScreen() {
                     Authorization: `Bearer ${storedToken}`
                 },
             });
-    
+
             const data = await response.json();
-    
+
             if (!response.ok) {
                 throw new Error(data.message || "User Data could not be loaded.");
             }
-    
+
             setUserData(data);
         } catch (error) {
             console.error('❌ Error loading user data:', error);
@@ -96,17 +96,17 @@ export default function ProfileScreen() {
         await fetchUserData();
         setRefreshing(false);
     };
-      
+
 
     const confirmLogout = () => {
         Alert.alert(
-          "Sign Out",
-          "Are you sure you want to log out?",
-          [
-            { text: "Cancel", style: "cancel" },
-            { text: "Yes", onPress: handleSignOut }
-          ],
-          { cancelable: true }
+            "Sign Out",
+            "Are you sure you want to log out?",
+            [
+                { text: "Cancel", style: "cancel" },
+                { text: "Yes", onPress: handleSignOut }
+            ],
+            { cancelable: true }
         );
     };
 
@@ -115,13 +115,12 @@ export default function ProfileScreen() {
         router.replace("/login");
     };
 
-    const theme = useTheme(); 
+    const theme = useTheme();
     const styles = useMemo(() => getStyles(theme), [theme]);
     const themeName = useThemeStore((s) => s.theme); // 'system', 'light', ...
-
+    const isBW = theme.id === 'blackWhiteTheme';
 
     const [showThemeModal, setShowThemeModal] = useState(false);
-
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -146,13 +145,13 @@ export default function ProfileScreen() {
                     <Image
                         source={
                             userData && userData.image_path
-                            ? {
-                                uri: `${API_BASE_URL}/uploads/${userData.image_path}`,
-                                headers: {
-                                    Authorization: `Bearer ${token}`,
-                                },
+                                ? {
+                                    uri: `${API_BASE_URL}/uploads/${userData.image_path}?grayscale=${isBW}`,
+                                    headers: {
+                                        Authorization: `Bearer ${token}`,
+                                    },
                                 }
-                            : require("@/assets/images/default-profile.jpg")
+                                : require("@/assets/images/default-profile.jpg")
                         }
                         style={styles.avatar}
                         onError={(error) => {
@@ -161,10 +160,10 @@ export default function ProfileScreen() {
                     />
                     <View style={styles.nameContainer}>
                         <Text style={styles.name}>
-                            {userData ? `${userData.first_name} ${userData.last_name}`: "Loading..."}
+                            {userData ? `${userData.first_name} ${userData.last_name}` : "Loading..."}
                         </Text>
                         <Text style={styles.email}>
-                            {userData ? `${userData.email}`: "Loading..."}
+                            {userData ? `${userData.email}` : "Loading..."}
                         </Text>
                     </View>
                 </View>
@@ -173,9 +172,9 @@ export default function ProfileScreen() {
                         label="Edit profile"
                         icon={<Feather name="edit" size={20} color={theme.text} />}
                         onPress={() => {
-                                if(!editMode) setEditMode(true)
-                                else if(editMode) setEditMode(false)
-                            }
+                            if (!editMode) setEditMode(true)
+                            else if (editMode) setEditMode(false)
+                        }
                         }
                         expanded={editMode} // 🔄
                     />
@@ -185,7 +184,7 @@ export default function ProfileScreen() {
                             token={token}
                             onDone={() => {
                                 setEditMode(false);
-                                fetchUserData(); 
+                                fetchUserData();
                             }}
                         />
                     )}
@@ -194,9 +193,9 @@ export default function ProfileScreen() {
                         label="Change Password"
                         icon={<MaterialCommunityIcons name="key" size={20} color={theme.text} />}
                         onPress={() => {
-                                if(!showPassword) setShowPassword(true)
-                                else if(showPassword) setShowPassword(false)
-                            }
+                            if (!showPassword) setShowPassword(true)
+                            else if (showPassword) setShowPassword(false)
+                        }
                         }
                         expanded={showPassword} // 🔄
                     />
@@ -254,7 +253,7 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => {
         avatar: {
             width: 150,
             height: 150,
-            borderRadius: '50%',
+            borderRadius: 75,
             marginBottom: 10,
         },
         nameContainer: {
@@ -276,7 +275,7 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => {
             paddingHorizontal: 20,
             paddingBottom: 10,
             marginTop: 30,
-          },
+        },
     });
 };
 

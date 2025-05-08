@@ -28,6 +28,8 @@ export default function HomeScreen() {
         distance: number;
         category_image: string;
         id: string;
+        latitude: number;
+        longitude: number;
     }
     interface Ticket {
         date: string;
@@ -159,6 +161,7 @@ export default function HomeScreen() {
     const CARD_GAP = 16;
     const [activeIndex, setActiveIndex] = useState(0); // State to track the active index of the FlatList
     const flatListRef = useRef<FlatList>(null);
+    const isLargeScreen = useMemo(() => screenWidth >= 768, [screenWidth]);
 
     const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
         const index = Math.round(event.nativeEvent.contentOffset.x / screenWidth);
@@ -167,8 +170,18 @@ export default function HomeScreen() {
 
     // Variable to store the theme styles
     const theme = useTheme();
-    const styles = useMemo(() => getStyles(theme), [theme]);
+    const styles = useMemo(() => getStyles(theme, isLargeScreen), [theme, isLargeScreen]);
     const isBW = theme.id === 'blackWhiteTheme';
+
+    const chunkArray = <T,>(array: T[], size: number): T[][] => {
+        const result = [];
+        for (let i = 0; i < array.length; i += size) {
+            result.push(array.slice(i, i + size));
+        }
+        return result;
+    };
+
+    const topPickPairs = chunkArray(topPicks, isLargeScreen ? 2 : 1);
 
     return (
         <SafeAreaView
@@ -184,34 +197,29 @@ export default function HomeScreen() {
                 }
             >
                 <TouchableOpacity
-                style={styles.profileRow}
-                onPress={() => router.push({
-                    pathname: "/profileScreen",
-                    params: {
-                      first_name: userInfo?.first_name ?? '',
-                      last_name: userInfo?.last_name ?? '',
-                      image_path: userInfo?.image_path ?? '',
-                    },
-                    })}
+                    style={styles.profileRow}
+                    onPress={() =>
+                        router.push("/profileScreen")
+                    }
                 >
                     <View style={styles.header}>
                         <View style={styles.profileRow}>
                             <Image
                                 source={
                                     userInfo && userInfo.image_path !== "null" && userInfo.image_path && token
-                                    ? {
-                                        uri: `${API_BASE_URL}/uploads/${userInfo.image_path}`,
-                                        headers: {
-                                            Authorization: `Bearer ${token}`,
-                                        },
-                                    }
-                                    : require("@/assets/images/default-profile.jpg")
+                                        ? {
+                                            uri: `${API_BASE_URL}/uploads/${userInfo.image_path}?grayscale=${isBW}`,
+                                            headers: {
+                                                Authorization: `Bearer ${token}`,
+                                            },
+                                        }
+                                        : require("@/assets/images/default-profile.jpg")
                                 }
                                 style={styles.avatar}
                                 onError={(error) => {
                                     console.log("Image failed to load:", error.nativeEvent.error);
                                 }}
-                                />
+                            />
                             <View>
                                 <Text style={styles.name}>
                                     {userInfo ? `${userInfo.first_name} ${userInfo.last_name}` : "Loading..."}
@@ -226,42 +234,40 @@ export default function HomeScreen() {
                 <Text style={styles.sectionTitle}>Top Picks</Text>
                 {topPicks.length > 0 ? (
                     <FlatList
-                        ref={flatListRef}
-                        data={topPicks}
+                        data={topPickPairs}
+                        keyExtractor={(_, index) => `pair-${index}`}
                         horizontal
-                        keyExtractor={(item) => item.id}
-                        renderItem={({ item }) => (
-                            <View style={{ width: CARD_WIDTH, marginRight: CARD_GAP }}>
-                                <TournamentView
-                                    title={item.tournament_name}
-                                    date={item.date}
-                                    imageUrl={{ uri: `${API_BASE_URL}/category/images/${item.category_image}` }}
-                                    tournamentId={item.id}
-                                    lat={item.latitude}
-                                    lon={item.longitude}
-                                    userLat={latitude}
-                                    userLon={longitude}
-                                    defaultDistance={item.distance}
-                                    type="detail"
-                                />
-                            </View>
-                        )}
                         showsHorizontalScrollIndicator={false}
-                        pagingEnabled={false} // must be false for snapToInterval to work
-                        snapToAlignment="start"
-                        snapToInterval={CARD_WIDTH + CARD_GAP}
-                        decelerationRate="fast"
+                        pagingEnabled
                         onScroll={handleScroll}
                         scrollEventThrottle={16}
-                        contentContainerStyle={{
-                            paddingHorizontal: (screenWidth - CARD_WIDTH) / 2,
-                        }}
+                        renderItem={({ item: pair }) => (
+                            <View style={styles.topPicksRow}>
+                                {pair.map((item) => (
+                                    <View key={item.id} style={styles.topPicksCardSideBySide}>
+                                        <TournamentView
+                                            title={item.tournament_name}
+                                            date={item.date}
+                                            imageUrl={{ uri: `${API_BASE_URL}/category/images/${item.category_image}` }}
+                                            tournamentId={item.id}
+                                            lat={item.latitude}
+                                            lon={item.longitude}
+                                            userLat={latitude}
+                                            userLon={longitude}
+                                            defaultDistance={item.distance}
+                                            type="detail"
+                                        />
+                                    </View>
+                                ))}
+                            </View>
+                        )}
                     />
+
                 ) : (
                     <Text style={styles.emptyText}>No top picks found.</Text>
                 )}
                 <View style={styles.dotsContainer}>
-                    {topPicks.map((_, index) => (
+                    {topPickPairs.map((_, index) => (
                         <Text
                             key={index}
                             style={[
@@ -273,6 +279,7 @@ export default function HomeScreen() {
                         </Text>
                     ))}
                 </View>
+
                 {/* Tickets */}
                 <Text style={styles.sectionTitle}>Tickets</Text>
                 {tickets.length > 0 ? (
@@ -308,23 +315,29 @@ export default function HomeScreen() {
                     )}
                 </View>
                 {history.length > 0 ? (
-                    history.slice(0, 6).map((item) => (
-                        <HistoryCard
-                            key={item.id}
-                            title={item.tournament_name}
-                            date={item.date}
-                            position={item.position ? formatPosition(item.position) : null}
-                            imageUrl={{
-                                uri: `${API_BASE_URL}/category/images/${item.category_image}?grayscale=${isBW}`,
-                                headers: {
-                                    Authorization: `Bearer ${token}`,
-                                },
-                            }}
-                            onInfoPress={() => router.push(
-                                `/history/${item.id}?position=${encodeURIComponent(item.position ? formatPosition(item.position) : '')}`
-                            )}
-                        />
-                    ))
+                    <FlatList
+                        data={history}
+                        keyExtractor={(item) => item.id}
+                        numColumns={isLargeScreen ? 2 : 1}
+                        scrollEnabled={false}
+                        columnWrapperStyle={isLargeScreen ? styles.historyColumnWrapper : undefined}
+                        renderItem={({ item }) => (
+                            <View style={styles.historyCardWrapper}>
+                                <HistoryCard
+                                    title={item.tournament_name}
+                                    date={item.date}
+                                    position={item.position ? formatPosition(item.position) : null}
+                                    imageUrl={{
+                                        uri: `${API_BASE_URL}/category/images/${item.category_image}?grayscale=${isBW}`,
+                                        headers: { Authorization: `Bearer ${token}` },
+                                    }}
+                                    onInfoPress={() => router.push(
+                                        `/history/${item.id}?position=${encodeURIComponent(item.position ? formatPosition(item.position) : '')}`
+                                    )}
+                                />
+                            </View>
+                        )}
+                    />
                 ) : (
                     <Text style={styles.emptyText}>No tournament history yet!</Text>
                 )}
@@ -342,9 +355,8 @@ const formatPosition = (n: number) => { // Generated by OpenAI
     return `${position} place`;
 };
 
-const getStyles = (theme: ReturnType<typeof useTheme>) => {
+const getStyles = (theme: ReturnType<typeof useTheme>, isLargeScreen: boolean) => {
     const isBW = theme.id === 'blackWhiteTheme';
-
     return StyleSheet.create({
         safeArea: {
             backgroundColor: theme.background,
@@ -359,7 +371,7 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => {
         profileRow: {
             flexDirection: "row",
             alignItems: "center",
-            justifyContent: "flex-start",
+            justifyContent: "space-between",
         },
         avatar: {
             width: 50,
@@ -425,7 +437,28 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => {
         inactiveDot: {
             color: theme.dotInactive,
         },
-
+        historyCardWrapper: {
+            flex: 1,
+            marginHorizontal: isLargeScreen ? 8 : 0,
+            width: isLargeScreen
+                ? (Dimensions.get('window').width - 48) / 2
+                : undefined,
+        },
+        historyColumnWrapper: {
+            justifyContent: isLargeScreen ? 'space-between' : 'center',
+            marginBottom: 16,
+        },
+        topPicksRow: {
+            width: Dimensions.get('window').width,
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            paddingHorizontal: 16,
+        },
+        topPicksCardSideBySide: {
+            width: isLargeScreen
+                ? (Dimensions.get('window').width - 48) / 2  // Two cards
+                : Dimensions.get('window').width - 32,       // Full width for single card
+        },
         historyTitle: {
             fontSize: 20,
             fontWeight: "bold",
@@ -446,4 +479,4 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => {
             textDecorationLine: 'underline',
         },
     });
-};
+}

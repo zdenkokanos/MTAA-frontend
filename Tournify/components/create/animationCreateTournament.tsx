@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, StyleSheet, View, Text } from 'react-native';
 import LottieView from 'lottie-react-native';
+import { useTheme } from '@/themes/theme';
 
 type AnimationProps = {
   show: boolean;
@@ -25,14 +26,20 @@ export default function AnimationCreateTournament({ show, onHide, caption }: Ani
       return () => clearTimeout(timer);
     }
   }, [animationDone]);
-  
+
+  const theme = useTheme();
+  const isBW = theme.id === 'blackWhiteTheme';
 
   return (
     <Modal visible={show} transparent animationType="fade">
       <View style={styles.overlay}>
         <View style={styles.modalContent}>
           <LottieView
-            source={require('@/assets/animations/successAnimation.json')}
+            source={
+              isBW
+                ? require('@/assets/animations/successAnimationBW.json')
+                : require('@/assets/animations/successAnimation.json')
+            }
             autoPlay
             loop={false}
             style={styles.animation}
