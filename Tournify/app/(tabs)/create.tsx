@@ -20,6 +20,7 @@ import AnimationCreateTournament from '@/components/create/animationCreateTourna
 // API Key
 import Constants from 'expo-constants';
 import OfflineBanner from '@/components/offline/offlineBanner';
+import { useRouter } from 'expo-router';
 const apiKey = Constants?.expoConfig?.extra?.GOOGLE_MAPS_API_KEY ?? 'DEFAULT_FALLBACK_KEY';
 
 export default function CreateTournament() {
@@ -137,6 +138,8 @@ export default function CreateTournament() {
     const theme = useTheme();
     const styles = useMemo(() => getStyles(theme), [theme]);
     const isBW = theme.id === 'blackWhiteTheme';
+
+    const router = useRouter();
 
     return (
         <SafeAreaView style={styles.safeArea}>
@@ -408,7 +411,15 @@ export default function CreateTournament() {
                                 <StartButton title="Submit" onPress={handleSubmit} />
                             </View>
 
-                            <AnimationCreateTournament show={showSuccess} onHide={() => setShowSuccess(false)} caption="Successfully created!"/>
+                            <AnimationCreateTournament 
+                                show={showSuccess} 
+                                caption="Successfully created!"
+                                onHide={() => {
+                                        setShowSuccess(false)
+                                        router.push(`/events`)
+                                    } 
+                                }
+                            />
 
 
                         </View>
