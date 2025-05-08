@@ -1,0 +1,121 @@
+import { ScrollView, Text, RefreshControl } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import React, { useEffect, useMemo, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useTheme } from '@/themes/theme';
+import HistoryCard from '@/components/home/historyCard';
+import API_BASE_URL from '@/config/config';
+import { useRouter } from 'expo-router';
+import { StyleSheet } from "react-native";
+import OfflineBanner from '@/components/offline/safeOfflineBanner';
+
+
+interface HistoryItem {
+    id: string;
+    tournament_name: string;
+    date: string;
+    position: number;
+    category_image: string;
+  }
+  
+
+export default function HistoryScreen() {
+    const [history, setHistory] = useState<HistoryItem[]>([]);
+    const [token, setToken] = useState<string | null>(null);
+    const router = useRouter();
+
+    const [refreshing, setRefreshing] = useState(false);
+
+    const fetchHistory = async () => {
+        const storedToken = await AsyncStorage.getItem("token");
+        const storedUserId = await AsyncStorage.getItem("userId");
+        if (!storedToken || !storedUserId) return;
+        setToken(storedToken);
+
+        const res = await fetch(`${API_BASE_URL}/users/${storedUserId}/tournaments/history`, {
+            headers: { Authorization: `Bearer ${storedToken}` },
+        });
+
+        const data = await res.json();
+        if (res.ok) setHistory(data);
+    };
+
+    useEffect(() => {
+        fetchHistory();
+    }, []);
+
+    const onRefresh = async () => {
+        setRefreshing(true);
+        await fetchHistory();
+        setRefreshing(false);
+    };
+
+    const theme = useTheme();
+    const styles = useMemo(() => getStyles(theme), [theme]);
+    const isBW = theme.id === 'blackWhiteTheme';
+    
+
+    return (
+        <SafeAreaView
+            style={styles.safeArea}
+            edges={['top', 'left', 'right']}
+        >
+            <OfflineBanner />
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: 40 }}
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                }
+            >
+                <Text style={styles.sectionTitle}>Your History</Text>
+                {history.length > 0 ? (
+                    history.map((item) => (
+                        <HistoryCard
+                            key={item.id}
+                            title={item.tournament_name}
+                            date={item.date}
+                            position={item.position}
+                            imageUrl={{
+                                uri: `${API_BASE_URL}/category/images/${item.category_image}?grayscale=${isBW}`,
+                                headers: { Authorization: `Bearer ${token}` },
+                            }}
+                            onInfoPress={() => router.push(
+                                `/history/${item.id}?position=${item.position}`
+                            )}
+                        />
+                    ))
+                ) : (
+                    <Text style={styles.emptyText}>No history found.</Text>
+                )}
+            </ScrollView>
+        </SafeAreaView>
+    );
+}
+const getStyles = (theme: ReturnType<typeof useTheme>) => {
+    const isBW = theme.id === 'blackWhiteTheme';
+
+    return StyleSheet.create({
+        safeArea: {
+            backgroundColor: theme.background,
+            minHeight: '100%',
+        },
+        sectionTitle: {
+            fontSize: 20,
+            fontWeight: "bold",
+            margin: 20,
+            color: theme.text,
+        },
+        emptyText: {
+            padding: 20,
+            fontSize: 14,
+            color: theme.mutedText,
+            fontStyle: "italic",
+            marginRight: 20,
+            marginBottom: 10,
+            marginLeft: 20,
+            backgroundColor: theme.card,
+            borderRadius: 10,
+        },
+    });
+};
