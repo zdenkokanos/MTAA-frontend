@@ -82,7 +82,7 @@ const TournamentView = ({ title, date, imageUrl, tournamentId, lat, lon, userLat
                             onPress={() => {
                                 const route =
                                     type === "owned"
-                                        ? status === "Ongoing"
+                                        ? status === "Ongoing" || status === "Closed"
                                             ? `/tournament/manage/${tournamentId}/dashboard`
                                             : `/tournament/manage/${tournamentId}/startEdit`
                                         : type === "ticket"
