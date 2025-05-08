@@ -87,33 +87,9 @@ export default function ManageTournamentScreen() {
         }
     };
 
-    const handleStart = async () => {
+    const handleEdit = async () => {
         try {
-            const storedToken = await AsyncStorage.getItem('token');
-            if (!storedToken) {
-                Alert.alert("Unauthorized", "Token is missing.");
-                return;
-            }
-
-            const res = await fetch(`${API_BASE_URL}/tournaments/${tournamentId}/start`, {
-                method: 'PUT',
-                headers: {
-                    Authorization: `Bearer ${storedToken}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            const data = await res.json();
-
-            if (res.ok) {
-                Alert.alert("Success", "Tournament has started.");
-                fetchTournament();
-            } else {
-                console.error("Start error:", data.message);
-                Alert.alert("Error", data.message || "Failed to start tournament.");
-            }
-
-            router.replace(`/tournament/manage/${tournamentId}/dashboard`);
+            router.replace(`/tournament/manage/${tournamentId}/edit`);
         } catch (error) {
             console.error("Start exception:", error);
             Alert.alert("Error", "Something went wrong while starting the tournament.");
@@ -240,7 +216,7 @@ export default function ManageTournamentScreen() {
                     </ScrollView>
 
                     <View style={styles.buttonContainer}>
-                        <StartButton title="Edit Statistics" onPress={handleStart} />
+                        <StartButton title="Edit Statistics" onPress={handleEdit} />
                     </View>
                 </View>
             </SafeAreaView>

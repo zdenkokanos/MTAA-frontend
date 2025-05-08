@@ -14,37 +14,38 @@ type SportPickerProps = {
 export default function SportPicker({ sport, setSport, categoryId, setCategoryId}: SportPickerProps) {
   const [modalVisible, setModalVisible] = useState(false);
   const [sports, setSports] = useState<any[]>([]);
-  const [categoryIds, setCategoryIds] = useState("");
   const [loading, setLoading] = useState(false);
-
-    useEffect(() => {
-        const fetchSports = async () => {
-            setLoading(true);
-            try {
-                const response = await fetch(`${API_BASE_URL}/tournaments/categories`, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                });
-        
-                const data = await response.json();
-        
-                if (!response.ok) {
-                throw new Error(data.message || "Unable to load sports.");
-                }
-
-                setSports(data); 
-                setCategoryIds(data[0].id);
-                setLoading(false);
-                
-            } catch (error) {
-                console.error('❌ Error loading categories:', error);
+  const [categoryIds, setCategoryIds] = useState("");
+  
+  useEffect(() => {
+    const fetchSports = async () => {
+        setLoading(true);
+        try {
+            const response = await fetch(`${API_BASE_URL}/tournaments/categories`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            });
+    
+            const data = await response.json();
+    
+            if (!response.ok) {
+            throw new Error(data.message || "Unable to load sports.");
             }
-        };
-        
-        fetchSports();
-    }, []);
+
+            setSports(data); 
+            setCategoryIds(data[0].id);
+            setLoading(false);
+            
+        } catch (error) {
+            console.error('❌ Error loading categories:', error);
+        }
+    };
+    
+    fetchSports();
+  }, []);
+    
 
     const theme = useTheme();
     const styles = useMemo(() => getStyles(theme), [theme]);
@@ -53,25 +54,25 @@ export default function SportPicker({ sport, setSport, categoryId, setCategoryId
       <View style={{ flex: 1, marginRight: 8 }}>
         <Text style={styles.label}>Sport</Text>
         <View style={styles.androidPickerWrapper}>
-          <Picker
-            selectedValue={sport}
-            onValueChange={(itemValue) => {
-              setSport(itemValue);
-              setModalVisible(false);
-              const selected = sports.find(s => s.category_name === itemValue);
-              if (selected) {
-                setCategoryId(selected.id);
-              }
-            }}
-            style={{ flex: 1, textAlignVertical: 'center' }}
-            itemStyle={{ fontSize: 16, lineHeight: 22 }}
-            mode="dropdown"
-          >
-            <Picker.Item label="Choose category" value={null} style={{color: theme.text, backgroundColor: theme.createInputBackground}}/>
-            {sports.map((s) => (
-              <Picker.Item key={s.id} label={s.category_name} value={s.category_name} style={{color: theme.text, backgroundColor: theme.createInputBackground}}/>
-            ))}
-          </Picker>
+        <Picker
+          selectedValue={categoryId}
+          onValueChange={(itemValue) => {
+            const selected = sports.find(s => s.id === itemValue);
+            if (selected) {
+              setCategoryId(selected.id);
+              setSport(selected.category_name);
+            }
+          }}
+          style={{ flex: 1, textAlignVertical: 'center' }}
+          itemStyle={{ fontSize: 16, lineHeight: 22 }}
+          mode="dropdown"
+        >
+          <Picker.Item label="Choose category" value={0} />
+          {sports.map((s) => (
+            <Picker.Item key={s.id} label={s.category_name} value={s.id} />
+          ))}
+        </Picker>
+
         </View>
       </View>
     );
@@ -84,9 +85,13 @@ export default function SportPicker({ sport, setSport, categoryId, setCategoryId
         onPress={() => setModalVisible(true)}
         style={styles.selector}
       >
-        <Text style={{ color: sport ? theme.text : '#aaa' }}>
-          { sport ? sports.find((s) => s.category_name === sport)?.category_name : 'Choose category' }
+        <Text style={{ color: categoryId ? theme.text : '#aaa' }}>
+          { categoryId
+              ? sports.find((s) => s.id === categoryId)?.category_name ?? 'Choose category'
+              : 'Choose category'
+          }
         </Text>
+
 
       </TouchableOpacity>
 
@@ -102,19 +107,18 @@ export default function SportPicker({ sport, setSport, categoryId, setCategoryId
               <ActivityIndicator style={{ padding: 20 }} />
             ) : (
               <Picker
-                selectedValue={sport}
+                selectedValue={categoryId}
                 onValueChange={(itemValue) => {
-                  setSport(itemValue);
-                  setModalVisible(true); 
-                  const selected = sports.find(s => s.category_name === itemValue);
+                  const selected = sports.find(s => s.id === itemValue);
                   if (selected) {
                     setCategoryId(selected.id);
+                    setSport(selected.category_name);
                   }
                 }}
               >
-                <Picker.Item label="Choose category" value={null} />
+                <Picker.Item label="Choose category" value={0} />
                 {sports.map((s) => (
-                  <Picker.Item key={s.id} label={s.category_name} value={s.category_name} />
+                  <Picker.Item key={s.id} label={s.category_name} value={s.id} />
                 ))}
               </Picker>
             )}

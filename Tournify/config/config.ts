@@ -1,3 +1,6 @@
-const API_BASE_URL = "http://147.175.160.17:3000";
+// const API_BASE_URL = "http://localhost:3000";
+const API_BASE_URL = "http://10.10.27.162:3000";
+// const API_BASE_URL = "http://10.15.42.113:3000";
+
 
 export default API_BASE_URL;
