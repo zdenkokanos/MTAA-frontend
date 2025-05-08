@@ -18,6 +18,7 @@ const options = [
 export default function ThemeSelectorModal({ visible, onClose }: Props) {
   const setTheme = useThemeStore((s) => s.setTheme);
   const theme = useTheme();
+  const isBW = theme.id === 'blackWhiteTheme';
 
   const handleSelect = (value: string) => {
     setTheme(value as any); // 'light' | 'dark' | 'bw' | 'system'
@@ -34,7 +35,7 @@ export default function ThemeSelectorModal({ visible, onClose }: Props) {
             </TouchableOpacity>
           ))}
           <TouchableOpacity onPress={onClose} style={styles.cancel}>
-            <Text style={[styles.cancelText, { color: theme.mutedText }]}>Cancel</Text>
+            <Text style={[styles.cancelText, { color: isBW ? '#ccc' : '#f00' }]}>Cancel</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -50,20 +51,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modal: {
-    width: '80%',
+    width: '75%',
     borderRadius: 12,
     paddingVertical: 20,
-    paddingHorizontal: 16,
   },
   option: {
-    paddingVertical: 6,
+    paddingVertical: 10,
   },
   optionText: {
     fontSize: 16,
     textAlign: 'center',
-    borderBottomColor: '#ccc',
-    borderBottomWidth: 1,
-    paddingBottom: 10,
+    borderBottomColor: 'gray',
+    borderBottomWidth: .5,
+    paddingBottom: 15,
   },
   cancel: {
     paddingTop: 10,

@@ -77,6 +77,7 @@ export default function ChangePasswordForm({token, onDone} :ChangePasswordProps 
 
   const theme = useTheme();
   const styles = useMemo(() => getStyles(theme), [theme]);
+  const isBW = theme.id === 'blackWhiteTheme';
 
   return (
     <View style={styles.container}>
@@ -114,8 +115,8 @@ export default function ChangePasswordForm({token, onDone} :ChangePasswordProps 
         {error && <Text style={styles.error}>{error}</Text>}
 
         <View style={styles.buttonGroup}>
-            <Button title="Cancel" onPress={onDone} />
-            <Button title="Save" onPress={handleChangePassword} disabled={loading} />
+            <Button title="Cancel" onPress={onDone} color={isBW ? '#ddd' : '#f00'}/>
+            <Button title="Save" onPress={handleChangePassword} disabled={loading} color={isBW ? '#fff' : '#007AFF'}/>
         </View>
     </View>
   );
@@ -132,6 +133,7 @@ label: {
     fontSize: 14,
     fontWeight: '600',
     marginTop: 8,
+    color: theme.text,
 },
 input: {
     flex: 1,

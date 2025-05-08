@@ -30,11 +30,13 @@ interface MenuItemProps {
 
 const MenuItem = ({ label, icon, onPress }: MenuItemProps) => {
     const theme = useTheme();
+    const menuStyles = useMemo(() => getMenuStyles(theme), [theme]);
+
     return (
-      <TouchableOpacity style={styles.item} onPress={onPress}>
-        <View style={styles.row}>
+      <TouchableOpacity style={menuStyles.item} onPress={onPress}>
+        <View style={menuStyles.row}>
           {icon}
-          <Text style={styles.label}>{label}</Text>
+          <Text style={menuStyles.label}>{label}</Text>
         </View>
         <Ionicons name="chevron-forward" size={20} color="gray" />
       </TouchableOpacity>
@@ -110,7 +112,6 @@ export default function ProfileScreen() {
     const theme = useTheme(); 
     const styles = useMemo(() => getStyles(theme), [theme]);
     const themeName = useThemeStore((s) => s.theme); // 'system', 'light', ...
-    const setTheme = useThemeStore((s) => s.setTheme);
 
 
     const [showThemeModal, setShowThemeModal] = useState(false);
@@ -262,7 +263,7 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => {
             color: theme.text,
         },
         container: {
-            backgroundColor: 'white',
+            backgroundColor: theme.background,
             borderRadius: 20,
             paddingHorizontal: 20,
             paddingBottom: 10,
@@ -270,23 +271,28 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => {
           },
     });
 };
-const styles = StyleSheet.create({
 
-    item: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingVertical: 16,
-      borderBottomWidth: 1,
-      borderColor: '#eee',
-    },
-    row: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 12,
-    },
-    label: {
-      fontSize: 16,
-      fontWeight: '500',
-    },
-});
+const getMenuStyles = (theme: ReturnType<typeof useTheme>) => {
+
+    return StyleSheet.create({
+        item: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            borderBottomWidth: .5,
+            borderColor: 'gray',
+            padding: 10,
+            paddingVertical: 25,
+        },
+        row: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            gap: 12,
+        },
+        label: {
+            color: theme.text,
+            fontSize: 16,
+            fontWeight: '500',
+        },
+    });
+};
