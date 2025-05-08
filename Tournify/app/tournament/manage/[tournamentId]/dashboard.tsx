@@ -94,15 +94,6 @@ export default function ManageTournamentScreen() {
         }
     };
 
-    const handleEdit = async () => {
-        try {
-            // router.replace(`/tournament/manage/${tournamentId}/edit`);
-        } catch (error) {
-            console.error("Start exception:", error);
-            Alert.alert("Error", "Something went wrong while starting the tournament.");
-        }
-    };
-
     useEffect(() => {
         fetchTournament();
     }, [tournamentId]);
@@ -230,11 +221,7 @@ export default function ManageTournamentScreen() {
                     </ScrollView>
 
                     <View style={styles.buttonContainer}>
-<<<<<<< HEAD
-                        <StartButton title="Edit Statistics" onPress={handleEdit} />
-=======
                         <StartButton title="Edit Leaderboard" onPress={() => router.push(`/tournament/manage/${tournamentId}/statistics`)} />
->>>>>>> main
                     </View>
                 </View>
             </SafeAreaView>
