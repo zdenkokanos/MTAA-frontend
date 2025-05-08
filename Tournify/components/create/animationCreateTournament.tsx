@@ -5,9 +5,10 @@ import LottieView from 'lottie-react-native';
 type AnimationProps = {
   show: boolean;
   onHide: (value: boolean) => void;
+  caption: string;
 };
 
-export default function AnimationCreateTournament({ show, onHide }: AnimationProps) {
+export default function AnimationCreateTournament({ show, onHide, caption }: AnimationProps) {
   const [animationDone, setAnimationDone] = useState(false);
 
   useEffect(() => {
@@ -20,7 +21,7 @@ export default function AnimationCreateTournament({ show, onHide }: AnimationPro
     if (animationDone) {
       const timer = setTimeout(() => {
         onHide(false);
-      }, 1000);
+      }, 10);
       return () => clearTimeout(timer);
     }
   }, [animationDone]);
@@ -37,7 +38,7 @@ export default function AnimationCreateTournament({ show, onHide }: AnimationPro
             style={styles.animation}
             onAnimationFinish={() => setAnimationDone(true)}
           />
-          <Text style={styles.successText}>Successfully created!</Text>
+          <Text style={styles.successText}>{caption}</Text>
         </View>
       </View>
     </Modal>

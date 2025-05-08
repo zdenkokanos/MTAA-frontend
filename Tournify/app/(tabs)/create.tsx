@@ -97,8 +97,8 @@ export default function CreateTournament() {
                 tournament_name: tournamentName,
                 category_id: sportId,
                 location_name: tournamentPlace,
-                latitude: latitude, //TODO: work !!!
-                longitude: longitude, //TODO: work !!!
+                latitude: latitude, 
+                longitude: longitude,
                 level: level,
                 max_team_size: Number(teamSize),
                 game_setting: gameSetting === 'other' ? customSetting : gameSetting,
@@ -408,7 +408,7 @@ export default function CreateTournament() {
                                 <StartButton title="Submit" onPress={handleSubmit} />
                             </View>
 
-                            <AnimationCreateTournament show={showSuccess} onHide={() => setShowSuccess(false)} />
+                            <AnimationCreateTournament show={showSuccess} onHide={() => setShowSuccess(false)} caption="Successfully created!"/>
 
 
                         </View>

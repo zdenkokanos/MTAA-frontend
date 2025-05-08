@@ -12,6 +12,8 @@ import StartButton from '@/components/startButton';
 import MapPreview from '@/components/tournamentDetail/mapPreview';
 import TournamentDescription from '@/components/tournamentDetail/tournamentDescription';
 import Leaderboard from '@/components/tournamentDetail/leaderboard';
+import { useTournamentStore } from '@/stores/useTournamentsStore';
+
 
 export default function ManageTournamentScreen() {
     const { tournamentId } = useLocalSearchParams();
@@ -20,6 +22,7 @@ export default function ManageTournamentScreen() {
     const isBW = theme.id === 'blackWhiteTheme';
 
     const router = useRouter();
+    const { shouldRefresh, setShouldRefresh } = useTournamentStore();
 
     const [tournament, setTournament] = useState<any>(null);
     const [teamsCount, setTeamsCount] = useState<number | null>(null);
@@ -89,7 +92,7 @@ export default function ManageTournamentScreen() {
 
     const handleEdit = async () => {
         try {
-            router.replace(`/tournament/manage/${tournamentId}/edit`);
+            // router.replace(`/tournament/manage/${tournamentId}/edit`);
         } catch (error) {
             console.error("Start exception:", error);
             Alert.alert("Error", "Something went wrong while starting the tournament.");
@@ -99,6 +102,13 @@ export default function ManageTournamentScreen() {
     useEffect(() => {
         fetchTournament();
     }, [tournamentId]);
+
+    useEffect(() => {
+        if (shouldRefresh) {
+            fetchTournament();
+            setShouldRefresh(false);
+        }
+    }, [shouldRefresh]);
 
     const onRefresh = async () => {
         setRefreshing(true);
