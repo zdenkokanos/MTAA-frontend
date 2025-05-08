@@ -71,6 +71,10 @@ export default function ManageTournamentScreen() {
                 setTournament(tournamentData);
             }
 
+            if (leaderboardRes.ok) {
+                setLeaderboard(leaderboardData);
+            }
+
             if (teamCountRes.ok) {
                 setTeamsCount(teamCountData[0]?.team_count ?? 0);
             } else {
@@ -226,7 +230,11 @@ export default function ManageTournamentScreen() {
                     </ScrollView>
 
                     <View style={styles.buttonContainer}>
+<<<<<<< HEAD
                         <StartButton title="Edit Statistics" onPress={handleEdit} />
+=======
+                        <StartButton title="Edit Leaderboard" onPress={() => router.push(`/tournament/manage/${tournamentId}/statistics`)} />
+>>>>>>> main
                     </View>
                 </View>
             </SafeAreaView>

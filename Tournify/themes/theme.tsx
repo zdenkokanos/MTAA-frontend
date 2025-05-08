@@ -22,6 +22,7 @@ export const lightTheme = {
     headerTable: "#f5f5f5",
     tableRow: "#fff",
     tableBorder: '#ddd',
+    cardColor: '#000000',
 };
 
 export const darkTheme = {
@@ -47,6 +48,7 @@ export const darkTheme = {
     headerTable: "#333333",
     tableRow: "#444444",
     tableBorder: '#555555',
+    cardColor: '#000000',
 };
 
 export const blackWhiteTheme = {
@@ -71,6 +73,7 @@ export const blackWhiteTheme = {
     headerTable: '#111111',
     tableRow: '#000000',
     tableBorder: '#444444',
+    cardColor: '#ffffff',
 };
 
 export const useTheme = () => {
