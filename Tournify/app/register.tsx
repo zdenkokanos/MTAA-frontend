@@ -216,7 +216,7 @@ export default function SignUpScreen() {
                             <StartButton title="Sign up" onPress={handleContinue} />
 
                             <Text style={styles.signUpText}>
-                                I have an account, <Text style={styles.signUpLink} onPress={() => router.push("/login")}>sign in.</Text>
+                                I have an account, <Text style={styles.signUpLink} onPress={() => router.replace("/login")}>sign in.</Text>
                             </Text>
                         </View>
                     </KeyboardAwareScrollView>

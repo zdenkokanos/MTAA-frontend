@@ -24,6 +24,7 @@ export const lightTheme = {
     tableRow: "#fff",
     tableBorder: '#ddd',
     cardColor: '#000000',
+    liveColor: '#FF3B30',
 };
 
 export const darkTheme = {
@@ -50,6 +51,7 @@ export const darkTheme = {
     tableRow: "#444444",
     tableBorder: '#555555',
     cardColor: '#000000',
+    liveColor: '#FF3B30',
 };
 
 export const blackWhiteTheme = {
@@ -75,6 +77,7 @@ export const blackWhiteTheme = {
     tableRow: '#000000',
     tableBorder: '#444444',
     cardColor: '#ffffff',
+    liveColor: '#fff',
 };
 
 export const useTheme = () => {

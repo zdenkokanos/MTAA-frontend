@@ -66,8 +66,6 @@ export default function ManageTournamentScreen() {
 
             if (enrolledRes.ok) {
                 setEnrolledTeams(enrolledData);
-            } else {
-                console.error("Failed to fetch enrolled teams:", enrolledData.message);
             }
 
         } catch (err) {

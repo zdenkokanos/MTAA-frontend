@@ -345,7 +345,7 @@ export default function EditTournament() {
                                 onHide={() => {
                                         setShowSuccess(false)  
                                         setShouldRefresh(true);
-                                        router.push(`/tournament/manage/${tournamentId}/startEdit`);
+                                        router.replace(`/tournament/manage/${tournamentId}/startEdit`);
                                     }
                                 }
                             />

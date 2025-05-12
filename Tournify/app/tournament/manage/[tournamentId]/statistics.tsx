@@ -8,6 +8,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import API_BASE_URL from '@/config/config';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '@/themes/theme';
+import { useNavigation } from '@react-navigation/native';
 
 function getOrdinal(n: number) {
     const s = ["th", "st", "nd", "rd"],
@@ -36,6 +37,8 @@ export default function EditLeaderboardScreen() {
     const [joinedTeams, setJoinedTeams] = useState<{ id: number; team_name: string }[]>([]);
     const [teamInputs, setTeamInputs] = useState<string[]>([]);
     const [suggestions, setSuggestions] = useState<{ id: number; team_name: string }[]>([]);
+
+    const navigation = useNavigation();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -178,7 +181,16 @@ export default function EditLeaderboardScreen() {
                 console.error(`${failed.length} records failed to submit.`);
             } else {
                 console.log('Leaderboard updated successfully');
-                router.replace(`/tournament/manage/${tournamentId}/dashboard`);
+                // router.replace(`/tournament/manage/${tournamentId}/dashboard`);
+                navigation.reset({
+                    index: 0,
+                    routes: [
+                        {
+                        name: 'tournament/manage/[tournamentId]/dashboard' as never,
+                        params: { tournamentId },
+                        },
+                    ],
+                });
             }
 
         } catch (error) {
