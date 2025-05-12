@@ -124,6 +124,7 @@ export default function HomeScreen() {
             await cacheAllTickets();
 
         } catch (err) {
+            router.replace("/errorScreen");
             console.error("Failed to load home screen data:", err);
         }
     };

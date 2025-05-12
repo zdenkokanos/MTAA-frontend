@@ -11,7 +11,6 @@ import TournamentDescription from '@/components/tournamentDetail/tournamentDescr
 import MapPreview from '@/components/tournamentDetail/mapPreview';
 import SafeOfflineBanner from '@/components/offline/safeOfflineBanner';
 import { formatDate } from '@/utils/formatDate';
-import { apiFetch } from '@/utils/apiFetch';
 
 export default function TournamentDetailScreen() {
     const { tournamentId } = useLocalSearchParams();
@@ -75,8 +74,8 @@ export default function TournamentDetailScreen() {
             setToken(storedToken);
 
             const [tournamentRes, teamCountRes] = await Promise.all([
-                apiFetch(`${API_BASE_URL}/tournaments/${tournamentId}/info`),
-                apiFetch(`${API_BASE_URL}/tournaments/${tournamentId}/teams/count`, {
+                fetch(`${API_BASE_URL}/tournaments/${tournamentId}/info`),
+                fetch(`${API_BASE_URL}/tournaments/${tournamentId}/teams/count`, {
                     headers: {
                         Authorization: `Bearer ${storedToken}`,
                         "Content-Type": "application/json",
@@ -100,6 +99,7 @@ export default function TournamentDetailScreen() {
             }
         } catch (err) {
             console.error('Error fetching tournament:', err);
+            router.replace("/errorScreen");
         } finally {
             setLoading(false);
         }
