@@ -136,8 +136,6 @@ export default function TournamentDetailScreen() {
         setRefreshing(false);
     };
 
-    useOnShakeRefresh(onRefresh);
-
     return (
         <>
             <SafeOfflineBanner />

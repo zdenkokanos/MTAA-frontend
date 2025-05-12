@@ -88,7 +88,7 @@ export default function HomeScreen() {
             if (userInfoResponse.ok) {
                 setUserInfo(userInfoData);
             } else {
-                console.error("User Info error:", userInfoData.message);
+                console.warn("User Info error:", userInfoData.message);
             }
 
             // Fetch Tickets

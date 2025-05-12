@@ -94,15 +94,27 @@ export default function ManageTournamentScreen() {
 
             const data = await res.json();
 
+            // Send push notifications to users
             if (res.ok) {
-                Alert.alert("Success", "Tournament has started.");
-                fetchTournament();
+                const notifyRes = await fetch(`${API_BASE_URL}/tournaments/${tournamentId}/notify-start`, {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `Bearer ${storedToken}`,
+                        'Content-Type': 'application/json',
+                    }
+                });
+                const notifyData = await notifyRes.json();
+                console.log("Notify response:", notifyRes.status, notifyData);
+
+                if (!notifyRes.ok) {
+                    Alert.alert("Warning", "Tournament started but users were not notified.");
+                }
             } else {
                 console.error("Start error:", data.message);
                 Alert.alert("Error", data.message || "Failed to start tournament.");
             }
-
             router.replace(`/tournament/manage/${tournamentId}/dashboard`);
+            Alert.alert("Success", "Tournament has started.");
         } catch (error) {
             console.error("Start exception:", error);
             Alert.alert("Error", "Something went wrong while starting the tournament.");

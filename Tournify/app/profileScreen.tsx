@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Platform, RefreshControl, Alert } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, Platform, RefreshControl, Alert, KeyboardAvoidingView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons, MaterialIcons, MaterialCommunityIcons, Feather } from '@expo/vector-icons';
 import { useTheme } from '@/themes/theme';
@@ -13,6 +13,7 @@ import { useNavigation } from '@react-navigation/native';
 
 import { useThemeStore } from '@/stores/themeStore';
 import ThemeSelectorModal from '@/components/profile/themeSelector';
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
 
 interface UserData {
@@ -133,105 +134,112 @@ export default function ProfileScreen() {
     return (
         <SafeAreaView style={styles.safeArea}>
             <OfflineBanner />
-            <ScrollView
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingBottom: 40 }}
-                refreshControl={
-                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-                }
+            <KeyboardAwareScrollView
+                contentContainerStyle={{ flexGrow: 1 }}
+                keyboardShouldPersistTaps="handled"
+                enableOnAndroid
+                extraScrollHeight={40} // Pushes the input above the keyboard
             >
-                <TouchableOpacity style={styles.backButton} onPress={() => {
-                    if (router.canGoBack()) {
-                        router.back();
-                    } else {
-                        router.replace("/(tabs)/home");
+                <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    contentContainerStyle={{ paddingBottom: 40 }}
+                    refreshControl={
+                        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
                     }
-                }}>
-                    <Ionicons name="arrow-back" size={24} color="white" />
-                </TouchableOpacity>
-                <View style={styles.header}>
-                    <Image
-                        source={
-                            userData && userData.image_path
-                                ? {
-                                    uri: `${API_BASE_URL}/uploads/${userData.image_path}?grayscale=${isBW}`,
-                                    headers: {
-                                        Authorization: `Bearer ${token}`,
-                                    },
-                                }
-                                : require("@/assets/images/default-profile.jpg")
+                >
+                    <TouchableOpacity style={styles.backButton} onPress={() => {
+                        if (router.canGoBack()) {
+                            router.back();
+                        } else {
+                            router.replace("/(tabs)/home");
                         }
-                        style={styles.avatar}
-                        onError={(error) => {
-                            console.log("Image failed to load:", error.nativeEvent.error);
-                        }}
-                    />
-                    <View style={styles.nameContainer}>
-                        <Text style={styles.name}>
-                            {userData ? `${userData.first_name} ${userData.last_name}` : "Loading..."}
-                        </Text>
-                        <Text style={styles.email}>
-                            {userData ? `${userData.email}` : "Loading..."}
-                        </Text>
-                    </View>
-                </View>
-                <View style={styles.container}>
-                    <MenuItem
-                        label="Edit profile"
-                        icon={<Feather name="edit" size={20} color={theme.text} />}
-                        onPress={() => {
-                            if (!editMode) setEditMode(true)
-                            else if (editMode) setEditMode(false)
-                        }
-                        }
-                        expanded={editMode} // 🔄
-                    />
-                    {editMode && userData && token && (
-                        <EditProfile
-                            user={userData}
-                            token={token}
-                            onDone={() => {
-                                setEditMode(false);
-                                fetchUserData();
+                    }}>
+                        <Ionicons name="arrow-back" size={24} color="white" />
+                    </TouchableOpacity>
+                    <View style={styles.header}>
+                        <Image
+                            source={
+                                userData && userData.image_path
+                                    ? {
+                                        uri: `${API_BASE_URL}/uploads/${userData.image_path}?grayscale=${isBW}`,
+                                        headers: {
+                                            Authorization: `Bearer ${token}`,
+                                        },
+                                    }
+                                    : require("@/assets/images/default-profile.jpg")
+                            }
+                            style={styles.avatar}
+                            onError={(error) => {
+                                console.log("Image failed to load:", error.nativeEvent.error);
                             }}
                         />
-                    )}
-
-                    <MenuItem
-                        label="Change Password"
-                        icon={<MaterialCommunityIcons name="key" size={20} color={theme.text} />}
-                        onPress={() => {
-                            if (!showPassword) setShowPassword(true)
-                            else if (showPassword) setShowPassword(false)
-                        }
-                        }
-                        expanded={showPassword} // 🔄
-                    />
-                    {showPassword && token && userData?.id && (
-                        <ChangePasswordForm
-                            token={token}
-                            onDone={() => setShowPassword(false)}
+                        <View style={styles.nameContainer}>
+                            <Text style={styles.name}>
+                                {userData ? `${userData.first_name} ${userData.last_name}` : "Loading..."}
+                            </Text>
+                            <Text style={styles.email}>
+                                {userData ? `${userData.email}` : "Loading..."}
+                            </Text>
+                        </View>
+                    </View>
+                    <View style={styles.container}>
+                        <MenuItem
+                            label="Edit profile"
+                            icon={<Feather name="edit" size={20} color={theme.text} />}
+                            onPress={() => {
+                                if (!editMode) setEditMode(true)
+                                else if (editMode) setEditMode(false)
+                            }
+                            }
+                            expanded={editMode} // 🔄
                         />
-                    )}
+                        {editMode && userData && token && (
+                            <EditProfile
+                                user={userData}
+                                token={token}
+                                onDone={() => {
+                                    setEditMode(false);
+                                    fetchUserData();
+                                }}
+                            />
+                        )}
 
-                    <MenuItem
-                        label={`Theme: ${themeName.toUpperCase()}`}
-                        icon={<MaterialIcons name="brightness-6" size={20} color={theme.text} />}
-                        onPress={() => setShowThemeModal(true)}
-                    />
+                        <MenuItem
+                            label="Change Password"
+                            icon={<MaterialCommunityIcons name="key" size={20} color={theme.text} />}
+                            onPress={() => {
+                                if (!showPassword) setShowPassword(true)
+                                else if (showPassword) setShowPassword(false)
+                            }
+                            }
+                            expanded={showPassword} // 🔄
+                        />
+                        {showPassword && token && userData?.id && (
+                            <ChangePasswordForm
+                                token={token}
+                                onDone={() => setShowPassword(false)}
+                            />
+                        )}
 
-                    <ThemeSelectorModal
-                        visible={showThemeModal}
-                        onClose={() => setShowThemeModal(false)}
-                    />
+                        <MenuItem
+                            label={`Theme: ${themeName.toUpperCase()}`}
+                            icon={<MaterialIcons name="brightness-6" size={20} color={theme.text} />}
+                            onPress={() => setShowThemeModal(true)}
+                        />
 
-                    <MenuItem
-                        label="Sign Out"
-                        icon={<Ionicons name="exit-outline" size={20} color={theme.text} />}
-                        onPress={confirmLogout}
-                    />
-                </View>
-            </ScrollView>
+                        <ThemeSelectorModal
+                            visible={showThemeModal}
+                            onClose={() => setShowThemeModal(false)}
+                        />
+
+                        <MenuItem
+                            label="Sign Out"
+                            icon={<Ionicons name="exit-outline" size={20} color={theme.text} />}
+                            onPress={confirmLogout}
+                        />
+                    </View>
+                </ScrollView>
+            </KeyboardAwareScrollView>
         </SafeAreaView>
     );
 }
