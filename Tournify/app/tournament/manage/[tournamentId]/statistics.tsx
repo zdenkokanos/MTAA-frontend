@@ -71,6 +71,7 @@ export default function EditLeaderboardScreen() {
 
                 // Create a map from team ID to name for easier lookup.
                 const teamMap = Object.fromEntries(teams.map((t: { id: number; team_name: string }) => [t.id, t.team_name]));
+                console.log('Team Map:', teamMap);
 
                 const prefilledInputs: string[] = new Array(teams.length).fill('');
                 leaderboardData.forEach((entry: any) => {
@@ -84,7 +85,6 @@ export default function EditLeaderboardScreen() {
 
             } catch (err) {
                 console.warn('Error loading leaderboard data:', err);
-                router.replace("/errorScreen");
             }
         };
 
@@ -132,6 +132,7 @@ export default function EditLeaderboardScreen() {
 
             // Map team names to their IDs
             const teamNameToId = Object.fromEntries(joinedTeams.map(team => [team.team_name, team.id]));
+            console.log('Team Name to ID Map:', teamNameToId);
 
             const requests = teamInputs.map((name, index) => {
                 const trimmedName = name.trim();

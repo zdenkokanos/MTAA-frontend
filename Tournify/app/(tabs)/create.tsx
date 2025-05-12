@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { Text, View, StyleSheet, KeyboardAvoidingView, Platform, SafeAreaView, TextInput, TouchableOpacity, Alert, FlatList } from "react-native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -43,6 +43,7 @@ export default function CreateTournament() {
     const [entryFee, setEntryFee] = useState('');
     const [prizeDescription, setPrizeDescription] = useState('');
     const [additionalInfo, setAdditionalInfo] = useState('');
+    const placeRef = useRef<any>(null);
 
     const [showSuccess, setShowSuccess] = useState(false);
 
@@ -127,6 +128,22 @@ export default function CreateTournament() {
             }
 
             setShowSuccess(true);
+            placeRef.current?.setAddressText('');
+            setTournamentName('');
+            setTournamentPlace('');
+            setLatitude(0);
+            setLongitude(0);
+            setLevel('');
+            setSport('');
+            setSportId(0);
+            setTournamentDate(new Date());
+            setTournamentTime(new Date());
+            setTeamSize('');
+            setGameSetting('');
+            setCustomSetting('');
+            setEntryFee('');
+            setPrizeDescription('');
+            setAdditionalInfo('');
             console.log('Tournament created successfully:', result);
 
         } catch (error: any) {
@@ -192,6 +209,7 @@ export default function CreateTournament() {
                                 <Text style={styles.label}>Event place</Text>
                                 <View>
                                     <GooglePlacesAutocomplete
+                                        ref={placeRef}
                                         placeholder="Enter your city"
                                         onPress={(data, details) => {
                                             if (!details) return;

@@ -213,7 +213,7 @@ export default function SignUpScreen() {
                                 </TouchableOpacity>
                             </View>
 
-                            <StartButton title="Sign up" onPress={handleContinue} />
+                            <StartButton title="Register" onPress={handleContinue} />
 
                             <Text style={styles.signUpText}>
                                 I have an account, <Text style={styles.signUpLink} onPress={() => router.replace("/login")}>sign in.</Text>

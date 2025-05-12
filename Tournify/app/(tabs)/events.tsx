@@ -409,6 +409,7 @@ const getStyles = (theme: ReturnType<typeof useTheme>, isLargeScreen: boolean) =
         paddingHorizontal: 16,
     },
     hostedCard: {
+        flex: isLargeScreen ? undefined : 1,
         width: isLargeScreen
             ? (Dimensions.get('window').width - 48) / 2
             : undefined,

@@ -35,8 +35,8 @@ export default function TournamentDetailScreen() {
             : `${API_BASE_URL}/tournaments/${tournamentId}/join_team`;
 
         const payload = selectedOption === "new"
-            ? { team_name: teamInput }
-            : { code: teamInput };
+            ? { team_name: teamInput.trim() }
+            : { code: teamInput.trim() };
 
         try {
             const response = await fetch(endpoint, {
@@ -57,13 +57,13 @@ export default function TournamentDetailScreen() {
                     params: { ticketId: data.ticketId.toString() },
                 });
             } else if (response.status === 400) {
-                console.error("Bad Request:", data.message);
+                console.warn("Bad Request:", data.message);
                 Alert.alert("Error", data.message);
             } else {
-                console.error("Error:", data.message);
+                console.warn("Error:", data.message);
             }
         } catch (error) {
-            console.error("Request failed:", error);
+            console.warn("Request failed:", error);
         }
     };
 
@@ -90,13 +90,13 @@ export default function TournamentDetailScreen() {
             if ((tournamentRes as Response).ok) {
                 setTournament(tournamentData);
             } else {
-                console.error('Tournament fetch error:', tournamentData.message);
+                console.warn('Tournament fetch error:', tournamentData.message);
             }
 
             if ((teamCountRes as Response).ok) {
                 setTeamsCount(teamCountData[0]?.team_count ?? 0);
             } else {
-                console.error('Team count fetch error:', teamCountData.message);
+                console.warn('Team count fetch error:', teamCountData.message);
             }
         } catch (err) {
             console.warn('Error fetching tournament:', err);
@@ -142,13 +142,18 @@ export default function TournamentDetailScreen() {
             <KeyboardAwareScrollView
                 style={styles.container}
                 contentContainerStyle={{ flexGrow: 1 }}
+                showsVerticalScrollIndicator={false}
                 keyboardShouldPersistTaps="handled"
                 enableOnAndroid
                 extraScrollHeight={40} // Pushes the input above the keyboard
+                refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+                }
             >
                 {/* Image and Back Button */}
                 <ScrollView style={styles.container}
                     keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={false}
                     contentContainerStyle={styles.container}
                     refreshControl={
                         <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -175,7 +180,6 @@ export default function TournamentDetailScreen() {
 
                         <View style={styles.headerRow}>
                             <Text style={styles.title}>{tournament.tournament_name}</Text>
-                            <Ionicons name="share-outline" size={24} style={styles.icons} />
                         </View>
 
                         <Text style={styles.dateUnderTitle}>{formatDate(tournament.date)}</Text>

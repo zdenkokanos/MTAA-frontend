@@ -54,14 +54,12 @@ export default function TournamentInfoScreen() {
                 setTournament(tournamentData);
             } else {
                 console.warn('Tournament fetch error:', tournamentData.message);
-                router.replace("/errorScreen");
             }
 
             if (leaderboardRes.ok) {
                 setLeaderboard(leaderboardData);
             } else {
                 console.warn('Leaderboard fetch error:', leaderboardData.message);
-                router.replace("/errorScreen");
             }
         } catch (err) {
             console.warn('Error fetching tournament data:', err);
