@@ -44,6 +44,7 @@ export default function CreateTournament() {
     const [prizeDescription, setPrizeDescription] = useState('');
     const [additionalInfo, setAdditionalInfo] = useState('');
     const placeRef = useRef<any>(null);
+    const [tournamentId, setTournamentId] = useState<string | null>(null);
 
     const [showSuccess, setShowSuccess] = useState(false);
 
@@ -122,6 +123,8 @@ export default function CreateTournament() {
             });
 
             const result = await response.json();
+            const tournamentId = result.id;
+            setTournamentId(tournamentId);
 
             if (!response.ok) {
                 throw new Error(result.message || 'Failed to create tournament');
@@ -440,7 +443,7 @@ export default function CreateTournament() {
                                 caption="Successfully created!"
                                 onHide={() => {
                                     setShowSuccess(false)
-                                    router.push(`/events`)
+                                    router.replace(`/tournament/manage/${tournamentId}/startEdit`);
                                 }
                                 }
                             />
