@@ -4,6 +4,9 @@ import { Text, View, StyleSheet, Platform, RefreshControl, ScrollView, FlatList,
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "@/themes/theme";
 import API_BASE_URL from "@/config/config";
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
+import { Animated } from 'react-native';
 
 import AntDesign from '@expo/vector-icons/AntDesign';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
@@ -85,6 +88,7 @@ export default function WelcomeScreen() {
         }
     };
 
+
     useEffect(() => {
         fetchData();
     }, []);
@@ -99,6 +103,12 @@ export default function WelcomeScreen() {
         setRefreshing(false);
     };
 
+    useFocusEffect(
+        useCallback(() => {
+            fetchData();
+        }, [])
+    );
+
     const screenWidth = Dimensions.get('window').width;
     const [activeIndex, setActiveIndex] = useState(0); // State to track the active index of the FlatList
     const isLargeScreen = useMemo(() => screenWidth >= 768, [screenWidth]);
@@ -110,6 +120,24 @@ export default function WelcomeScreen() {
         const index = Math.round(event.nativeEvent.contentOffset.x / screenWidth);
         setActiveIndex(index);
     }; // Function to handle the scroll event and update the active index
+
+    const pulseAnim = useRef(new Animated.Value(1)).current;
+    useEffect(() => {
+        Animated.loop(
+            Animated.sequence([
+                Animated.timing(pulseAnim, {
+                    toValue: 1.1,
+                    duration: 1000,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(pulseAnim, {
+                    toValue: 1,
+                    duration: 1000,
+                    useNativeDriver: true,
+                }),
+            ])
+        ).start();
+    }, []);
 
     const chunkArray = <T,>(array: T[], size: number): T[][] => {
         const result: T[][] = [];
@@ -195,6 +223,49 @@ export default function WelcomeScreen() {
                         ))}
                     </View>
                 </View>
+                {/* Happening Now tournaments */}
+                {registeredTournaments.filter(item => item.status === 'Ongoing').length > 0 && (
+                    <View>
+                        <View style={styles.mainTitle}>
+                            <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
+                                <MaterialIcons name="live-tv" style={styles.liveIcon} size={25} />
+                            </Animated.View>
+                            <Text style={styles.liveTitle}>Happening Now</Text>
+                        </View>
+                        <View>
+                            <FlatList
+                                data={registeredTournaments.filter(item => item.status === 'Ongoing')}
+                                keyExtractor={(item) => item.id}
+                                numColumns={isLargeScreen ? 2 : 1}
+                                columnWrapperStyle={isLargeScreen ? styles.registeredColumnWrapper : undefined}
+                                contentContainerStyle={styles.registeredList}
+                                scrollEnabled={false}
+                                renderItem={({ item }) => (
+                                    <View style={styles.registeredCardWrapper}>
+                                        <TournamentView
+                                            title={item.tournament_name}
+                                            date={item.date}
+                                            imageUrl={{ uri: `${API_BASE_URL}/category/images/${item.category_image}` }}
+                                            tournamentId={item.id}
+                                            lat={null}
+                                            lon={null}
+                                            userLat={null}
+                                            userLon={null}
+                                            defaultDistance={item.distance}
+                                            type="ticket"
+                                            ticketId={item.id}
+                                        />
+                                    </View>
+                                )}
+                            />
+
+
+                        </View>
+
+                    </View>
+                )}
+
+
                 {/* Upcomming tournaments */}
                 <View>
                     <View style={styles.mainTitle}>
@@ -202,9 +273,9 @@ export default function WelcomeScreen() {
                         <Text style={styles.title}>Upcoming events</Text>
                     </View>
                     <View>
-                        {registeredTournaments.length > 0 ? (
+                        {registeredTournaments.filter(item => item.status !== 'Ongoing').length > 0 ? (
                             <FlatList
-                                data={registeredTournaments}
+                                data={registeredTournaments.filter(item => item.status !== 'Ongoing')}
                                 keyExtractor={(item) => item.id}
                                 numColumns={isLargeScreen ? 2 : 1}
                                 columnWrapperStyle={isLargeScreen ? styles.registeredColumnWrapper : undefined}
@@ -230,7 +301,7 @@ export default function WelcomeScreen() {
                             />
 
                         ) : (
-                            <Text style={styles.emptyText}>You will see your registered tournaments here.</Text>
+                            <Text style={styles.emptyText}>You will see your upcoming tournaments here.</Text>
                         )}
 
                     </View>
@@ -263,10 +334,21 @@ const getStyles = (theme: ReturnType<typeof useTheme>, isLargeScreen: boolean) =
         marginBottom: 25,
         color: theme.text,
     },
+    liveTitle: {
+        fontSize: 25,
+        fontWeight: 'bold',
+        marginBottom: 25,
+        color: theme.liveColor,
+    },
     icon: {
         marginTop: 2,
         marginRight: 10,
         color: theme.text,
+    },
+    liveIcon: {
+        marginTop: 2,
+        marginRight: 10,
+        color: theme.liveColor,
     },
     sectionTitle: {
         fontSize: 12,

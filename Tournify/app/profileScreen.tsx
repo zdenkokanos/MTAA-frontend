@@ -9,6 +9,7 @@ import EditProfile from '../components/profile/editProfile';
 import OfflineBanner from '@/components/offline/safeOfflineBanner';
 import ChangePasswordForm from '@/components/profile/changePassword';
 import { router } from "expo-router";
+import { useNavigation } from '@react-navigation/native';
 
 import { useThemeStore } from '@/stores/themeStore';
 import ThemeSelectorModal from '@/components/profile/themeSelector';
@@ -28,6 +29,7 @@ interface MenuItemProps {
     onPress: () => void;
     expanded?: boolean;
 }
+
 
 const MenuItem = ({ label, icon, onPress, expanded = false }: MenuItemProps) => {
     const theme = useTheme();
@@ -55,6 +57,8 @@ export default function ProfileScreen() {
     const [refreshing, setRefreshing] = useState(false);
     const [token, setToken] = useState<string | null>(null);
     const [userData, setUserData] = useState<UserData | null>(null);
+
+    const navigation = useNavigation();
 
     const [editMode, setEditMode] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
@@ -112,7 +116,10 @@ export default function ProfileScreen() {
 
     const handleSignOut = async () => {
         await AsyncStorage.multiRemove(["token", "userId"]);
-        router.replace("/login");
+        navigation.reset({
+            index: 0,
+            routes: [{ name: 'welcome' as never }],
+        });
     };
 
     const theme = useTheme();

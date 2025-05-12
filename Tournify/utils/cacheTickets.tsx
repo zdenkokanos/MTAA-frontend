@@ -124,7 +124,7 @@ export const cacheAllTickets = async () => {
         await AsyncStorage.setItem('cachedTickets', JSON.stringify(detailedTickets));
         console.log('✅ Tickets cached successfully');
     } catch (err) {
-        console.error('❌ Error caching all tickets:', err);
+        console.log('❌ Error caching all tickets:', err);
     }
 };
 
