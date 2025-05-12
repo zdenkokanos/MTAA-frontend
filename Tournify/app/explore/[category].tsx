@@ -1,4 +1,4 @@
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { View, Text, StyleSheet, FlatList, SafeAreaView, Platform, RefreshControl, ActivityIndicator, Dimensions, TextInput } from 'react-native';
 import { useEffect, useMemo, useState } from 'react';
 import API_BASE_URL from '@/config/config';
@@ -43,8 +43,9 @@ export default function CategoryTournamentsScreen() {
             setTournaments(Array.isArray(data) ? data : []);
 
         } catch (error) {
-            console.error('Error loading tournaments:', error);
+            console.warn('Error loading tournaments:', error);
             setTournaments([]); // fallback 
+            router.replace("/errorScreen");
         } finally {
             setLoading(false);
         }

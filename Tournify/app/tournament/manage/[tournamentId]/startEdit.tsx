@@ -69,7 +69,8 @@ export default function ManageTournamentScreen() {
             }
 
         } catch (err) {
-            console.error('Error fetching tournament data:', err);
+            console.warn('Error fetching tournament data:', err);
+            router.replace("/errorScreen");
         } finally {
             setLoading(false);
         }
@@ -153,7 +154,7 @@ export default function ManageTournamentScreen() {
                                 style={styles.image}
                             />
                             <SafeAreaView style={styles.safeAreaBack}>
-                                <TouchableOpacity style={styles.backButton} onPress={() => router.replace(`/events`) }>
+                                <TouchableOpacity style={styles.backButton} onPress={() => router.replace(`/events`)}>
                                     <Ionicons name="arrow-back" size={24} color="white" />
                                 </TouchableOpacity>
                             </SafeAreaView>

@@ -21,7 +21,7 @@ import { useRef } from 'react';
 
 export default function TicketDetailScreen() {
     const socketRef = useRef<any>(null);
-    
+
     const { ticketId } = useLocalSearchParams();
     const [loading, setLoading] = useState(true);
     const [ticket, setTicket] = useState<any>(null);
@@ -123,27 +123,27 @@ export default function TicketDetailScreen() {
 
     useEffect(() => {
         if (!ticket?.tournament_id) return;
-    
+
         socketRef.current = io(API_BASE_URL, {
             transports: ['websocket'],
         });
-    
+
         socketRef.current.emit('join_room', `tournament-${ticket.tournament_id}`);
-    
+
         socketRef.current.on('enrolled_updated', (data: { tournament_id: string | number }) => {
             if (String(data.tournament_id) === String(ticket.tournament_id)) {
                 console.log("📥 Real-time update received in TicketDetailScreen");
                 fetchData();
             }
         });
-    
+
         return () => {
             socketRef.current?.disconnect();
         };
     }, [ticket?.tournament_id]);
-    
-    
-    
+
+
+
 
     // Variable to store the theme styles
     const theme = useTheme();
@@ -173,7 +173,7 @@ export default function TicketDetailScreen() {
                         source={{
                             uri: tournament.localCategoryImage || `${API_BASE_URL}/category/images/${tournament.category_image}?grayscale=${isBW}`,
                             ...(tournament.localCategoryImage
-                                ? {} 
+                                ? {}
                                 : token
                                     ? { headers: { Authorization: `Bearer ${token}` } }
                                     : {}),
@@ -444,6 +444,6 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => {
             padding: 20,
             borderRadius: 20,
         },
-        
+
     });
 };

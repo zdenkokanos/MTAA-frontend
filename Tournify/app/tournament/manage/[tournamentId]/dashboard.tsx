@@ -88,7 +88,8 @@ export default function ManageTournamentScreen() {
             }
 
         } catch (err) {
-            console.error('Error fetching tournament data:', err);
+            console.warn('Error fetching tournament data:', err);
+            router.replace("/errorScreen");
         } finally {
             setLoading(false);
         }

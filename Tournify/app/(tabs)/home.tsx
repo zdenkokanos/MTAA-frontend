@@ -35,6 +35,7 @@ export default function HomeScreen() {
         date: string;
         category_image: string;
         id: string;
+        local_image?: string;
     }
     interface HistoryItem {
         id: string;
@@ -124,8 +125,34 @@ export default function HomeScreen() {
             await cacheAllTickets();
 
         } catch (err) {
-            router.replace("/errorScreen");
-            console.error("Failed to load home screen data:", err);
+            console.warn("Failed to load home screen data:", err);
+            await loadTicketsFromCache();
+        }
+    };
+
+    const loadTicketsFromCache = async () => {
+        try {
+            const cached = await AsyncStorage.getItem("cachedTickets");
+            if (!cached) {
+                console.warn("No cached tickets found.");
+                return;
+            }
+
+            const parsed = JSON.parse(cached);
+
+            const normalizedTickets = parsed
+                .filter((entry: any) => entry.ticket && entry.tournament)
+                .map((entry: any) => ({
+                    id: entry.id,
+                    date: entry.tournament.date,
+                    category_image: entry.tournament.category_image,
+                    local_image: entry.tournament.localCategoryImage,
+                }));
+
+            setTickets(normalizedTickets);
+            console.log("Loaded tickets from cache.");
+        } catch (cacheErr) {
+            console.warn("Failed to load tickets from cache:", cacheErr);
         }
     };
 
@@ -295,10 +322,12 @@ export default function HomeScreen() {
                                 ticketId={ticket.id}
                                 date={ticket.date}
                                 imageUrl={{
-                                    uri: `${API_BASE_URL}/category/images/${ticket.category_image}?grayscale=${isBW}`,
-                                    headers: {
-                                        Authorization: `Bearer ${token}`,
-                                    },
+                                    uri: ticket.local_image || `${API_BASE_URL}/category/images/${ticket.category_image}?grayscale=${isBW}`,
+                                    ...(ticket.local_image
+                                        ? {}
+                                        : token
+                                            ? { headers: { Authorization: `Bearer ${token}` } }
+                                            : {}),
                                 }}
                             />
                         ))}

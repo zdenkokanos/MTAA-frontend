@@ -11,6 +11,7 @@ import TournamentDescription from '@/components/tournamentDetail/tournamentDescr
 import MapPreview from '@/components/tournamentDetail/mapPreview';
 import SafeOfflineBanner from '@/components/offline/safeOfflineBanner';
 import { formatDate } from '@/utils/formatDate';
+import useOnShakeRefresh from '@/hooks/useOnShakeRefresh';
 
 export default function TournamentDetailScreen() {
     const { tournamentId } = useLocalSearchParams();
@@ -98,7 +99,7 @@ export default function TournamentDetailScreen() {
                 console.error('Team count fetch error:', teamCountData.message);
             }
         } catch (err) {
-            console.error('Error fetching tournament:', err);
+            console.warn('Error fetching tournament:', err);
             router.replace("/errorScreen");
         } finally {
             setLoading(false);
@@ -134,6 +135,8 @@ export default function TournamentDetailScreen() {
         await fetchTournament();
         setRefreshing(false);
     };
+
+    useOnShakeRefresh(onRefresh);
 
     return (
         <>

@@ -8,6 +8,7 @@ import API_BASE_URL from '@/config/config';
 import { useRouter } from 'expo-router';
 import { StyleSheet } from "react-native";
 import OfflineBanner from '@/components/offline/safeOfflineBanner';
+import useOnShakeRefresh from '@/hooks/useOnShakeRefresh';
 
 
 interface HistoryItem {
@@ -27,17 +28,22 @@ export default function HistoryScreen() {
     const [refreshing, setRefreshing] = useState(false);
 
     const fetchHistory = async () => {
-        const storedToken = await AsyncStorage.getItem("token");
-        const storedUserId = await AsyncStorage.getItem("userId");
-        if (!storedToken || !storedUserId) return;
-        setToken(storedToken);
+        try {
+            const storedToken = await AsyncStorage.getItem("token");
+            const storedUserId = await AsyncStorage.getItem("userId");
+            if (!storedToken || !storedUserId) return;
+            setToken(storedToken);
 
-        const res = await fetch(`${API_BASE_URL}/users/${storedUserId}/tournaments/history`, {
-            headers: { Authorization: `Bearer ${storedToken}` },
-        });
+            const res = await fetch(`${API_BASE_URL}/users/${storedUserId}/tournaments/history`, {
+                headers: { Authorization: `Bearer ${storedToken}` },
+            });
 
-        const data = await res.json();
-        if (res.ok) setHistory(data);
+            const data = await res.json();
+            if (res.ok) setHistory(data);
+        } catch (err) {
+            console.warn("Failed to fetch history:", err);
+            router.replace("/errorScreen");
+        }
     };
 
     useEffect(() => {
@@ -49,6 +55,8 @@ export default function HistoryScreen() {
         await fetchHistory();
         setRefreshing(false);
     };
+
+    useOnShakeRefresh(onRefresh);
 
     const theme = useTheme();
     const styles = useMemo(() => getStyles(theme), [theme]);

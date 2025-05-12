@@ -22,19 +22,25 @@ export default function ErrorScreen() {
         return () => unsubscribe();
     }, []);
 
-    const handleGoHome = () => {
-        if (!isConnected) return;
-
+    const handleGoBack = () => {
         setLoading(true);
         setTimeout(() => {
-            router.push('/');
+            if (router.canGoBack?.()) {
+                router.back();
+            } else {
+                router.replace('/');
+            }
         }, 200);
     };
 
     return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20, backgroundColor: theme.background }}>
             <LottieView
-                source={require('../assets/animations/nettworkLost.json')}
+                source={
+                    isBW
+                        ? require('../assets/animations/nettworkLostGray.json')
+                        : require('../assets/animations/nettworkLost.json')
+                }
                 autoPlay
                 loop
                 style={{ width: 200, height: 200 }}
@@ -45,12 +51,15 @@ export default function ErrorScreen() {
             <Text style={{ marginTop: 10, color: 'red', textAlign: 'center' }}>{message}</Text>
 
             <TouchableOpacity
-                onPress={handleGoHome}
-                disabled={loading || isConnected === false}
+                onPress={handleGoBack}
                 activeOpacity={0.7}
                 style={{
                     marginTop: 30,
-                    backgroundColor: loading || isConnected === false ? '#6c757d' : '#007bff',
+                    backgroundColor: isBW
+                        ? '#999' // grayscale gray
+                        : loading
+                            ? '#6c757d' // normal loading gray
+                            : '#007bff', // normal blue
                     paddingVertical: 10,
                     paddingHorizontal: 20,
                     borderRadius: 8,
@@ -60,7 +69,7 @@ export default function ErrorScreen() {
                     <ActivityIndicator color="#fff" />
                 ) : (
                     <Text style={{ color: 'white', fontSize: 16 }}>
-                        {isConnected === false ? 'Offline' : 'Go to Home'}
+                        Go Back
                     </Text>
                 )}
             </TouchableOpacity>

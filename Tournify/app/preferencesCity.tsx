@@ -84,7 +84,7 @@ export default function CityPreferencesScreen() {
                 alert(data.message || "Sign up failed");
             }
         } catch (error) {
-            console.error("Sign up error:", error);
+            console.warn("Sign up error:", error);
             alert("An error occurred. Please try again.");
         }
     };

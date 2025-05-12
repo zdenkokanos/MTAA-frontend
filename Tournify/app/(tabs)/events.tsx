@@ -14,6 +14,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import TournamentView from "@/components/explore/tournamentView";
 import useLocation from "@/hooks/useLocation";
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { router } from "expo-router";
 
 interface Tournament {
     id: string;
@@ -84,7 +85,8 @@ export default function WelcomeScreen() {
 
 
         } catch (err) {
-            console.error("EventsScreen fetch error:", err);
+            console.warn("EventsScreen fetch error:", err);
+            router.replace("/errorScreen");
         }
     };
 

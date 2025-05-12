@@ -55,7 +55,7 @@ export default function EditTournament() {
         const fetchTournament = async () => {
             const token = await AsyncStorage.getItem('token');
             const res = await fetch(`${API_BASE_URL}/tournaments/${tournamentId}/info`, {
-            headers: { Authorization: `Bearer ${token}` }
+                headers: { Authorization: `Bearer ${token}` }
             });
 
             const data = await res.json();
@@ -79,14 +79,14 @@ export default function EditTournament() {
                 Alert.alert('Error', data.message || 'Failed to load tournament');
             }
         };
-        
+
         fetchTournament();
     }, [tournamentId]);
 
-    
+
     const handleSubmit = async () => {
         const token = await AsyncStorage.getItem('token');
-        
+
         if (!tournamentName || tournamentName.trim().length < 3) {
             Alert.alert('Validation Error', 'Please enter a valid tournament name (at least 3 characters).');
             return;
@@ -135,7 +135,7 @@ export default function EditTournament() {
                 tournament_name: tournamentName,
                 category_id: sportId,
                 location_name: tournamentPlace,
-                latitude, 
+                latitude,
                 longitude,
                 level,
                 max_team_size: Number(teamSize),
@@ -167,7 +167,7 @@ export default function EditTournament() {
             console.log('Tournament updated successfully:', result);
 
         } catch (error) {
-            console.error('Error updating tournament:', error);
+            console.warn('Error updating tournament:', error);
         }
     };
 
@@ -339,14 +339,14 @@ export default function EditTournament() {
                                 <StartButton title="Update" onPress={handleSubmit} />
                             </View>
 
-                            <AnimationCreateTournament 
-                                show={showSuccess} 
-                                caption="Succesfully Updated!" 
+                            <AnimationCreateTournament
+                                show={showSuccess}
+                                caption="Succesfully Updated!"
                                 onHide={() => {
-                                        setShowSuccess(false)  
-                                        setShouldRefresh(true);
-                                        router.replace(`/tournament/manage/${tournamentId}/startEdit`);
-                                    }
+                                    setShowSuccess(false)
+                                    setShouldRefresh(true);
+                                    router.replace(`/tournament/manage/${tournamentId}/startEdit`);
+                                }
                                 }
                             />
 

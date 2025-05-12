@@ -46,7 +46,8 @@ export default function PreferencesSportScreen() {
 
         setSportsData(data);
       } catch (error) {
-        console.error('❌ Error loading categories:', error);
+        console.warn('❌ Error loading categories:', error);
+        router.replace("/errorScreen");
       }
     };
 
