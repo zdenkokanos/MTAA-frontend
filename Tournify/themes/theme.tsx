@@ -77,7 +77,7 @@ export const blackWhiteTheme = {
     tableRow: '#000000',
     tableBorder: '#444444',
     cardColor: '#ffffff',
-    liveColor: '#FF3B30',
+    liveColor: '#fff',
 };
 
 export const useTheme = () => {

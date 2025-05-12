@@ -224,15 +224,15 @@ export default function WelcomeScreen() {
                     </View>
                 </View>
                 {/* Happening Now tournaments */}
-                <View>
-                    <View style={styles.mainTitle}>
-                        <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
-                            <MaterialIcons name="live-tv" style={styles.liveIcon} size={25} />
-                        </Animated.View>
-                        <Text style={styles.liveTitle}>Happening Now</Text>
-                    </View>
+                {registeredTournaments.filter(item => item.status === 'Ongoing').length > 0 && (
                     <View>
-                        {registeredTournaments.filter(item => item.status === 'Ongoing').length > 0 ? (
+                        <View style={styles.mainTitle}>
+                            <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
+                                <MaterialIcons name="live-tv" style={styles.liveIcon} size={25} />
+                            </Animated.View>
+                            <Text style={styles.liveTitle}>Happening Now</Text>
+                        </View>
+                        <View>
                             <FlatList
                                 data={registeredTournaments.filter(item => item.status === 'Ongoing')}
                                 keyExtractor={(item) => item.id}
@@ -259,13 +259,11 @@ export default function WelcomeScreen() {
                                 )}
                             />
 
-                        ) : (
-                            <Text style={styles.emptyText}>You will see your upcoming tournaments here.</Text>
-                        )}
+
+                        </View>
 
                     </View>
-
-                </View>
+                )}
 
                 
                 {/* Upcomming tournaments */}
