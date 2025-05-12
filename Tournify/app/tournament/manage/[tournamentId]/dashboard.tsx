@@ -84,7 +84,7 @@ export default function ManageTournamentScreen() {
             if (enrolledRes.ok) {
                 setEnrolledTeams(enrolledData);
             } else {
-                console.error("Failed to fetch enrolled teams:", enrolledData.message);
+                console.warn("Failed to fetch enrolled teams:", enrolledData.message);
             }
 
         } catch (err) {
@@ -239,7 +239,7 @@ export default function ManageTournamentScreen() {
 
                     <View style={styles.buttonContainer}>
                         <StartButton
-                            title="Edit Leaderboard"
+                            title="Edit Statistics"
                             onPress={() =>
                                 router.push(`/tournament/manage/${tournamentId}/statistics?t_status=${encodeURIComponent(tournament.status)}`)
                             }

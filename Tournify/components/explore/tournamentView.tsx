@@ -134,7 +134,7 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => {
             fontSize: 18,
             fontWeight: "bold",
             marginBottom: 8,
-            maxWidth: 220,
+            maxWidth: 190,
         },
         detailsRow: {
             flexDirection: "row",

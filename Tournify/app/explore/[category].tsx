@@ -10,12 +10,14 @@ import LottieView from 'lottie-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import OfflineBanner from '@/components/offline/offlineBanner';
 import useOnShakeRefresh from '@/hooks/useOnShakeRefresh';
+import { useIsFocused } from '@react-navigation/native';
 
 export default function CategoryTournamentsScreen() {
     const { latitude, longitude, error, getUserLocation } = useLocation();
     const { category } = useLocalSearchParams<{ category: string }>();
     const [tournaments, setTournaments] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+    const isFocused = useIsFocused();
 
     const categoryParts = category?.split('-');
     const categoryId = categoryParts?.[0];
@@ -45,7 +47,6 @@ export default function CategoryTournamentsScreen() {
         } catch (error) {
             console.warn('Error loading tournaments:', error);
             setTournaments([]); // fallback 
-            router.replace("/errorScreen");
         } finally {
             setLoading(false);
         }
@@ -58,6 +59,12 @@ export default function CategoryTournamentsScreen() {
     useEffect(() => {
         getUserLocation();
     }, []);
+
+    useEffect(() => {
+        if (isFocused) {
+            fetchTournaments();
+        }
+    }, [isFocused]);
 
     // Refresh control for the FlatList
     const [refreshing, setRefreshing] = useState(false);

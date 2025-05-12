@@ -89,7 +89,6 @@ export default function ProfileScreen() {
             setUserData(data);
         } catch (error) {
             console.warn('❌ Error loading user data:', error);
-            router.replace("/errorScreen");
         }
     };
 

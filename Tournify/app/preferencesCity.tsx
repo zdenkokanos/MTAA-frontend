@@ -79,6 +79,7 @@ export default function CityPreferencesScreen() {
                 await AsyncStorage.setItem("userId", JSON.stringify(data.user.id));
                 await AsyncStorage.setItem("token", data.token);
                 reset();
+                alert("Sign up successful");
                 router.replace("/(tabs)/home");
             } else {
                 alert(data.message || "Sign up failed");

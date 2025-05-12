@@ -25,11 +25,7 @@ export default function ErrorScreen() {
     const handleGoBack = () => {
         setLoading(true);
         setTimeout(() => {
-            if (router.canGoBack?.()) {
-                router.back();
-            } else {
-                router.replace('/');
-            }
+            router.replace('/');
         }, 200);
     };
 

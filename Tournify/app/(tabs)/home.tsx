@@ -20,6 +20,7 @@ export default function HomeScreen() {
     interface UserInfo {
         first_name: string;
         last_name: string;
+        preferred_location: string;
         image_path: string | null;
     }
     interface TopPick {
@@ -115,6 +116,7 @@ export default function HomeScreen() {
             });
 
             const historyData = await historyResponse.json();
+            console.log("History Data:", historyData);
             if (historyResponse.ok) {
                 setHistory(historyData);
             } else {
@@ -252,7 +254,7 @@ export default function HomeScreen() {
                                 <Text style={styles.name}>
                                     {userInfo ? `${userInfo.first_name} ${userInfo.last_name}` : "Loading..."}
                                 </Text>
-                                <Text style={styles.level}>Intermediate</Text>
+                                <Text style={styles.level}>{userInfo?.preferred_location}</Text>
                             </View>
                         </View>
 
