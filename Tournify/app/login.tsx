@@ -110,7 +110,7 @@ export default function LoginScreen() {
                             </TouchableOpacity>
                             <StartButton title="Sign in" onPress={handleLogin} />
                             <Text style={styles.signUpText}>
-                                Don't have an account? <Text style={styles.signUpLink} onPress={() => router.push("/register")}>Sign up.</Text>
+                                Don't have an account? <Text style={styles.signUpLink} onPress={() => router.replace("/register")}>Sign up.</Text>
                             </Text>
                         </View>
                     </ScrollView>

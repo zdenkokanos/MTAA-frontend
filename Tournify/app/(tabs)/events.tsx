@@ -4,6 +4,8 @@ import { Text, View, StyleSheet, Platform, RefreshControl, ScrollView, FlatList,
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "@/themes/theme";
 import API_BASE_URL from "@/config/config";
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
 
 import AntDesign from '@expo/vector-icons/AntDesign';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
@@ -85,6 +87,7 @@ export default function WelcomeScreen() {
         }
     };
 
+
     useEffect(() => {
         fetchData();
     }, []);
@@ -98,6 +101,12 @@ export default function WelcomeScreen() {
         await fetchData();
         setRefreshing(false);
     };
+
+    useFocusEffect(
+    useCallback(() => {
+        fetchData();
+    }, [])
+    );
 
     const screenWidth = Dimensions.get('window').width;
     const [activeIndex, setActiveIndex] = useState(0); // State to track the active index of the FlatList
