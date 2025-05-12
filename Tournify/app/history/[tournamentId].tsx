@@ -11,6 +11,7 @@ import Leaderboard from '@/components/tournamentDetail/leaderboard';
 import MapPreview from '@/components/tournamentDetail/mapPreview';
 import Badge from '@/components/tournamentDetail/badge';
 import SafeOfflineBanner from '@/components/offline/safeOfflineBanner';
+import useOnShakeRefresh from '@/hooks/useOnShakeRefresh';
 
 export default function TournamentInfoScreen() {
     const { tournamentId, position } = useLocalSearchParams();
@@ -52,16 +53,19 @@ export default function TournamentInfoScreen() {
             if (tournamentRes.ok) {
                 setTournament(tournamentData);
             } else {
-                console.error('Tournament fetch error:', tournamentData.message);
+                console.warn('Tournament fetch error:', tournamentData.message);
+                router.replace("/errorScreen");
             }
 
             if (leaderboardRes.ok) {
                 setLeaderboard(leaderboardData);
             } else {
-                console.error('Leaderboard fetch error:', leaderboardData.message);
+                console.warn('Leaderboard fetch error:', leaderboardData.message);
+                router.replace("/errorScreen");
             }
         } catch (err) {
-            console.error('Error fetching tournament data:', err);
+            console.warn('Error fetching tournament data:', err);
+            router.replace("/errorScreen");
         } finally {
             setLoading(false);
         }
@@ -78,6 +82,8 @@ export default function TournamentInfoScreen() {
         await fetchTournament();
         setRefreshing(false);
     };
+
+    useOnShakeRefresh(onRefresh);
 
     if (loading) {
         return (

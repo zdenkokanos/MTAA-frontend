@@ -11,6 +11,7 @@ import TournamentDescription from '@/components/tournamentDetail/tournamentDescr
 import MapPreview from '@/components/tournamentDetail/mapPreview';
 import SafeOfflineBanner from '@/components/offline/safeOfflineBanner';
 import { formatDate } from '@/utils/formatDate';
+import useOnShakeRefresh from '@/hooks/useOnShakeRefresh';
 
 export default function TournamentDetailScreen() {
     const { tournamentId } = useLocalSearchParams();
@@ -83,22 +84,23 @@ export default function TournamentDetailScreen() {
                 }),
             ]);
 
-            const tournamentData = await tournamentRes.json();
-            const teamCountData = teamCountRes.status !== 204 ? await teamCountRes.json() : {};
+            const tournamentData = await (tournamentRes as Response).json() as { message?: string;[key: string]: any };
+            const teamCountData = (teamCountRes as Response).status !== 204 ? await (teamCountRes as Response).json() : {};
 
-            if (tournamentRes.ok) {
+            if ((tournamentRes as Response).ok) {
                 setTournament(tournamentData);
             } else {
                 console.error('Tournament fetch error:', tournamentData.message);
             }
 
-            if (teamCountRes.ok) {
+            if ((teamCountRes as Response).ok) {
                 setTeamsCount(teamCountData[0]?.team_count ?? 0);
             } else {
                 console.error('Team count fetch error:', teamCountData.message);
             }
         } catch (err) {
-            console.error('Error fetching tournament:', err);
+            console.warn('Error fetching tournament:', err);
+            router.replace("/errorScreen");
         } finally {
             setLoading(false);
         }
@@ -403,7 +405,7 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => {
             lineHeight: 18,
         },
         continueButton: {
-            backgroundColor:  isBW ? '#bbb' : '#38b381',
+            backgroundColor: isBW ? '#bbb' : '#38b381',
             paddingVertical: 16,
             borderRadius: 12,
             alignItems: 'center',

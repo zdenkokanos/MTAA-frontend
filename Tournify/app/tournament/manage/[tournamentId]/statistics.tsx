@@ -83,7 +83,8 @@ export default function EditLeaderboardScreen() {
                 setTeamInputs(prefilledInputs);
 
             } catch (err) {
-                console.error('Error loading leaderboard data:', err);
+                console.warn('Error loading leaderboard data:', err);
+                router.replace("/errorScreen");
             }
         };
 
@@ -186,8 +187,8 @@ export default function EditLeaderboardScreen() {
                     index: 0,
                     routes: [
                         {
-                        name: 'tournament/manage/[tournamentId]/dashboard' as never,
-                        params: { tournamentId },
+                            name: 'tournament/manage/[tournamentId]/dashboard' as never,
+                            params: { tournamentId },
                         },
                     ],
                 });

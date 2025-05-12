@@ -37,7 +37,7 @@ export default function QRScannerScreen() {
 
             setScanResult(res.ok ? 'valid' : 'invalid');
         } catch (error) {
-            console.error("QR Scan Error:", error);
+            alert("An error occurred while scanning the QR code. Please try again.");
             setScanResult('invalid');
         } finally {
             setTimeout(() => {
@@ -65,7 +65,7 @@ export default function QRScannerScreen() {
             </View>
         );
     }
-    
+
 
     return (
         <View style={styles.container}>

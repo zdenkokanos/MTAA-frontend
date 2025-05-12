@@ -14,6 +14,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import TournamentView from "@/components/explore/tournamentView";
 import useLocation from "@/hooks/useLocation";
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import { router } from "expo-router";
 
 interface Tournament {
     id: string;
@@ -84,7 +85,8 @@ export default function WelcomeScreen() {
 
 
         } catch (err) {
-            console.error("EventsScreen fetch error:", err);
+            console.warn("EventsScreen fetch error:", err);
+            router.replace("/errorScreen");
         }
     };
 
@@ -104,9 +106,9 @@ export default function WelcomeScreen() {
     };
 
     useFocusEffect(
-    useCallback(() => {
-        fetchData();
-    }, [])
+        useCallback(() => {
+            fetchData();
+        }, [])
     );
 
     const screenWidth = Dimensions.get('window').width;
@@ -135,7 +137,7 @@ export default function WelcomeScreen() {
                     duration: 1000,
                     useNativeDriver: true,
                 }),
-        ])
+            ])
         ).start();
     }, []);
 
@@ -265,7 +267,7 @@ export default function WelcomeScreen() {
                     </View>
                 )}
 
-                
+
                 {/* Upcomming tournaments */}
                 <View>
                     <View style={styles.mainTitle}>
@@ -407,7 +409,6 @@ const getStyles = (theme: ReturnType<typeof useTheme>, isLargeScreen: boolean) =
         paddingHorizontal: 16,
     },
     hostedCard: {
-        flex: 1,
         width: isLargeScreen
             ? (Dimensions.get('window').width - 48) / 2
             : undefined,

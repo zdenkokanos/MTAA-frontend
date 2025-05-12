@@ -4,12 +4,12 @@ import { Picker } from '@react-native-picker/picker';
 import { useTheme } from "@/themes/theme";
 
 type LevelPickerProps = {
-    level: string;
-    setLevel: (value: string) => void;
-  };
-  
-  export default function LevelPicker({ level, setLevel }: LevelPickerProps) {
-  
+  level: string;
+  setLevel: (value: string) => void;
+};
+
+export default function LevelPicker({ level, setLevel }: LevelPickerProps) {
+
   const [modalVisible, setModalVisible] = useState(false);
 
   const levels = [
@@ -31,11 +31,11 @@ type LevelPickerProps = {
             selectedValue={level}
             onValueChange={(itemValue) => setLevel(itemValue)}
             mode="dropdown"
-            style={{color: theme.text}}
+            style={{ color: theme.text }}
           >
-            <Picker.Item label="Choose level" value={null} style={{color: theme.text, backgroundColor: theme.createInputBackground}}/>
+            <Picker.Item label="Choose level" value={null} style={{ color: theme.text, backgroundColor: theme.createInputBackground }} />
             {levels.map((l) => (
-              <Picker.Item key={l.value} label={l.label} value={l.value} style={{color: theme.text, backgroundColor: theme.createInputBackground}}/>
+              <Picker.Item key={l.value} label={l.label} value={l.value} style={{ color: theme.text, backgroundColor: theme.createInputBackground }} />
             ))}
           </Picker>
         </View>
@@ -43,7 +43,7 @@ type LevelPickerProps = {
     );
   }
   return (
-    <View style={ styles.inputWrapper}>
+    <View style={styles.inputWrapper}>
       <Text style={styles.label}>Select level</Text>
       <TouchableOpacity
         onPress={() => setModalVisible(true)}
@@ -62,9 +62,9 @@ type LevelPickerProps = {
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-                <TouchableOpacity onPress={() => setModalVisible(false)}>
-                  <Text style={styles.doneText}>Done</Text>
-                </TouchableOpacity>
+              <TouchableOpacity onPress={() => setModalVisible(false)}>
+                <Text style={styles.doneText}>Done</Text>
+              </TouchableOpacity>
             </View>
 
             <Picker
@@ -137,6 +137,6 @@ const getStyles = (theme: ReturnType<typeof useTheme>) => StyleSheet.create({
     paddingRight: 15,
   },
   inputWrapper: {
-    flex: 1, 
+    flex: 1,
   },
 });

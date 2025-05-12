@@ -41,7 +41,8 @@ export default function ExploreScreen() {
             setLoading(false);
 
         } catch (error) {
-            console.error('❌ Error loading categories:', error);
+            console.warn('❌ Error loading categories:', error);
+            router.replace("/errorScreen");
         }
     };
 
